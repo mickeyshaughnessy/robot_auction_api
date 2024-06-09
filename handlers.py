@@ -17,4 +17,8 @@ def submit_bid(data):
     # check bid certificate
     # 
     # create bid / put bid in redis
-    return bid 
+    return bid
+
+def nearby_services(data):
+    # query transaction log with {data}
+    return {}
