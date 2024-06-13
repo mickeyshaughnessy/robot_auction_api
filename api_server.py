@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import json, redis, uuid
+import handlers
 
 app = Flask(__name__)
 redis = redis.StrictRedis()
@@ -12,11 +13,11 @@ def submit_bid():
     response, status = handlers.submit_bid(data)
     return jsonify(response), status
 
-@app.route('/nearby_services', methods=['POST'])
-def submit_bid():
+@app.route('/nearby_activity', methods=['POST'])
+def nearby_activity():
     # route for buyers to see recent nearby services rendered 
     data = request.get_json()
-    response, status = handlers.nearby_services(data)
+    response, status = handlers.nearby_activity(data)
     return jsonify(response), status
 
 ##### SELLER INTERFACE ###### 
