@@ -4,14 +4,26 @@ import json, redis, uuid
 app = Flask(__name__)
 redis = redis.StrictRedis()
 
+##### BUYER INTERFACE #######
 @app.route('/submit_bid', methods=['POST'])
 def submit_bid():
+    # route for buyers to submit bids
     data = request.get_json()
     response, status = handlers.submit_bid(data)
     return jsonify(response), status
 
+@app.route('/nearby_services', methods=['POST'])
+def submit_bid():
+    # route for buyers to see recent nearby services rendered 
+    data = request.get_json()
+    response, status = handlers.nearby_services(data)
+    return jsonify(response), status
+
+##### SELLER INTERFACE ###### 
+
 @app.route('/grab_job', methods=['POST'])
 def grab_job():
+    # route for robots to grab jobs
     data = request.get_json()
     response, status = handlers.grab_job(data)
     return jsonify(response), status
