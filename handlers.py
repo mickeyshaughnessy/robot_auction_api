@@ -14,14 +14,15 @@ def matches(bid, robot_data):
     res = bid.get('service') in robot_data.get('services', [])
     if res == False:
         return res
-    print('here')
+    print('here1')
     # Check that the robot timeframe and the bid timeframe overlap  ## time in utc timestamp
-    res = bid.get('end_time', 0) < robot_data.get('end_time', 1)
-    if res == False:
-        return res
+    #res = bid.get('end_time', 0) < robot_data.get('end_time', 1)
+    #if res == False:
+    #    return res
+    #print('here1')
     # Check that the travel distance is acceptable # later factor in distance
-    res = distance((robot_data.get('lat', 0), robot_data.get('lon', 0)), (bid.get('lat', 0), bid.get('lon', 0))) < robot_data.get("max_distance")
-    print(distance((robot_data.get('lat', 0), robot_data.get('lon', 0)), (bid.get('lat', 0), bid.get('lon', 0))))
+    res = distance((robot_data.get('lat', 0), robot_data.get('lon', 0)), (bid.get('lat', 0), bid.get('lon', 0))) < robot_data.get("max_distance",1)
+    #print(distance((robot_data.get('lat', 0), robot_data.get('lon', 0)), (bid.get('lat', 0), bid.get('lon', 0))))
 
     print(robot_data.get("max_distance"))
     print('here!')
@@ -121,7 +122,7 @@ if __name__ == "__main__":
         'lat': 40.7128,
         'lon': -74.0060,
         'price': 100,
-        'end_time': 1680000000,
+        'end_time': 2680000000,
     }
 
     # Submit the bid
