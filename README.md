@@ -6,13 +6,15 @@ The purpose is to facilitate robot services buying and selling.
 
 This will speed the adoption of robot services, which is good.
 
-The system is an exchange, but instead of selling stocks or ad impressions, you're selling robot services.
+The system is an exchange, but instead of selling stocks or ad impressions, we're selling robot services.
 
 Like a job board for robots.
 
+![Description](images/weird.png)
+
 There are three parts:
-* buyer client
-* seller client
+* buyer client (https://github.com/MevlutArslan/robot-auction-frontend)
+* seller client 
 * exchange
 
 The buyer client interacts with the exchange API through the /make_bid route.
