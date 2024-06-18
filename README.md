@@ -15,7 +15,9 @@ Like a job board for robots.
 There are three parts:
 * buyer client (https://github.com/MevlutArslan/robot-auction-frontend)
 * seller client 
-* exchange
+* exchange (this repository)
+
+## The exchange ##
 
 The buyer client interacts with the exchange API through the /make_bid route.
 The seller client interacts with the exchange API through the /grab_job route.
@@ -24,4 +26,5 @@ A buyer may set a bid for a certain (service, location, time, price) tuple.
 A seller submits a request for a job with a (service, location, time) tuple, and receives the highest price matching bid.
 
 The deal is struck and the buyer pays, the robot performs the service, and then the seller is paid.
+
 
