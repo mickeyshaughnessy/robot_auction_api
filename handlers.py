@@ -9,7 +9,6 @@ def distance(x1, x2):
 def matches(bid, robot_data):
 
     #print(bid, robot_data)
-
     # Check that the robot can do the job
     res = bid.get('service') in robot_data.get('services', [])
     if res == False:

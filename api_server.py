@@ -11,7 +11,7 @@ def ping():
 
 ##### BUYER INTERFACE #######
 @app.route('/make_bid', methods=['POST'])
-def submit_bid():
+def make_bid():
     # route for buyers to submit bids
     data = request.get_json()
     response, status = handlers.submit_bid(data)
