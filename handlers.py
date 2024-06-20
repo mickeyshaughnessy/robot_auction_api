@@ -64,18 +64,35 @@ def grab_job(data):
     else:
         return None  # No matching bids
 
-def submit_bid(data):
-    # check bid certificate
-    bid = data.get('bid', {})
-    # make bid_id
-    bid_id = str(uuid.uuid4())
-    # create bid / put bid in redis
-    redis.hset("REDHASH_ALL_LIVE_BIDS", bid_id, json.dumps(bid)) 
+def valid(data):
+    # check that account has sufficient balance
+    account_id = data.get("account_id",-1)
+    account = redis.hget("REDHASH_ACCOUNTS", account_id)
+    if account:
+        account = json.loads(account)
+        all_outstanding = redis.hgetall("REDHASH_ALL_LIVE_BIDS")
+        response, status = {"message" : "insufficient funds"}, 400
+    response, status = {"message" : "insufficient funds"}, 400
     return True 
 
+def submit_bid(data):
+    # check bid certificate
+    if valid(data):
+
+        # make bid_id
+        bid = data.get('bid', {})
+        bid_id = str(uuid.uuid4())
+        # create bid / put bid in redis
+        redis.hset("REDHASH_ALL_LIVE_BIDS", bid_id, json.dumps(bid)) 
+        return True 
+    return False
+
 def nearby_activity(data):
-    # query transaction log with {data}
-    return {}
+    all_live_bids = redis.hgetall("REDHASH_ALL_LIVE_BIDS")
+
+    return json.dumps(all_live_bids) 
+
+
 
 if __name__ == "__main__":
     # Test 1: Submit a bid and grab the job
