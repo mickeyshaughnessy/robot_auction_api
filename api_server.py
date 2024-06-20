@@ -15,14 +15,14 @@ def make_bid():
     # route for buyers to submit bids
     data = request.get_json()
     response, status = handlers.submit_bid(data)
-    return jsonify(response), 200 
+    return jsonify(response), status 
 
 @app.route('/nearby', methods=['POST'])
 def nearby_activity():
-    # route for buyers to see recent nearby services rendered 
+    # route for buyers to see recent nearby bids 
     data = request.get_json()
     response = handlers.nearby_activity(data)
-    return jsonify(response), 200 
+    return jsonify(response), status 
 
 ##### SELLER INTERFACE ###### 
 
