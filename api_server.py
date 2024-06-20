@@ -5,20 +5,24 @@ import handlers
 app = Flask(__name__)
 redis = redis.StrictRedis()
 
+@app.route('/ping', methods=['POST','GET'])
+def ping():
+    return '{"message" : "ok"}', 200 
+
 ##### BUYER INTERFACE #######
-@app.route('/submit_bid', methods=['POST'])
+@app.route('/make_bid', methods=['POST'])
 def submit_bid():
     # route for buyers to submit bids
     data = request.get_json()
     response, status = handlers.submit_bid(data)
-    return jsonify(response), status
+    return jsonify(response), 200 
 
-@app.route('/nearby_activity', methods=['POST'])
+@app.route('/nearby', methods=['POST'])
 def nearby_activity():
     # route for buyers to see recent nearby services rendered 
     data = request.get_json()
-    response, status = handlers.nearby_activity(data)
-    return jsonify(response), status
+    response = handlers.nearby_activity(data)
+    return jsonify(response), 200 
 
 ##### SELLER INTERFACE ###### 
 
