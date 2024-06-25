@@ -71,7 +71,6 @@ def sufficient_funds(data):
     account = redis.hget("REDHASH_ACCOUNTS", account_id)
     if account and bid_price:
         account = json.loads(account)
-
         all_outstanding = []
         for bid_id, b in redis.hscan_iter("REDHASH_ALL_LIVE_BIDS"):
             b = json.loads(b)
@@ -79,12 +78,12 @@ def sufficient_funds(data):
                 all_outstanding.append(b)
         if account.get("balance",0) - sum([b.get("bid_price",0) for b in all_outstanding]) + data.get("bid_price",0) > 0:
             response, status = {"message" : "sufficient funds"}, 200
-
     response, status = {"message" : "insufficient funds or malformed request"}, 400
     return True 
 
 def certify(data):
     # check that the request is certified 
+    return True
 
 def submit_bid(data):
     # check bid certificate
@@ -93,7 +92,6 @@ def submit_bid(data):
        # make bid_id
         bid = data.get('bid', {})
         bid_id = str(uuid.uuid4())
-        # create bid / put bid in redis
         redis.hset("REDHASH_ALL_LIVE_BIDS", bid_id, json.dumps(bid)) 
         return bid_id, True 
     return bid_id, False
