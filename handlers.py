@@ -60,9 +60,9 @@ def grab_job(data):
         # Remove the bid from the live bids hash
         redis.hdel("REDHASH_ALL_LIVE_BIDS", _m[0][1])
 
-        return new_job
+        return new_job, 200
     else:
-        return None  # No matching bids
+        return None, 204  # No matching bids
 
 def valid(data):
     # check that account has sufficient balance
@@ -84,13 +84,13 @@ def submit_bid(data):
         bid_id = str(uuid.uuid4())
         # create bid / put bid in redis
         redis.hset("REDHASH_ALL_LIVE_BIDS", bid_id, json.dumps(bid)) 
-        return True 
-    return False
+        return bid_id, True 
+    return bid_id, False 
 
 def nearby_activity(data):
     all_live_bids = redis.hgetall("REDHASH_ALL_LIVE_BIDS")
 
-    return json.dumps(all_live_bids) 
+    return json.dumps(all_live_bids), 200 
 
 
 
