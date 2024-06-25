@@ -83,6 +83,9 @@ def sufficient_funds(data):
     response, status = {"message" : "insufficient funds or malformed request"}, 400
     return True 
 
+def certify(data):
+    # check that the request is certified 
+
 def submit_bid(data):
     # check bid certificate
     certificate = certify(data)
