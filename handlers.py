@@ -64,28 +64,37 @@ def grab_job(data):
     else:
         return None, 204  # No matching bids
 
-def valid(data):
+def sufficient_funds(data):
     # check that account has sufficient balance
     account_id = data.get("account_id",-1)
+    bid_price = data.get("bid_price", 0)
     account = redis.hget("REDHASH_ACCOUNTS", account_id)
-    if account:
+    if account and bid_price:
         account = json.loads(account)
-        all_outstanding = redis.hgetall("REDHASH_ALL_LIVE_BIDS")
-        response, status = {"message" : "insufficient funds"}, 400
-    response, status = {"message" : "insufficient funds"}, 400
+
+        all_outstanding = []
+        for bid_id, b in redis.hscan_iter("REDHASH_ALL_LIVE_BIDS"):
+            b = json.loads(b)
+            if b.get("bidder_account_id") == account_id:
+                all_outstanding.append(b)
+        if account.get("balance",0) - sum([b.get("bid_price",0) for b in all_outstanding]) + data.get("bid_price",0) > 0:
+            response, status = {"message" : "sufficient funds"}, 200
+
+    response, status = {"message" : "insufficient funds or malformed request"}, 400
     return True 
 
 def submit_bid(data):
     # check bid certificate
-    if valid(data):
-
-        # make bid_id
+    certificate = certify(data)
+    if sufficient_funds(data) and certificate:
+       # make bid_id
         bid = data.get('bid', {})
         bid_id = str(uuid.uuid4())
         # create bid / put bid in redis
         redis.hset("REDHASH_ALL_LIVE_BIDS", bid_id, json.dumps(bid)) 
         return bid_id, True 
-    return bid_id, False 
+    return bid_id, False
+
 
 def nearby_activity(data):
     all_live_bids = redis.hgetall("REDHASH_ALL_LIVE_BIDS")
