@@ -22,7 +22,7 @@ def nearby_activity():
     # route for buyers to see recent nearby bids 
     data = request.get_json()
     response = handlers.nearby_activity(data)
-    return jsonify(response), status 
+    return jsonify(response), 200
 
 ##### SELLER INTERFACE ###### 
 

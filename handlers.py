@@ -93,8 +93,8 @@ def submit_bid(data):
         bid = data.get('bid', {})
         bid_id = str(uuid.uuid4())
         redis.hset("REDHASH_ALL_LIVE_BIDS", bid_id, json.dumps(bid)) 
-        return bid_id, True 
-    return bid_id, False
+        return bid_id, 200 
+    return bid_id, 403
 
 
 def nearby_activity(data):
