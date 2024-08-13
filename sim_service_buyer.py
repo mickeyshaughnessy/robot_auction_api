@@ -11,7 +11,7 @@ class ServiceBuyer:
         self.balance = initial_balance
 
     def make_bid(self, service, lat, lon, price):
-        url = f"{API_BASE_URL}/make_bid"
+        url = f"{API_BASE_URL}/make_bid?simulated=true"
         data = {
             "account_id": self.account_id,
             "bid_price": price,
