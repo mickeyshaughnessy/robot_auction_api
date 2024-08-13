@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import json, uuid
 import handlers
+import config
 
 app = Flask(__name__)
 
@@ -33,4 +34,4 @@ def grab_job():
     return jsonify(response), status
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=config.API_PORT)
