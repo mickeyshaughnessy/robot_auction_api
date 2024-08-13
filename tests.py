@@ -101,7 +101,7 @@ class TestRobotMarketplace(unittest.TestCase):
         }
         mock_redis.hgetall.return_value = mock_bids
 
-        response, status = handlers.get_nearby_activity()
+        response, status = handlers.nearby_activity()
         self.assertEqual(status, 200)
         nearby_bids = json.loads(response)
         self.assertEqual(len(nearby_bids), 2)
