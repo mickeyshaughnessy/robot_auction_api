@@ -1,9 +1,8 @@
 from flask import Flask, request, jsonify
-import json, redis, uuid
+import json, uuid
 import handlers
 
 app = Flask(__name__)
-redis = redis.StrictRedis()
 
 @app.route('/ping', methods=['POST','GET'])
 def ping():
