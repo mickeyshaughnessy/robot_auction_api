@@ -2,8 +2,18 @@ import uuid
 import redis
 import json
 import math
+import hashlib
+from config import simulated_key
 
 redis = redis.StrictRedis()
+
+def is_simulated(data):
+    if 'simulated' not in data:
+        return False
+    client_key = data['simulated']
+    # Use SHA256 for hashing
+    hashed_key = hashlib.sha256(client_key.encode()).hexdigest()
+    return hashed_key == simulated_key
 
 def calculate_distance(point1, point2):
     return math.sqrt(sum((p1 - p2) ** 2 for p1, p2 in zip(point1, point2)))
@@ -45,6 +55,9 @@ def grab_job(robot_data):
     return new_job, 200
 
 def has_sufficient_funds(data):
+    if is_simulated(data):
+        return True  # Always return True for simulated traffic
+
     account_id = data.get("account_id")
     bid_price = data.get("bid_price", 0)
     account_json = redis.hget("REDHASH_ACCOUNTS", account_id)
@@ -63,14 +76,19 @@ def has_sufficient_funds(data):
 
     total_outstanding = sum(b.get("bid_price", 0) for b in all_outstanding)
     
-    return balance - total_outstanding - bid_price >= 0  # Changed to >= and subtracted bid_price
+    return balance - total_outstanding - bid_price >= 0
 
 def submit_bid(data):
     if not has_sufficient_funds(data):
-        return "", 403  # Changed to return empty string and 403 status code
+        return "", 403
 
     bid = data.get('bid', {})
     bid_id = str(uuid.uuid4())
+    
+    # Mark the bid as simulated if the flag is set
+    if is_simulated(data):
+        bid["simulated"] = True
+    
     redis.hset("REDHASH_ALL_LIVE_BIDS", bid_id, json.dumps(bid))
     return bid_id, 200
 
