@@ -4,45 +4,46 @@ import redis
 import uuid
 from unittest.mock import patch, MagicMock
 import handlers
+import config
 
 class TestRobotMarketplace(unittest.TestCase):
     def setUp(self):
         self.redis = redis.StrictRedis()
-        
+
         # Clean up any existing test data
         self.cleanup()
-        
+
         # Set up test data
         self.setup_test_data()
-        
+
     def tearDown(self):
         # Clean up test data after each test
         self.cleanup()
-        
+
     def cleanup(self):
-        for key in self.redis.scan_iter("REDHASH_TEST*"):
+        for key in self.redis.scan_iter("TEST*"):
             self.redis.delete(key)
-        
+
     def setup_test_data(self):
         # Set up test accounts
         test_accounts = {
-            "REDHASH_TEST_ACCOUNT1": json.dumps({"balance": 1000}),
-            "REDHASH_TEST_ACCOUNT2": json.dumps({"balance": 500}),
+            "TEST_ACCOUNT1": json.dumps({"balance": 1000}),
+            "TEST_ACCOUNT2": json.dumps({"balance": 500}),
         }
         for key, value in test_accounts.items():
-            self.redis.hset("REDHASH_TEST_ACCOUNTS", key, value)
-        
+            self.redis.hset(config.REDHASH_ACCOUNTS, key, value)
+
         # Set up test bids
         test_bids = {
             str(uuid.uuid4()): json.dumps({
-                "bidder_account_id": "REDHASH_TEST_ACCOUNT1",
+                "bidder_account_id": "TEST_ACCOUNT1",
                 "service": "cleaning",
                 "lat": 40.7128,
                 "lon": -74.0060,
                 "price": 50
             }),
             str(uuid.uuid4()): json.dumps({
-                "bidder_account_id": "REDHASH_TEST_ACCOUNT2",
+                "bidder_account_id": "TEST_ACCOUNT2",
                 "service": "gardening",
                 "lat": 40.7129,
                 "lon": -74.0061,
@@ -50,7 +51,7 @@ class TestRobotMarketplace(unittest.TestCase):
             })
         }
         for key, value in test_bids.items():
-            self.redis.hset("REDHASH_TEST_ALL_LIVE_BIDS", key, value)
+            self.redis.hset(config.REDHASH_ALL_LIVE_BIDS, key, value)
 
     @patch('handlers.redis')
     def test_submit_bid_sufficient_funds(self, mock_redis):
@@ -59,7 +60,7 @@ class TestRobotMarketplace(unittest.TestCase):
         mock_redis.hset.return_value = True
 
         bid_data = {
-            "account_id": "REDHASH_TEST_ACCOUNT1",
+            "account_id": "TEST_ACCOUNT1",
             "bid_price": 100,
             "bid": {
                 "service": "cleaning",
@@ -79,7 +80,7 @@ class TestRobotMarketplace(unittest.TestCase):
         mock_redis.hscan_iter.return_value = []
 
         bid_data = {
-            "account_id": "REDHASH_TEST_ACCOUNT2",
+            "account_id": "TEST_ACCOUNT2",
             "bid_price": 1000,
             "bid": {
                 "service": "gardening",
@@ -101,7 +102,8 @@ class TestRobotMarketplace(unittest.TestCase):
         }
         mock_redis.hgetall.return_value = mock_bids
 
-        response, status = handlers.nearby_activity()
+        data = {"lat": 40.7128, "lon": -74.0060}  # Add this line
+        response, status = handlers.nearby_activity(data)  # Pass the data parameter
         self.assertEqual(status, 200)
         nearby_bids = json.loads(response)
         self.assertEqual(len(nearby_bids), 2)
@@ -154,7 +156,7 @@ class TestRobotMarketplace(unittest.TestCase):
         mock_redis.hscan_iter.return_value = []
 
         data = {
-            "account_id": "REDHASH_TEST_ACCOUNT1",
+            "account_id": "TEST_ACCOUNT1",
             "bid_price": 500
         }
         result = handlers.has_sufficient_funds(data)
@@ -167,7 +169,7 @@ class TestRobotMarketplace(unittest.TestCase):
         mock_redis.hscan_iter.return_value = []
 
         data = {
-            "account_id": "REDHASH_TEST_ACCOUNT2",
+            "account_id": "TEST_ACCOUNT2",
             "bid_price": 1000
         }
         result = handlers.has_sufficient_funds(data)
