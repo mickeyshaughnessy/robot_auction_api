@@ -14,6 +14,8 @@ def ping():
 def make_bid():
     # route for buyers to submit bids
     data = request.get_json()
+    # Add simulation flag to the data
+    data["simulated"] = request.args.get('simulated', 'false').lower() == 'true'
     response, status = handlers.submit_bid(data)
     return jsonify(response), status 
 
@@ -30,9 +32,10 @@ def nearby_activity():
 def grab_job():
     # route for robots to grab jobs
     data = request.get_json()
+    # Add simulation flag to the data
+    data["simulated"] = request.args.get('simulated', 'false').lower() == 'true'
     response, status = handlers.grab_job(data)
     return jsonify(response), status
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
-
+    app.run(debug=True)
