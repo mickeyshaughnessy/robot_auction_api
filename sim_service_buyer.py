@@ -3,7 +3,8 @@ import json
 import time
 import random
 
-API_BASE_URL = "http://localhost:5001"  # Adjust this to the actual API server URL
+API_BASE_URL = "http://localhost:5000"  # Adjust this to the actual API server URL
+SIMULATED_KEY = "password"  # This should match the key used to generate the hash in config.py
 
 class ServiceBuyer:
     def __init__(self, account_id, initial_balance):
@@ -11,7 +12,7 @@ class ServiceBuyer:
         self.balance = initial_balance
 
     def make_bid(self, service, lat, lon, price):
-        url = f"{API_BASE_URL}/make_bid?simulated=true"
+        url = f"{API_BASE_URL}/make_bid"
         data = {
             "account_id": self.account_id,
             "bid_price": price,
@@ -21,7 +22,8 @@ class ServiceBuyer:
                 "lon": lon,
                 "price": price,
                 "bidder_account_id": self.account_id
-            }
+            },
+            "simulated": SIMULATED_KEY
         }
         response = requests.post(url, json=data)
         if response.status_code == 200:
@@ -34,7 +36,7 @@ class ServiceBuyer:
 
     def check_nearby_activity(self, lat, lon):
         url = f"{API_BASE_URL}/nearby"
-        data = {"lat": lat, "lon": lon}
+        data = {"lat": lat, "lon": lon, "simulated": SIMULATED_KEY}
         response = requests.post(url, json=data)
         if response.status_code == 200:
             nearby_bids = response.json()
