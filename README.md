@@ -1,10 +1,10 @@
-# Robot Services Exchange
+# Robot Services Exchange (RSX)
 
-Welcome to the future of automation services! This repository contains the code for a groundbreaking robot services exchange platform.
+Welcome to the future of automation services! This repository contains the code for a new robot services exchange platform.
 
 ## What is it?
 
-The Robot Services Exchange is an innovative marketplace that connects buyers and sellers of robot services. Think of it as a specialized job board where robots are the service providers.
+The Robot Services Exchange (RSX) is a marketplace that connects buyers and sellers of robot services. Think of it as a specialized job board where robots are the service providers.
 
 ## Key Features
 
