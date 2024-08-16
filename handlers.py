@@ -26,48 +26,50 @@ def grab_job(robot_data):
     for bid_id, bid_json in redis.hscan_iter(REDHASH_ALL_LIVE_BIDS):
         bid = json.loads(bid_json)
         if is_bid_matching(bid, robot_data):
-            matched_bids.append((bid.get('price', 0), bid_id, bid))
-
+            matched_bids.append((bid.get('price', 0), bid_id.decode(), bid))
+    
     if not matched_bids:
-        return None, 204
-
+        return None, 204  # No Content - No matching bids found
+    
     best_match = max(matched_bids, key=lambda x: x[0])
     _, bid_id, job = best_match
-
     job_id = str(uuid.uuid4())
     new_job = {
         'job_id': job_id,
         'bid_id': bid_id,
         'status': 'won',
-        'job_request': robot_data,
+        'job_request': {k: v for k, v in robot_data.items() if isinstance(v, (str, int, float, bool, list, dict))},
         'bid_params': job,
     }
-
     redis.hset(REDHASH_ALL_WINS, bid_id, json.dumps(new_job))
     redis.hdel(REDHASH_ALL_LIVE_BIDS, bid_id)
-
     return new_job, 200
 
 def has_sufficient_funds(data):
     if is_simulated(data):
         return True  # Always return True for simulated traffic
-
     account_id = data.get("account_id")
     bid_price = data.get("bid_price", 0)
+    
+    if not account_id:
+        return False  # Return False if account_id is None
+    
     account_json = redis.hget(REDHASH_ACCOUNTS, account_id)
     
-    if not account_json or not bid_price:
-        return False
-
-    account = json.loads(account_json)
+    if not account_json:
+        return False  # Return False if account not found
+    
+    try:
+        account = json.loads(account_json)
+    except json.JSONDecodeError:
+        return False  # Return False if account data is invalid
+    
     balance = account.get("balance", 0)
-
     all_outstanding = []
     for _, b in redis.hscan_iter(REDHASH_ALL_LIVE_BIDS):
         b = json.loads(b)
         if b.get("bidder_account_id") == account_id:
             all_outstanding.append(b)
-
     total_outstanding = sum(b.get("bid_price", 0) for b in all_outstanding)
     
     return balance - total_outstanding - bid_price >= 0
@@ -88,7 +90,9 @@ def submit_bid(data):
 
 def nearby_activity(data):
     all_live_bids = redis.hgetall(REDHASH_ALL_LIVE_BIDS)
-    return json.dumps(all_live_bids), 200
+    # Convert byte keys to strings
+    decoded_bids = {k.decode('utf-8'): json.loads(v.decode('utf-8')) for k, v in all_live_bids.items()}
+    return decoded_bids, 200
 
 if __name__ == "__main__":
     print("This is the main module. Run tests.py to execute the tests.")
