@@ -1,17 +1,16 @@
 # Robot Services Exchange (RSX)
 
-Welcome to the future of automation services! This repository contains the code for a new robot services exchange platform.
+Welcome to the future of automation services! This repository contains the code for the Robot Services Exchange.
 
 ## What is it?
 
-The Robot Services Exchange (RSX) is a marketplace that connects buyers and sellers of robot services. Think of it as a specialized job board where robots are the service providers.
+The Robot Services Exchange (RSX) is a marketplace that connects buyers and sellers of robot services. Think of it as a job board where robots are the service providers. It's also a webpage where people who want to buy robot services can, by submitting bids indicating the maximum amount they are willing to pay for the service. 
 
 ## Key Features
 
-- **Buyer Interface**: Easily place bids for specific robot services
-- **Seller Interface**: List robot capabilities and accept job offers
+- **Buyer Interface**: Easily place bids for specific robot services - (time, location, service, bid)
+- **Seller Interface**: Accept job offers
 - **Smart Matching**: Automated pairing of service requests with the best-suited robots
-- **Secure Transactions**: Safe and efficient handling of payments
 - **API-First Design**: Fully programmable for seamless integration
 
 ## How It Works
@@ -20,6 +19,7 @@ The Robot Services Exchange (RSX) is a marketplace that connects buyers and sell
 2. Sellers list their robots' capabilities and availability
 3. Our smart exchange matches buyers' needs with sellers' offerings
 4. Deals are struck automatically based on the best price match
+
 5. Robots perform the requested services
 6. Payments are securely processed and distributed
 
@@ -41,9 +41,9 @@ Join us in shaping the future of robot services - where efficiency meets innovat
 
 The Robot Services Exchange consists of three main parts:
 
-- **Buyer Client**: Interact with the exchange API through the `/make_bid` route. [GitHub Repository](https://github.com/MevlutArslan/robot-auction-frontend)
+- **Buyer Client**: Interact with the exchange API through the `/make_bid` route. 
 - **Seller Client**: Interact with the exchange API through the `/grab_job` route.
-- **Exchange**: This repository, which handles the core functionality of the platform.
+- **Exchange**: This repository, which handles the core internal functionality of the platform.
 
 ## Technical Details
 
