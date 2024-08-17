@@ -17,7 +17,6 @@ def register():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
-    user_type = data.get('user_type')
     
     # Add logic to store user in Redis
     user_data = {
