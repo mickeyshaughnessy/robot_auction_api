@@ -32,6 +32,9 @@ def run_tests():
     r = setup_redis()
     cleanup_redis(r)
 
+    buyer_token = None
+    seller_token = None
+
     try:
         # Test ping route
         def test_ping():
@@ -55,27 +58,36 @@ def run_tests():
 
         # Test buyer login
         def test_buyer_login():
+            nonlocal buyer_token
             data = {"username": "test_buyer", "password": "password"}
             response = requests.post(f"{API_BASE_URL}/login", json=data)
             if response.status_code != 200:
                 return False, f"Expected status code 200, got {response.status_code}. Response: {response.text}"
             json_data = response.json()
-            return "access_token" in json_data, "Response does not contain access_token"
+            if "access_token" not in json_data:
+                return False, "Response does not contain access_token"
+            buyer_token = json_data["access_token"]
+            return True, ""
         run_test("Buyer login", test_buyer_login)
 
         # Test seller login
         def test_seller_login():
+            nonlocal seller_token
             data = {"username": "test_seller", "password": "password"}
             response = requests.post(f"{API_BASE_URL}/login", json=data)
             if response.status_code != 200:
                 return False, f"Expected status code 200, got {response.status_code}. Response: {response.text}"
             json_data = response.json()
-            return "access_token" in json_data, "Response does not contain access_token"
+            if "access_token" not in json_data:
+                return False, "Response does not contain access_token"
+            seller_token = json_data["access_token"]
+            return True, ""
         run_test("Seller login", test_seller_login)
 
         # Test account balance
         def test_account_balance():
-            response = requests.get(f"{API_BASE_URL}/account_balance?username=test_buyer")
+            headers = {"Authorization": buyer_token}
+            response = requests.get(f"{API_BASE_URL}/account_balance", headers=headers)
             if response.status_code != 200:
                 return False, f"Expected status code 200, got {response.status_code}. Response: {response.text}"
             json_data = response.json()
@@ -93,10 +105,10 @@ def run_tests():
                     "end_time": int(time.time()) + 3600
                 },
                 "simulated": True,
-                "account_id": "test_buyer",
                 "bid_price": 50
             }
-            response = requests.post(f"{API_BASE_URL}/make_bid", json=bid_data)
+            headers = {"Authorization": buyer_token}
+            response = requests.post(f"{API_BASE_URL}/make_bid", json=bid_data, headers=headers)
             if response.status_code != 200:
                 return False, f"Expected status code 200, got {response.status_code}. Response: {response.text}"
             return response.json() is not None, "Response does not contain bid_id"
@@ -105,7 +117,8 @@ def run_tests():
         # Test nearby activity
         def test_nearby_activity():
             data = {"lat": 40.7128, "lon": -74.0060}
-            response = requests.post(f"{API_BASE_URL}/nearby", json=data)
+            headers = {"Authorization": buyer_token}
+            response = requests.post(f"{API_BASE_URL}/nearby", json=data, headers=headers)
             if response.status_code != 200:
                 return False, f"Expected status code 200, got {response.status_code}. Response: {response.text}"
             nearby_bids = response.json()
@@ -120,7 +133,8 @@ def run_tests():
                 "lon": -74.0060,
                 "max_distance": 1
             }
-            response = requests.post(f"{API_BASE_URL}/grab_job", json=robot_data)
+            headers = {"Authorization": seller_token}
+            response = requests.post(f"{API_BASE_URL}/grab_job", json=robot_data, headers=headers)
             if response.status_code != 200:
                 return False, f"Expected status code 200, got {response.status_code}. Response: {response.text}"
             job = response.json()
