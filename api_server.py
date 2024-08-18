@@ -1,17 +1,13 @@
 from flask import Flask, request, jsonify
-import redis
-import uuid
-import json
+import redis, uuid, json
 from functools import wraps
-import handlers
-import config
+import handlers, config
 
 app = Flask(__name__)
 redis_client = redis.StrictRedis()
 
 def simulation_traffic_middleware(request):
     if request.headers.get('X-Simulation-Traffic') == 'true':
-        # Log or track simulated traffic here
         print("Simulated traffic detected")
 
 @app.before_request
@@ -21,10 +17,11 @@ def before_request():
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = request.headers.get('Authorization')
-        if not token:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
             return jsonify({'error': 'Token is missing'}), 401
         
+        token = auth_header.split(" ")[-1]  # This will work with or without "Bearer" prefix
         username = redis_client.get(f"auth_token:{token}")
         if not username:
             return jsonify({'error': 'Token is invalid or expired'}), 401
@@ -39,15 +36,13 @@ def ping():
 @app.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
+    username, password = data.get('username'), data.get('password')
     
     if not all([username, password]):
         return jsonify({"error": "Missing required parameters"}), 400
     
     user_data = {
         "password": password,
-        "user_type": user_type,
         "balance": 1000  # Starting balance
     }
     redis_client.hset(config.REDHASH_ACCOUNTS, username, json.dumps(user_data))
@@ -56,8 +51,7 @@ def register():
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
+    username, password = data.get('username'), data.get('password')
     
     if not all([username, password]):
         return jsonify({"error": "Missing required parameters"}), 400
