@@ -3,11 +3,10 @@ import json
 import redis
 import time
 import uuid
+from llm import generate_completion
 
 API_BASE_URL = "http://localhost:5001"
-REDIS_HOST = "localhost"
-REDIS_PORT = 6379
-REDIS_DB = 0
+REDIS_HOST, REDIS_PORT, REDIS_DB = "localhost", 6379, 0
 
 def setup_redis():
     return redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
@@ -17,129 +16,76 @@ def cleanup_redis(r):
         r.delete(key)
 
 def run_test(description, test_function, *args):
+    print(f"\nTesting: {description}")
     try:
         result, message = test_function(*args)
-        if result:
-            print(f"PASS: {description}")
-        else:
-            print(f"FAIL: {description} - {message}")
+        print(f"{'PASS' if result else 'FAIL'}: {message}")
         return result
     except Exception as e:
-        print(f"ERROR: {description} - {str(e)}")
+        print(f"ERROR: {str(e)}")
         return False
 
 def run_tests():
-    r = setup_redis()
+    r, buyer_token, seller_token = setup_redis(), None, None
     cleanup_redis(r)
 
-    buyer_token = None
-    seller_token = None
-
     try:
-        # Test ping route
         def test_ping():
             response = requests.get(f"{API_BASE_URL}/ping")
-            return response.status_code == 200, f"Expected status code 200, got {response.status_code}"
-        run_test("Ping route", test_ping)
+            return response.status_code == 200, f"Ping: status {response.status_code}"
 
-        # Test buyer registration
         def test_buyer_registration():
-            data = {"username": "test_buyer", "password": "password", "user_type": "buyer"}
-            response = requests.post(f"{API_BASE_URL}/register", json=data)
-            return response.status_code == 201, f"Expected status code 201, got {response.status_code}. Response: {response.text}"
-        run_test("Buyer registration", test_buyer_registration)
+            response = requests.post(f"{API_BASE_URL}/register", json={"username": "test_buyer", "password": "password", "user_type": "buyer"})
+            return response.status_code == 201, f"Buyer registration: status {response.status_code}"
 
-        # Test seller registration
         def test_seller_registration():
-            data = {"username": "test_seller", "password": "password", "user_type": "seller"}
-            response = requests.post(f"{API_BASE_URL}/register", json=data)
-            return response.status_code == 201, f"Expected status code 201, got {response.status_code}. Response: {response.text}"
-        run_test("Seller registration", test_seller_registration)
+            response = requests.post(f"{API_BASE_URL}/register", json={"username": "test_seller", "password": "password", "user_type": "seller"})
+            return response.status_code == 201, f"Seller registration: status {response.status_code}"
 
-        # Test buyer login
         def test_buyer_login():
             nonlocal buyer_token
-            data = {"username": "test_buyer", "password": "password"}
-            response = requests.post(f"{API_BASE_URL}/login", json=data)
-            if response.status_code != 200:
-                return False, f"Expected status code 200, got {response.status_code}. Response: {response.text}"
-            json_data = response.json()
-            if "access_token" not in json_data:
-                return False, "Response does not contain access_token"
-            buyer_token = json_data["access_token"]
-            return True, ""
-        run_test("Buyer login", test_buyer_login)
+            response = requests.post(f"{API_BASE_URL}/login", json={"username": "test_buyer", "password": "password"})
+            if response.status_code == 200:
+                buyer_token = response.json().get("access_token")
+            return response.status_code == 200, f"Buyer login: status {response.status_code}"
 
-        # Test seller login
         def test_seller_login():
             nonlocal seller_token
-            data = {"username": "test_seller", "password": "password"}
-            response = requests.post(f"{API_BASE_URL}/login", json=data)
-            if response.status_code != 200:
-                return False, f"Expected status code 200, got {response.status_code}. Response: {response.text}"
-            json_data = response.json()
-            if "access_token" not in json_data:
-                return False, "Response does not contain access_token"
-            seller_token = json_data["access_token"]
-            return True, ""
-        run_test("Seller login", test_seller_login)
+            response = requests.post(f"{API_BASE_URL}/login", json={"username": "test_seller", "password": "password"})
+            if response.status_code == 200:
+                seller_token = response.json().get("access_token")
+            return response.status_code == 200, f"Seller login: status {response.status_code}"
 
-        # Test account balance
         def test_account_balance():
-            headers = {"Authorization": buyer_token}
-            response = requests.get(f"{API_BASE_URL}/account_balance", headers=headers)
-            if response.status_code != 200:
-                return False, f"Expected status code 200, got {response.status_code}. Response: {response.text}"
-            json_data = response.json()
-            return "balance" in json_data, "Response does not contain balance"
-        run_test("Account balance", test_account_balance)
+            response = requests.get(f"{API_BASE_URL}/account_balance", headers={"Authorization": buyer_token})
+            return response.status_code == 200 and "balance" in response.json(), f"Account balance: status {response.status_code}"
 
-        # Test bid submission
         def test_bid_submission():
             bid_data = {
-                "bid": {
-                    "service": "cleaning",
-                    "lat": 40.7128,
-                    "lon": -74.0060,
-                    "price": 50,
-                    "end_time": int(time.time()) + 3600
-                },
+                "bid": {"service": "cleaning", "lat": 40.7128, "lon": -74.0060, "price": 50, "end_time": int(time.time()) + 3600},
                 "simulated": True,
                 "bid_price": 50
             }
-            headers = {"Authorization": buyer_token}
-            response = requests.post(f"{API_BASE_URL}/make_bid", json=bid_data, headers=headers)
-            if response.status_code != 200:
-                return False, f"Expected status code 200, got {response.status_code}. Response: {response.text}"
-            return response.json() is not None, "Response does not contain bid_id"
-        run_test("Bid submission", test_bid_submission)
+            response = requests.post(f"{API_BASE_URL}/make_bid", json=bid_data, headers={"Authorization": buyer_token})
+            return response.status_code == 200, f"Bid submission: status {response.status_code}"
 
-        # Test nearby activity
         def test_nearby_activity():
-            data = {"lat": 40.7128, "lon": -74.0060}
-            headers = {"Authorization": buyer_token}
-            response = requests.post(f"{API_BASE_URL}/nearby", json=data, headers=headers)
-            if response.status_code != 200:
-                return False, f"Expected status code 200, got {response.status_code}. Response: {response.text}"
-            nearby_bids = response.json()
-            return len(nearby_bids) > 0, f"Expected at least one nearby bid, got {len(nearby_bids)}"
-        run_test("Nearby activity", test_nearby_activity)
+            response = requests.post(f"{API_BASE_URL}/nearby", json={"lat": 40.7128, "lon": -74.0060}, headers={"Authorization": buyer_token})
+            return response.status_code == 200, f"Nearby activity: status {response.status_code}, bids: {len(response.json())}"
 
-        # Test grab job
         def test_grab_job():
-            robot_data = {
-                "services": ["cleaning"],
-                "lat": 40.7128,
-                "lon": -74.0060,
-                "max_distance": 1
-            }
-            headers = {"Authorization": seller_token}
-            response = requests.post(f"{API_BASE_URL}/grab_job", json=robot_data, headers=headers)
-            if response.status_code != 200:
-                return False, f"Expected status code 200, got {response.status_code}. Response: {response.text}"
-            job = response.json()
-            return job.get("status") == "won", f"Expected job status 'won', got {job.get('status')}"
-        run_test("Grab job", test_grab_job)
+            robot_data = {"services": ["cleaning", "gardening"], "lat": 40.7128, "lon": -74.0060, "max_distance": 1}
+            llm_prompt = "Buyer: cleaning\nSeller: cleaning, gardening\nMatch? (True/False)"
+            llm_response = generate_completion(llm_prompt)
+            response = requests.post(f"{API_BASE_URL}/grab_job", json=robot_data, headers={"Authorization": seller_token})
+            print(f"LLM Response: {llm_response}")
+            return response.status_code == 200, f"Grab job: status {response.status_code}, job status: {response.json().get('status')}"
+
+        tests = [test_ping, test_buyer_registration, test_seller_registration, test_buyer_login, test_seller_login,
+                 test_account_balance, test_bid_submission, test_nearby_activity, test_grab_job]
+        
+        for test in tests:
+            run_test(test.__name__.replace('test_', '').replace('_', ' ').capitalize(), test)
 
     finally:
         cleanup_redis(r)

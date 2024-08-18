@@ -3,6 +3,7 @@ import redis
 import json
 import math
 from config import SIMULATION_KEY, REDHASH_ALL_LIVE_BIDS, REDHASH_ALL_WINS, REDHASH_ACCOUNTS
+from llm import matched_service
 
 redis_client = redis.StrictRedis()
 
@@ -29,9 +30,10 @@ def calculate_distance(point1, point2):
     return distance
 
 def is_service_match(bid_service, robot_services):
-    # TODO: Implement service matching using a text LLM
-    # For now, just check if the bid service is in the robot's services list
-    return bid_service in robot_services
+    # Use the matched_service function from llm.py
+    buyer_description = f"I need a robot to perform this service: {bid_service}"
+    seller_description = f"Our robot can perform these services: {', '.join(robot_services)}"
+    return matched_service(buyer_description, seller_description)
 
 def is_bid_matching(bid, robot_data):
     if not is_service_match(bid.get('service'), robot_data.get('services', [])):
