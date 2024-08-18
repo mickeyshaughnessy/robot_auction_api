@@ -5,7 +5,7 @@ import time
 import uuid
 from llm import generate_completion
 
-API_BASE_URL = "http://localhost:5001"
+API__URL = "http://localhost:5001"
 REDIS_HOST, REDIS_PORT, REDIS_DB = "localhost", 6379, 0
 
 def setup_redis():
@@ -16,7 +16,7 @@ def cleanup_redis(r):
         r.delete(key)
 
 def run_test(description, test_function, *args):
-    print(f"\nTesting: {description}")
+    print(f"Testing: {description}")
     try:
         result, message = test_function(*args)
         print(f"{'PASS' if result else 'FAIL'}: {message}")
@@ -31,33 +31,33 @@ def run_tests():
 
     try:
         def test_ping():
-            response = requests.get(f"{API_BASE_URL}/ping")
+            response = requests.get(f"{API__URL}/ping")
             return response.status_code == 200, f"Ping: status {response.status_code}"
 
         def test_buyer_registration():
-            response = requests.post(f"{API_BASE_URL}/register", json={"username": "test_buyer", "password": "password", "user_type": "buyer"})
+            response = requests.post(f"{API__URL}/register", json={"username": "test_buyer", "password": "password", "user_type": "buyer"})
             return response.status_code == 201, f"Buyer registration: status {response.status_code}"
 
         def test_seller_registration():
-            response = requests.post(f"{API_BASE_URL}/register", json={"username": "test_seller", "password": "password", "user_type": "seller"})
+            response = requests.post(f"{API__URL}/register", json={"username": "test_seller", "password": "password", "user_type": "seller"})
             return response.status_code == 201, f"Seller registration: status {response.status_code}"
 
         def test_buyer_login():
             nonlocal buyer_token
-            response = requests.post(f"{API_BASE_URL}/login", json={"username": "test_buyer", "password": "password"})
+            response = requests.post(f"{API__URL}/login", json={"username": "test_buyer", "password": "password"})
             if response.status_code == 200:
                 buyer_token = response.json().get("access_token")
             return response.status_code == 200, f"Buyer login: status {response.status_code}"
 
         def test_seller_login():
             nonlocal seller_token
-            response = requests.post(f"{API_BASE_URL}/login", json={"username": "test_seller", "password": "password"})
+            response = requests.post(f"{API__URL}/login", json={"username": "test_seller", "password": "password"})
             if response.status_code == 200:
                 seller_token = response.json().get("access_token")
             return response.status_code == 200, f"Seller login: status {response.status_code}"
 
         def test_account_balance():
-            response = requests.get(f"{API_BASE_URL}/account_balance", headers={"Authorization": buyer_token})
+            response = requests.get(f"{API__URL}/account_balance", headers={"Authorization": buyer_token})
             return response.status_code == 200 and "balance" in response.json(), f"Account balance: status {response.status_code}"
 
         def test_bid_submission():
@@ -66,18 +66,18 @@ def run_tests():
                 "simulated": True,
                 "bid_price": 50
             }
-            response = requests.post(f"{API_BASE_URL}/make_bid", json=bid_data, headers={"Authorization": buyer_token})
+            response = requests.post(f"{API__URL}/make_bid", json=bid_data, headers={"Authorization": buyer_token})
             return response.status_code == 200, f"Bid submission: status {response.status_code}"
 
         def test_nearby_activity():
-            response = requests.post(f"{API_BASE_URL}/nearby", json={"lat": 40.7128, "lon": -74.0060}, headers={"Authorization": buyer_token})
+            response = requests.post(f"{API__URL}/nearby", json={"lat": 40.7128, "lon": -74.0060}, headers={"Authorization": buyer_token})
             return response.status_code == 200, f"Nearby activity: status {response.status_code}, bids: {len(response.json())}"
 
         def test_grab_job():
             robot_data = {"services": ["cleaning", "gardening"], "lat": 40.7128, "lon": -74.0060, "max_distance": 1}
             llm_prompt = "Buyer: cleaning\nSeller: cleaning, gardening\nMatch? (True/False)"
             llm_response = generate_completion(llm_prompt)
-            response = requests.post(f"{API_BASE_URL}/grab_job", json=robot_data, headers={"Authorization": seller_token})
+            response = requests.post(f"{API__URL}/grab_job", json=robot_data, headers={"Authorization": seller_token})
             print(f"LLM Response: {llm_response}")
             return response.status_code == 200, f"Grab job: status {response.status_code}, job status: {response.json().get('status')}"
 
