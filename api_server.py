@@ -1,14 +1,22 @@
 from flask import Flask, request, jsonify
-import json
 import redis
 import uuid
-import datetime
+import json
 from functools import wraps
 import handlers
 import config
 
 app = Flask(__name__)
 redis_client = redis.StrictRedis()
+
+def simulation_traffic_middleware(request):
+    if request.headers.get('X-Simulation-Traffic') == 'true':
+        # Log or track simulated traffic here
+        print("Simulated traffic detected")
+
+@app.before_request
+def before_request():
+    simulation_traffic_middleware(request)
 
 def token_required(f):
     @wraps(f)
@@ -33,9 +41,8 @@ def register():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
-    user_type = data.get('user_type')
     
-    if not all([username, password, user_type]):
+    if not all([username, password]):
         return jsonify({"error": "Missing required parameters"}), 400
     
     user_data = {
