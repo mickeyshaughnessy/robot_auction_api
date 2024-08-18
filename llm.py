@@ -3,12 +3,12 @@ import json
 
 OLLAMA_API_URL = "http://localhost:11434/api/generate"
 
-def generate_completion(prompt, model="llama2", max_tokens=100):
+def generate_completion(prompt, model="phi", max_tokens=100):
     """
     Generate a completion using the Ollama API.
 
     :param prompt: The input prompt for the model
-    :param model: The model to use (default is "llama2")
+    :param model: The model to use (default is "phi")
     :param max_tokens: Maximum number of tokens to generate (default is 100)
     :return: The generated text
     """
