@@ -17,7 +17,7 @@ def is_bid_matching(bid, robot_data):
     bid_description, robot_description = bid.get('service'), robot_data.get('service')
     if not (bid_description and robot_description): 
         return False
-    if not (matched_service(bid_description and robot_description)):
+    if not (matched_service(bid_description, robot_description)):
         return False
     bid_location, robot_location = (bid.get('lat', 0), bid.get('lon', 0)), (robot_data.get('lat', 0), robot_data.get('lon', 0))
     if calculate_distance(bid_location, robot_location) > robot_data.get("max_distance", 1):
@@ -25,7 +25,7 @@ def is_bid_matching(bid, robot_data):
     return bid.get('end_time', 0) > time.time()
 
 def grab_job(data):
-    if not all(key in data for key in ['services', 'lat', 'lon', 'max_distance']):
+    if not all(key in data for key in ['service', 'lat', 'lon', 'max_distance']):
         return {"error": "Missing required parameters"}, 400
     matched_bids = [(bid.get('price', 0), bid_id.decode(), json.loads(bid_json)) 
                     for bid_id, bid_json in redis_client.hscan_iter(REDHASH_ALL_LIVE_BIDS) 
