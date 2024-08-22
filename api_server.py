@@ -20,12 +20,10 @@ def token_required(f):
         auth_header = request.headers.get('Authorization')
         if not auth_header:
             return jsonify({'error': 'Token is missing'}), 401
-        
-        token = auth_header.split(" ")[-1]  # This will work with or without "Bearer" prefix
+        token = auth_header.split(" ")[-1]
         username = redis_client.get(f"auth_token:{token}")
         if not username:
             return jsonify({'error': 'Token is invalid or expired'}), 401
-        
         return f(username.decode(), *args, **kwargs)
     return decorated
 
@@ -37,14 +35,12 @@ def ping():
 def register():
     data = request.get_json()
     username, password = data.get('username'), data.get('password')
-    
     if not all([username, password]):
         return jsonify({"error": "Missing required parameters"}), 400
-    
     user_data = {
-        "username" : username,
-        "password": password,
-        "created_on" : int(time.time()),
+        "username": username,
+        "password": handlers.hash_password(password),
+        "created_on": int(time.time()),
     }
     redis_client.hset(config.REDHASH_ACCOUNTS, username, json.dumps(user_data))
     return jsonify({"message": "User registered successfully"}), 201
@@ -53,16 +49,14 @@ def register():
 def login():
     data = request.get_json()
     username, password = data.get('username'), data.get('password')
-    
     if not all([username, password]):
         return jsonify({"error": "Missing required parameters"}), 400
-    
     user_data = redis_client.hget(config.REDHASH_ACCOUNTS, username)
     if user_data:
         user = json.loads(user_data)
-        if user['password'] == password:
+        if handlers.verify_password(user['password'], password):
             token = str(uuid.uuid4())
-            redis_client.setex(f"auth_token:{token}", 3600, username)  # Expire after 1 hour
+            redis_client.setex(f"auth_token:{token}", 3600, username)
             return jsonify({"access_token": token}), 200
     return jsonify({"error": "Invalid username or password"}), 401
 
@@ -75,8 +69,8 @@ def account_data(current_user):
     account = json.loads(account_json)
     return jsonify({
         "created_on": account.get("created_on", 0),
-        "stars" : account.get("stars", 0),
-        }), 200
+        "stars": account.get("stars", 0),
+    }), 200
 
 @app.route('/make_bid', methods=['POST'])
 @token_required
@@ -100,6 +94,14 @@ def grab_job(current_user):
     data = request.get_json()
     data['username'] = current_user
     response, status = handlers.grab_job(data)
+    return jsonify(response), status
+
+@app.route('/sign_job', methods=['POST'])
+@token_required
+def sign_job(current_user):
+    data = request.get_json()
+    data['username'] = current_user
+    response, status = handlers.sign_job(data)
     return jsonify(response), status
 
 if __name__ == '__main__':
