@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Robot Auction API Documentation</title>
+    <title>Robot Services Exchange (RSX) API Documentation</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -43,7 +43,7 @@
         th {
             background-color: #f2f2f2;
         }
-        .fun-button {
+        .api-button {
             background-color: #3498db;
             color: white;
             border: none;
@@ -57,47 +57,74 @@
             border-radius: 5px;
             transition: background-color 0.3s;
         }
-        .fun-button:hover {
+        .api-button:hover {
             background-color: #2980b9;
+        }
+        .api-button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        #response {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 20px;
+            white-space: pre-wrap;
         }
     </style>
 </head>
 <body>
     <h1>Robot Services Exchange (RSX) API Documentation</h1>
     
-    <h3> The RSX &alpha; API is currently running at http://100.26.236.1:5001</h3>
+    <h3>The RSX API is currently running at http://100.26.236.1:5001</h3>
     
-    <button class="fun-button" onclick="alert('Beep boop! API is operational!')">Check API Status</button>
+    <div id="response"></div>
     
     <h2>Authentication Endpoints</h2>
    
     <div class="endpoint">
         <h3><span class="method">POST</span> <span class="path">/register</span></h3>
         <p>Register a new user account.</p>
-        <h4>Request Body:</h4>
-        <table>
-            <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>username</td><td>string</td><td>Desired username</td></tr>
-            <tr><td>password</td><td>string</td><td>Desired password</td></tr>
-        </table>
-        <h4>Response:</h4>
-        <p>Status 201: User registered successfully</p>
-        <button class="fun-button" onclick="alert('Welcome, human! Your robot army awaits.')">Register Now</button>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="registerUsername">Username:</label>
+                <input type="text" id="registerUsername" required>
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">Password:</label>
+                <input type="password" id="registerPassword" required>
+            </div>
+            <button class="api-button" type="submit">Register</button>
+        </form>
     </div>
 
     <div class="endpoint">
         <h3><span class="method">POST</span> <span class="path">/login</span></h3>
         <p>Authenticate a user and receive an access token.</p>
-        <h4>Request Body:</h4>
-        <table>
-            <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>username</td><td>string</td><td>User's username</td></tr>
-            <tr><td>password</td><td>string</td><td>User's password</td></tr>
-        </table>
-        <h4>Response:</h4>
-        <p>Status 200: Login successful, returns access token<br>
-        Status 401: Invalid username or password</p>
-        <button class="fun-button" onclick="alert('Access granted. Prepare for robot domination!')">Login</button>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="loginUsername">Username:</label>
+                <input type="text" id="loginUsername" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <button class="api-button" type="submit">Login</button>
+        </form>
     </div>
 
     <h2>Account Management</h2>
@@ -105,17 +132,17 @@
     <div class="endpoint">
         <h3><span class="method">GET</span> <span class="path">/account_data</span></h3>
         <p>Retrieve the account data for a user.</p>
-        <h4>Query Parameters:</h4>
-        <table>
-            <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>username</td><td>string</td><td>User's username</td></tr>
-            <tr><td><password/td><td>string</td><td>User's password</td></tr>
-        </table>
-        <h4>Response:</h4>
-        <p>Status 200: Returns account data<br>
-        Status 400: Username is required<br>
-        Status 404: Account not found</p>
-        <button class="fun-button" onclick="alert('Accessing your robot overlord profile...')">View Account</button>
+        <form id="accountDataForm">
+            <div class="form-group">
+                <label for="accountDataUsername">Username:</label>
+                <input type="text" id="accountDataUsername" required>
+            </div>
+            <div class="form-group">
+                <label for="accountDataPassword">Password:</label>
+                <input type="password" id="accountDataPassword" required>
+            </div>
+            <button class="api-button" type="submit">View Account</button>
+        </form>
     </div>
 
     <h2>Buyer Endpoints</h2>
@@ -123,33 +150,45 @@
     <div class="endpoint">
         <h3><span class="method">POST</span> <span class="path">/make_bid</span></h3>
         <p>Submit a new bid for a robot service.</p>
-        <h4>Request Body:</h4>
-        <table>
-            <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>service</td><td>string</td><td>Type of service requested</td></tr>
-            <tr><td>lat</td><td>float</td><td>Latitude of service location</td></tr>
-            <tr><td>lon</td><td>float</td><td>Longitude of service location</td></tr>
-            <tr><td>price</td><td>float</td><td>Bid price</td></tr>
-            <tr><td>end_time</td><td>int</td><td>Unix timestamp of bid expiration</td></tr>
-        </table>
-        <h4>Response:</h4>
-        <p>Status 200: Bid submitted successfully, returns bid ID<br>
-        Status 403: Insufficient funds or other error</p>
-        <button class="fun-button" onclick="alert('Bid placed! May the best robot win.')">Place Bid</button>
+        <form id="makeBidForm">
+            <div class="form-group">
+                <label for="bidService">Service:</label>
+                <input type="text" id="bidService" required>
+            </div>
+            <div class="form-group">
+                <label for="bidLat">Latitude:</label>
+                <input type="number" id="bidLat" step="any" required>
+            </div>
+            <div class="form-group">
+                <label for="bidLon">Longitude:</label>
+                <input type="number" id="bidLon" step="any" required>
+            </div>
+            <div class="form-group">
+                <label for="bidPrice">Price:</label>
+                <input type="number" id="bidPrice" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="bidEndTime">End Time (Unix Timestamp):</label>
+                <input type="number" id="bidEndTime" required>
+            </div>
+            <button class="api-button" type="submit">Place Bid</button>
+        </form>
     </div>
 
     <div class="endpoint">
         <h3><span class="method">POST</span> <span class="path">/nearby</span></h3>
         <p>Retrieve nearby robot service activities.</p>
-        <h4>Request Body:</h4>
-        <table>
-            <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>lat</td><td>float</td><td>Latitude of search center</td></tr>
-            <tr><td>lon</td><td>float</td><td>Longitude of search center</td></tr>
-        </table>
-        <h4>Response:</h4>
-        <p>Status 200: Returns list of nearby activities</p>
-        <button class="fun-button" onclick="alert('Scanning for nearby robot activity...')">Find Nearby Robots</button>
+        <form id="nearbyForm">
+            <div class="form-group">
+                <label for="nearbyLat">Latitude:</label>
+                <input type="number" id="nearbyLat" step="any" required>
+            </div>
+            <div class="form-group">
+                <label for="nearbyLon">Longitude:</label>
+                <input type="number" id="nearbyLon" step="any" required>
+            </div>
+            <button class="api-button" type="submit">Find Nearby Activities</button>
+        </form>
     </div>
 
     <h2>Seller Endpoints</h2>
@@ -157,29 +196,137 @@
     <div class="endpoint">
         <h3><span class="method">POST</span> <span class="path">/grab_job</span></h3>
         <p>Attempt to accept an available job for a robot.</p>
-        <h4>Request Body:</h4>
-        <table>
-            <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>services</td><td>array</td><td>List of services the robot can perform</td></tr>
-            <tr><td>lat</td><td>float</td><td>Current latitude of the robot</td></tr>
-            <tr><td>lon</td><td>float</td><td>Current longitude of the robot</td></tr>
-            <tr><td>max_distance</td><td>float</td><td>Maximum travel distance for the robot</td></tr>
-        </table>
-        <h4>Response:</h4>
-        <p>Status 200: Job successfully grabbed, returns job details<br>
-        Status 204: No matching jobs available</p>
-        <button class="fun-button" onclick="alert('Job acquired. Initiating world domination sequence...')">Grab Job</button>
+        <form id="grabJobForm">
+            <div class="form-group">
+                <label for="jobServices">Services (comma-separated):</label>
+                <input type="text" id="jobServices" required>
+            </div>
+            <div class="form-group">
+                <label for="jobLat">Latitude:</label>
+                <input type="number" id="jobLat" step="any" required>
+            </div>
+            <div class="form-group">
+                <label for="jobLon">Longitude:</label>
+                <input type="number" id="jobLon" step="any" required>
+            </div>
+            <div class="form-group">
+                <label for="jobMaxDistance">Max Distance:</label>
+                <input type="number" id="jobMaxDistance" step="any" required>
+            </div>
+            <button class="api-button" type="submit">Grab Job</button>
+        </form>
     </div>
 
     <h2>System Check</h2>
 
     <div class="endpoint">
-        <h3><span class="method">GET/POST</span> <span class="path">/ping</span></h3>
+        <h3><span class="method">GET</span> <span class="path">/ping</span></h3>
         <p>Check if the API is operational.</p>
-        <h4>Response:</h4>
-        <p>Status 200: API is operational</p>
-        <button class="fun-button" onclick="alert('Ping successful! Robots are listening...')">Ping API</button>
+        <button id="pingButton" class="api-button">Ping API</button>
     </div>
 
+    <script>
+        const API_URL = 'http://100.26.236.1:5001';
+        let accessToken = '';
+
+        function updateButtonStates() {
+            const loggedIn = !!accessToken;
+            document.querySelectorAll('.api-button').forEach(button => {
+                if (button.id === 'pingButton' || button.closest('form').id === 'registerForm' || button.closest('form').id === 'loginForm') {
+                    button.disabled = false;
+                } else {
+                    button.disabled = !loggedIn;
+                }
+            });
+        }
+
+        function displayResponse(response) {
+            document.getElementById('response').textContent = JSON.stringify(response, null, 2);
+        }
+
+        async function makeRequest(endpoint, method, body = null) {
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            if (accessToken) {
+                headers['Authorization'] = `Bearer ${accessToken}`;
+            }
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    method,
+                    headers,
+                    body: body ? JSON.stringify(body) : null
+                });
+                const data = await response.json();
+                displayResponse(data);
+                return data;
+            } catch (error) {
+                displayResponse({ error: error.message });
+            }
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+            await makeRequest('/register', 'POST', { username, password });
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const response = await makeRequest('/login', 'POST', { username, password });
+            if (response.access_token) {
+                accessToken = response.access_token;
+                updateButtonStates();
+            }
+        });
+
+        document.getElementById('accountDataForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('accountDataUsername').value;
+            const password = document.getElementById('accountDataPassword').value;
+            await makeRequest(`/account_data?username=${username}&password=${password}`, 'GET');
+        });
+
+        document.getElementById('makeBidForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const bid = {
+                service: document.getElementById('bidService').value,
+                lat: parseFloat(document.getElementById('bidLat').value),
+                lon: parseFloat(document.getElementById('bidLon').value),
+                price: parseFloat(document.getElementById('bidPrice').value),
+                end_time: parseInt(document.getElementById('bidEndTime').value)
+            };
+            await makeRequest('/make_bid', 'POST', bid);
+        });
+
+        document.getElementById('nearbyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                lat: parseFloat(document.getElementById('nearbyLat').value),
+                lon: parseFloat(document.getElementById('nearbyLon').value)
+            };
+            await makeRequest('/nearby', 'POST', data);
+        });
+
+        document.getElementById('grabJobForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                services: document.getElementById('jobServices').value.split(','),
+                lat: parseFloat(document.getElementById('jobLat').value),
+                lon: parseFloat(document.getElementById('jobLon').value),
+                max_distance: parseFloat(document.getElementById('jobMaxDistance').value)
+            };
+            await makeRequest('/grab_job', 'POST', data);
+        });
+
+        document.getElementById('pingButton').addEventListener('click', async () => {
+            await makeRequest('/ping', 'GET');
+        });
+
+        updateButtonStates();
+    </script>
 </body>
 </html>
