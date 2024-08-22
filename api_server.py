@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-import redis, uuid, json
+import redis, uuid, json, time
 from functools import wraps
 import handlers, config
 
@@ -42,8 +42,9 @@ def register():
         return jsonify({"error": "Missing required parameters"}), 400
     
     user_data = {
+        "username" : username,
         "password": password,
-        "balance": 1000  # Starting balance
+        "created_on" : int(time.time()),
     }
     redis_client.hset(config.REDHASH_ACCOUNTS, username, json.dumps(user_data))
     return jsonify({"message": "User registered successfully"}), 201
@@ -65,14 +66,17 @@ def login():
             return jsonify({"access_token": token}), 200
     return jsonify({"error": "Invalid username or password"}), 401
 
-@app.route('/account_balance', methods=['GET'])
+@app.route('/account_data', methods=['GET'])
 @token_required
-def account_balance(current_user):
+def account_data(current_user):
     account_json = redis_client.hget(config.REDHASH_ACCOUNTS, current_user)
     if not account_json:
         return jsonify({"error": "Account not found"}), 404
     account = json.loads(account_json)
-    return jsonify({"balance": account.get("balance", 0)}), 200
+    return jsonify({
+        "created_on": account.get("created_on", 0),
+        "stars" : account.get("stars", 0),
+        }), 200
 
 @app.route('/make_bid', methods=['POST'])
 @token_required
