@@ -112,7 +112,8 @@ def sign_job(data):
     if not user_data:
         return {"error": "User not found"}, 404
     
-    if not verify_password(user_data['password'], signature):
+    # Use generate_signature for verification
+    if signature != generate_signature(user_data['password'], job_id):
         return {"error": "Invalid signature"}, 403
     
     if f"{user_type}_signed" in job:
@@ -129,6 +130,5 @@ def sign_job(data):
     redis_client.hset(REDHASH_ACCOUNTS, counterparty, json.dumps(counterparty_data))
     
     return {"message": "Job signed successfully"}, 200
-
 if __name__ == "__main__":
     print("This is the main module. Run tests.py to execute the tests.")

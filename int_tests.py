@@ -3,6 +3,7 @@ from llm import generate_completion
 
 API__URL = "http://localhost:5001"
 REDIS_HOST, REDIS_PORT, REDIS_DB = "localhost", 6379, 0
+REDHASH_ACCOUNTS = "REDHASH_ACCOUNTS"
 
 def setup_redis():
     return redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
@@ -20,6 +21,9 @@ def run_test(description, test_function, *args):
     except Exception as e:
         print(f"ERROR: {str(e)}")
         return False
+
+def generate_signature(password, job_id):
+    return hashlib.sha256(f"{password}{job_id}".encode()).hexdigest()
 
 def run_tests():
     r, buyer_token, seller_token = setup_redis(), None, None
@@ -96,8 +100,12 @@ def run_tests():
             
             job_id = grab_response.json().get('job_id')
             
+            # Get the hashed password for the buyer
+            buyer_data = json.loads(r.hget(REDHASH_ACCOUNTS, "test_buyer") or '{}')
+            buyer_hashed_password = buyer_data.get('password', '')
+            
             # Sign the job as buyer
-            buyer_signature = hashlib.sha256(f"password{job_id}".encode()).hexdigest()
+            buyer_signature = generate_signature(buyer_hashed_password, job_id)
             buyer_sign_data = {
                 "username": "test_buyer",
                 "job_id": job_id,
@@ -106,8 +114,12 @@ def run_tests():
             }
             buyer_sign_response = requests.post(f"{API__URL}/sign_job", json=buyer_sign_data, headers={"Authorization": buyer_token})
             
+            # Get the hashed password for the seller
+            seller_data = json.loads(r.hget(REDHASH_ACCOUNTS, "test_seller") or '{}')
+            seller_hashed_password = seller_data.get('password', '')
+            
             # Sign the job as seller
-            seller_signature = hashlib.sha256(f"password{job_id}".encode()).hexdigest()
+            seller_signature = generate_signature(seller_hashed_password, job_id)
             seller_sign_data = {
                 "username": "test_seller",
                 "job_id": job_id,
@@ -117,7 +129,7 @@ def run_tests():
             seller_sign_response = requests.post(f"{API__URL}/sign_job", json=seller_sign_data, headers={"Authorization": seller_token})
             
             return (buyer_sign_response.status_code == 200 and seller_sign_response.status_code == 200, 
-                    f"Sign job: Buyer status {buyer_sign_response.status_code}, Seller status {seller_sign_response.status_code}")
+                f"Sign job: Buyer status {buyer_sign_response.status_code}, Seller status {seller_sign_response.status_code}")
 
         tests = [test_ping, test_buyer_registration, test_seller_registration, test_buyer_login, test_seller_login,
                  test_bid_submission, test_nearby_activity, test_grab_job, test_sign_job]
