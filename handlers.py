@@ -17,12 +17,11 @@ def is_bid_matching(bid, robot_data):
     bid_description, robot_description = bid.get('service'), robot_data.get('service')
     if not (bid_description and robot_description): 
         return False
-    if not (matched_service(bid_description, robot_description)):
+    if not matched_service(bid_description, robot_description):
         return False
     bid_location, robot_location = (bid.get('lat', 0), bid.get('lon', 0)), (robot_data.get('lat', 0), robot_data.get('lon', 0))
-    if calculate_distance(bid_location, robot_location) > robot_data.get("max_distance", 1):
-        return False
-    return bid.get('end_time', 0) > time.time()
+    return (calculate_distance(bid_location, robot_location) <= robot_data.get("max_distance", 1) and
+            bid.get('end_time', 0) > time.time())
 
 def grab_job(data):
     if not all(key in data for key in ['service', 'lat', 'lon', 'max_distance']):
@@ -33,13 +32,11 @@ def grab_job(data):
         try:
             bid = json.loads(bid_json)
             if is_bid_matching(bid, data):
-                price = bid.get('price', 0)
-                matched_bids.append((price, bid_id.decode(), bid))
+                matched_bids.append((bid.get('price', 0), bid_id.decode(), bid))
         except json.JSONDecodeError:
             print(f"Invalid JSON for bid {bid_id}")
     
     if not matched_bids:
-        print('no matched bids')
         return {}, 204
     
     _, bid_id, job = max(matched_bids, key=lambda x: x[0])
@@ -63,12 +60,15 @@ def grab_job(data):
     return new_job, 200
 
 def submit_bid(data):
-    bid = data.get('bid', {})
-    if not all(param in bid for param in ['service', 'lat', 'lon', 'price', 'end_time']):
+    required_params = ['service', 'lat', 'lon', 'price', 'end_time']
+    if not all(param in data for param in required_params):
         return {"error": "Missing required parameters"}, 400
+    
     bid_id = str(uuid.uuid4())
+    bid = {param: data[param] for param in required_params}
     bid['username'] = data['username']
     bid["simulated"] = is_simulated(data)
+    
     redis_client.hset(REDHASH_ALL_LIVE_BIDS, bid_id, json.dumps(bid))
     return {"bid_id": bid_id}, 200
 

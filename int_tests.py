@@ -1,4 +1,4 @@
-import requests, json, redis, time, uuid, hashlib
+import requests, json, redis, time, uuid, hashlib, config
 from llm import generate_completion
 
 API__URL = "http://localhost:5001"
@@ -54,8 +54,8 @@ def run_tests():
 
         def test_bid_submission():
             bid_data = {
-                "bid": {"service": "cleaning", "lat": 40.7128, "lon": -74.0060, "price": 50, "end_time": int(time.time()) + 3600},
-                "simulated": True
+                "service": "cleaning", "lat": 40.7128, "lon": -74.0060, "price": 50, "end_time": int(time.time()) + 3600,
+                "simulated": config.SIMULATION_KEY 
             }
             response = requests.post(f"{API__URL}/make_bid", json=bid_data, headers={"Authorization": buyer_token})
             return response.status_code == 200, f"Bid submission: status {response.status_code}"
@@ -77,8 +77,12 @@ def run_tests():
         def test_sign_job():
             # First, create a job
             bid_data = {
-                "bid": {"service": "cleaning", "lat": 40.7128, "lon": -74.0060, "price": 50, "end_time": int(time.time()) + 3600},
-                "simulated": True
+                "service": "cleaning",
+                "lat": 40.7128,
+                "lon": -74.0060,
+                "price": 50,
+                "end_time": int(time.time()) + 3600,
+                "simulated": config.SIMULATION_KEY 
             }
             bid_response = requests.post(f"{API__URL}/make_bid", json=bid_data, headers={"Authorization": buyer_token})
             if bid_response.status_code != 200:
