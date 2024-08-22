@@ -3,7 +3,12 @@ import redis, uuid, json, time
 from functools import wraps
 import handlers, config
 
+from flask import Flask
+from flask_cors import CORS
+
 app = Flask(__name__)
+CORS(app)
+
 redis_client = redis.StrictRedis()
 
 def simulation_traffic_middleware(request):
