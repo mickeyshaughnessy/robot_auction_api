@@ -17,10 +17,8 @@ def is_bid_matching(bid, robot_data):
     bid_description, robot_description = bid.get('service'), robot_data.get('service')
     if not (bid_description and robot_description): 
         return False
-    print(bid_description, robot_description)
     if not (matched_service(bid_description, robot_description)):
         return False
-    print('matched')
     bid_location, robot_location = (bid.get('lat', 0), bid.get('lon', 0)), (robot_data.get('lat', 0), robot_data.get('lon', 0))
     if calculate_distance(bid_location, robot_location) > robot_data.get("max_distance", 1):
         return False
@@ -31,7 +29,7 @@ def grab_job(data):
         return {"error": "Missing required fields"}, 400
     
     matched_bids = []
-    for bid_id, bid_json in redis_client.hscan_iter("REDHASH_ALL_LIVE_BIDS"):
+    for bid_id, bid_json in redis_client.hscan_iter(REDHASH_ALL_LIVE_BIDS):
         try:
             bid = json.loads(bid_json)
             if is_bid_matching(bid, data):
@@ -50,12 +48,17 @@ def grab_job(data):
         'job_id': job_id,
         'bid_id': bid_id,
         'status': 'won',
-        'job_request': {k: v for k, v in data.items() if isinstance(v, (str, int, float, bool, list, dict))},
-        'bid_params': job
+        'service': job['service'],
+        'lat': job['lat'],
+        'lon': job['lon'],
+        'price': job['price'],
+        'end_time': job['end_time'],
+        'buyer_username': job['username'],
+        'seller_username': data['username']
     }
     
-    redis_client.hset("REDHASH_ALL_WINS", bid_id, json.dumps(new_job))
-    redis_client.hdel("REDHASH_ALL_LIVE_BIDS", bid_id)
+    redis_client.hset(REDHASH_ALL_WINS, job_id, json.dumps(new_job))
+    redis_client.hdel(REDHASH_ALL_LIVE_BIDS, bid_id)
     
     return new_job, 200
 
@@ -76,7 +79,7 @@ def nearby_activity(data):
     nearby_radius = 10  # miles
     nearby_deals = {
         deal_id.decode('utf-8'): deal for deal_id, deal_json in redis_client.hgetall(REDHASH_ALL_WINS).items()
-        if (deal := json.loads(deal_json)) and calculate_distance(user_location, (deal['bid_params'].get('lat', 0), deal['bid_params'].get('lon', 0))) <= nearby_radius
+        if (deal := json.loads(deal_json)) and calculate_distance(user_location, (deal.get('lat', 0), deal.get('lon', 0))) <= nearby_radius
     }
     return nearby_deals, 200
 
@@ -102,8 +105,8 @@ def sign_job(data):
     if not job:
         return {"error": "Job not found"}, 404
     
-    user_type = 'buyer' if username == job['bid_params']['username'] else 'seller'
-    counterparty = job['bid_params']['username'] if user_type == 'seller' else job['job_request']['username']
+    user_type = 'buyer' if username == job['buyer_username'] else 'seller'
+    counterparty = job['seller_username'] if user_type == 'buyer' else job['buyer_username']
     
     user_data = json.loads(redis_client.hget(REDHASH_ACCOUNTS, username) or '{}')
     if not user_data:
