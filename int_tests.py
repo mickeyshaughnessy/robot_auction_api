@@ -1,9 +1,8 @@
 import requests, json, redis, time, uuid, hashlib, config
 from llm import generate_completion
 
-API__URL = "http://localhost:5001"
+API__URL = "https://172.31.35.173:5001"
 REDIS_HOST, REDIS_PORT, REDIS_DB = "localhost", 6379, 0
-REDHASH_ACCOUNTS = "REDHASH_ACCOUNTS"
 
 def setup_redis():
     return redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
@@ -101,7 +100,7 @@ def run_tests():
             job_id = grab_response.json().get('job_id')
             
             # Get the hashed password for the buyer
-            buyer_data = json.loads(r.hget(REDHASH_ACCOUNTS, "test_buyer") or '{}')
+            buyer_data = json.loads(r.hget(config.REDHASH_ACCOUNTS, "test_buyer") or '{}')
             buyer_hashed_password = buyer_data.get('password', '')
             
             # Sign the job as buyer
@@ -115,7 +114,7 @@ def run_tests():
             buyer_sign_response = requests.post(f"{API__URL}/sign_job", json=buyer_sign_data, headers={"Authorization": buyer_token})
             
             # Get the hashed password for the seller
-            seller_data = json.loads(r.hget(REDHASH_ACCOUNTS, "test_seller") or '{}')
+            seller_data = json.loads(r.hget(config.REDHASH_ACCOUNTS, "test_seller") or '{}')
             seller_hashed_password = seller_data.get('password', '')
             
             # Sign the job as seller
