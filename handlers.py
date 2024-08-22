@@ -1,4 +1,4 @@
-import uuid, redis, json, math, time
+import uuid, redis, json, math, time, hashlib
 from config import SIMULATION_KEY, REDHASH_ALL_LIVE_BIDS, REDHASH_ALL_WINS, REDHASH_ACCOUNTS
 from match import matched_service
 
@@ -17,8 +17,10 @@ def is_bid_matching(bid, robot_data):
     bid_description, robot_description = bid.get('service'), robot_data.get('service')
     if not (bid_description and robot_description): 
         return False
+    print(bid_description, robot_description)
     if not (matched_service(bid_description, robot_description)):
         return False
+    print('matched')
     bid_location, robot_location = (bid.get('lat', 0), bid.get('lon', 0)), (robot_data.get('lat', 0), robot_data.get('lon', 0))
     if calculate_distance(bid_location, robot_location) > robot_data.get("max_distance", 1):
         return False
@@ -26,37 +28,41 @@ def is_bid_matching(bid, robot_data):
 
 def grab_job(data):
     if not all(key in data for key in ['service', 'lat', 'lon', 'max_distance']):
-        return {"error": "Missing required parameters"}, 400
-    matched_bids = [(bid.get('price', 0), bid_id.decode(), json.loads(bid_json)) 
-                    for bid_id, bid_json in redis_client.hscan_iter(REDHASH_ALL_LIVE_BIDS) 
-                    if is_bid_matching(json.loads(bid_json), data)]
+        return {"error": "Missing required fields"}, 400
+    
+    matched_bids = []
+    for bid_id, bid_json in redis_client.hscan_iter("REDHASH_ALL_LIVE_BIDS"):
+        try:
+            bid = json.loads(bid_json)
+            if is_bid_matching(bid, data):
+                price = bid.get('price', 0)
+                matched_bids.append((price, bid_id.decode(), bid))
+        except json.JSONDecodeError:
+            print(f"Invalid JSON for bid {bid_id}")
+    
     if not matched_bids:
         print('no matched bids')
         return {}, 204
+    
     _, bid_id, job = max(matched_bids, key=lambda x: x[0])
     job_id = str(uuid.uuid4())
     new_job = {
-        'job_id': job_id, 'bid_id': bid_id, 'status': 'won',
+        'job_id': job_id,
+        'bid_id': bid_id,
+        'status': 'won',
         'job_request': {k: v for k, v in data.items() if isinstance(v, (str, int, float, bool, list, dict))},
-        'bid_params': job,
+        'bid_params': job
     }
-    redis_client.hset(REDHASH_ALL_WINS, bid_id, json.dumps(new_job))
-    redis_client.hdel(REDHASH_ALL_LIVE_BIDS, bid_id)
+    
+    redis_client.hset("REDHASH_ALL_WINS", bid_id, json.dumps(new_job))
+    redis_client.hdel("REDHASH_ALL_LIVE_BIDS", bid_id)
+    
     return new_job, 200
-
-def has_sufficient_funds(username, bid_price):
-    account = json.loads(redis_client.hget(REDHASH_ACCOUNTS, username) or '{}')
-    balance = account.get("balance", 0)
-    outstanding = sum(json.loads(b).get("price", 0) for _, b in redis_client.hscan_iter(REDHASH_ALL_LIVE_BIDS) 
-                      if json.loads(b).get("username") == username)
-    return balance - outstanding - bid_price >= 0
 
 def submit_bid(data):
     bid = data.get('bid', {})
     if not all(param in bid for param in ['service', 'lat', 'lon', 'price', 'end_time']):
         return {"error": "Missing required parameters"}, 400
-    if not has_sufficient_funds(data['username'], bid['price']):
-        return {"error": "Insufficient funds"}, 403
     bid_id = str(uuid.uuid4())
     bid['username'] = data['username']
     bid["simulated"] = is_simulated(data)
@@ -73,6 +79,53 @@ def nearby_activity(data):
         if (deal := json.loads(deal_json)) and calculate_distance(user_location, (deal['bid_params'].get('lat', 0), deal['bid_params'].get('lon', 0))) <= nearby_radius
     }
     return nearby_deals, 200
+
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def verify_password(stored_hash, provided_password):
+    return stored_hash == hash_password(provided_password)
+
+def generate_signature(password, job_id):
+    return hashlib.sha256(f"{password}{job_id}".encode()).hexdigest()
+
+def sign_job(data):
+    username = data.get('username')
+    job_id = data.get('job_id')
+    signature = data.get('signature')
+    star_rating = data.get('star_rating')
+    
+    if not all([username, job_id, signature, star_rating]):
+        return {"error": "Missing required parameters"}, 400
+    
+    job = json.loads(redis_client.hget(REDHASH_ALL_WINS, job_id) or '{}')
+    if not job:
+        return {"error": "Job not found"}, 404
+    
+    user_type = 'buyer' if username == job['bid_params']['username'] else 'seller'
+    counterparty = job['bid_params']['username'] if user_type == 'seller' else job['job_request']['username']
+    
+    user_data = json.loads(redis_client.hget(REDHASH_ACCOUNTS, username) or '{}')
+    if not user_data:
+        return {"error": "User not found"}, 404
+    
+    if not verify_password(user_data['password'], signature):
+        return {"error": "Invalid signature"}, 403
+    
+    if f"{user_type}_signed" in job:
+        return {"error": "Job already signed by this user"}, 400
+    
+    job[f"{user_type}_signed"] = True
+    job[f"{user_type}_rating"] = star_rating
+    
+    counterparty_data = json.loads(redis_client.hget(REDHASH_ACCOUNTS, counterparty) or '{}')
+    counterparty_data['stars'] = counterparty_data.get('stars', 0) + star_rating
+    counterparty_data['total_ratings'] = counterparty_data.get('total_ratings', 0) + 1
+    
+    redis_client.hset(REDHASH_ALL_WINS, job_id, json.dumps(job))
+    redis_client.hset(REDHASH_ACCOUNTS, counterparty, json.dumps(counterparty_data))
+    
+    return {"message": "Job signed successfully"}, 200
 
 if __name__ == "__main__":
     print("This is the main module. Run tests.py to execute the tests.")
