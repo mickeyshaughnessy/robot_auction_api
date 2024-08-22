@@ -33,7 +33,7 @@ The Robot Services Exchange (RSX) is a marketplace that connects buyers and sell
 
 ## Get Started
 
-Ready to revolutionize how you interact with robot services? Check out our [documentation]() to begin integrating with our API.
+Ready to revolutionize how you interact with robot services? Check out our [documentation](api_docs.html) to begin integrating with our API.
 
 Join us in shaping the future of robot services - where efficiency meets innovation!
 
