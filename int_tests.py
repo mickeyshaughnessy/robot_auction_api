@@ -74,7 +74,7 @@ def run_tests():
             return response.status_code == 200, f"Nearby activity: status {response.status_code}, bids: {len(response.json())}"
 
         def test_grab_job():
-            robot_data = {"services": ["cleaning", "gardening"], "lat": 40.7128, "lon": -74.0060, "max_distance": 10}
+            robot_data = {"service": "cleaning, gardening", "lat": 40.7128, "lon": -74.0060, "max_distance": 10}
             response = requests.post(f"{API__URL}/grab_job", json=robot_data, headers={"Authorization": seller_token})
             print(f"Grab job response status: {response.status_code}")
             print(f"Grab job response content: {response.text}")

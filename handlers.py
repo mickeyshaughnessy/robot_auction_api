@@ -14,8 +14,10 @@ def calculate_distance(point1, point2):
     return 3959 * 2 * math.asin(math.sqrt(a))  # Earth radius in miles
 
 def is_bid_matching(bid, robot_data):
-    print(bid, robot_data)
-    if not matched_service(bid.get('service', ''), ', '.join(robot_data.get('services', []))):
+    bid_description, robot_description = bid.get('service'), robot_data.get('service')
+    if not (bid_description and robot_description): 
+        return False
+    if not (matched_service(bid_description and robot_description)):
         return False
     bid_location, robot_location = (bid.get('lat', 0), bid.get('lon', 0)), (robot_data.get('lat', 0), robot_data.get('lon', 0))
     if calculate_distance(bid_location, robot_location) > robot_data.get("max_distance", 1):
@@ -29,6 +31,7 @@ def grab_job(data):
                     for bid_id, bid_json in redis_client.hscan_iter(REDHASH_ALL_LIVE_BIDS) 
                     if is_bid_matching(json.loads(bid_json), data)]
     if not matched_bids:
+        print('no matched bids')
         return {}, 204
     _, bid_id, job = max(matched_bids, key=lambda x: x[0])
     job_id = str(uuid.uuid4())
