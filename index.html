@@ -43,12 +43,31 @@
         th {
             background-color: #f2f2f2;
         }
+        .fun-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .fun-button:hover {
+            background-color: #2980b9;
+        }
     </style>
 </head>
 <body>
     <h1>Robot Services Exchange (RSX) API Documentation</h1>
     
     <h3> The RSX &alpha; API is currently running at http://100.26.236.1:5001</h3>
+    
+    <button class="fun-button" onclick="alert('Beep boop! API is operational!')">Check API Status</button>
     
     <h2>Authentication Endpoints</h2>
    
@@ -63,6 +82,7 @@
         </table>
         <h4>Response:</h4>
         <p>Status 201: User registered successfully</p>
+        <button class="fun-button" onclick="alert('Welcome, human! Your robot army awaits.')">Register Now</button>
     </div>
 
     <div class="endpoint">
@@ -77,6 +97,7 @@
         <h4>Response:</h4>
         <p>Status 200: Login successful, returns access token<br>
         Status 401: Invalid username or password</p>
+        <button class="fun-button" onclick="alert('Access granted. Prepare for robot domination!')">Login</button>
     </div>
 
     <h2>Account Management</h2>
@@ -94,6 +115,7 @@
         <p>Status 200: Returns account data<br>
         Status 400: Username is required<br>
         Status 404: Account not found</p>
+        <button class="fun-button" onclick="alert('Accessing your robot overlord profile...')">View Account</button>
     </div>
 
     <h2>Buyer Endpoints</h2>
@@ -113,6 +135,7 @@
         <h4>Response:</h4>
         <p>Status 200: Bid submitted successfully, returns bid ID<br>
         Status 403: Insufficient funds or other error</p>
+        <button class="fun-button" onclick="alert('Bid placed! May the best robot win.')">Place Bid</button>
     </div>
 
     <div class="endpoint">
@@ -126,6 +149,7 @@
         </table>
         <h4>Response:</h4>
         <p>Status 200: Returns list of nearby activities</p>
+        <button class="fun-button" onclick="alert('Scanning for nearby robot activity...')">Find Nearby Robots</button>
     </div>
 
     <h2>Seller Endpoints</h2>
@@ -144,6 +168,7 @@
         <h4>Response:</h4>
         <p>Status 200: Job successfully grabbed, returns job details<br>
         Status 204: No matching jobs available</p>
+        <button class="fun-button" onclick="alert('Job acquired. Initiating world domination sequence...')">Grab Job</button>
     </div>
 
     <h2>System Check</h2>
@@ -153,6 +178,7 @@
         <p>Check if the API is operational.</p>
         <h4>Response:</h4>
         <p>Status 200: API is operational</p>
+        <button class="fun-button" onclick="alert('Ping successful! Robots are listening...')">Ping API</button>
     </div>
 
 </body>
