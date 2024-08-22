@@ -110,6 +110,13 @@ def sign_job(current_user):
     return jsonify(response), status
 
 if __name__ == '__main__':
-    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    context.load_cert_chain('cert.pem', 'key.pem')
-    app.run(host='0.0.0.0', port=config.API_PORT, ssl_context=context, debug=True)
+    try:
+        # Attempt to load SSL certificates (production assumed)
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        context.load_cert_chain('cert.pem', 'key.pem')
+        app.run(host='0.0.0.0', port=config.API_PORT, ssl_context=context)
+
+    except FileNotFoundError:
+        # Fallback to running without SSL if certificates not found
+        print("Warning: SSL certificates not found. Running in development mode without SSL.")
+        app.run(host='0.0.0.0', port=config.API_PORT, debug=True)
