@@ -8,7 +8,7 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-
+app.config['APPLICATION_ROOT'] = '/api'
 redis_client = redis.StrictRedis()
 
 def simulation_traffic_middleware(request):
@@ -110,4 +110,6 @@ def sign_job(current_user):
     return jsonify(response), status
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=config.API_PORT, debug=True)
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.load_cert_chain('cert.pem', 'key.pem')
+    app.run(host='0.0.0.0', port=config.API_PORT, ssl_context=context, debug=True)
