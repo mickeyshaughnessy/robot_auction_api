@@ -11,7 +11,7 @@ def calculate_distance(point1, point2):
     lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
     dlat, dlon = lat2 - lat1, lon2 - lon1
     a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
-    return 3959 * 2 * math.asin(math.sqrt(a))  # Earth radius in miles
+    return 3959 * 2 * math.asin(math.sqrt(a))
 
 def is_bid_matching(bid, robot_data):
     bid_description, robot_description = bid.get('service'), robot_data.get('service')
@@ -77,11 +77,11 @@ def nearby_activity(data):
         return {"error": "Missing required parameters"}, 400
     user_location = data['lat'], data['lon']
     nearby_radius = 10  # miles
-    nearby_deals = {
-        deal_id.decode('utf-8'): deal for deal_id, deal_json in redis_client.hgetall(REDHASH_ALL_WINS).items()
-        if (deal := json.loads(deal_json)) and calculate_distance(user_location, (deal.get('lat', 0), deal.get('lon', 0))) <= nearby_radius
+    nearby_bids = {
+        bid_id.decode('utf-8'): bid for bid_id, bid_json in redis_client.hgetall(REDHASH_ALL_LIVE_BIDS).items()
+        if (bid := json.loads(bid_json)) and calculate_distance(user_location, (bid.get('lat', 0), bid.get('lon', 0))) <= nearby_radius
     }
-    return nearby_deals, 200
+    return nearby_bids, 200
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -89,16 +89,13 @@ def hash_password(password):
 def verify_password(stored_hash, provided_password):
     return stored_hash == hash_password(provided_password)
 
-def generate_signature(password, job_id):
-    return hashlib.sha256(f"{password}{job_id}".encode()).hexdigest()
-
 def sign_job(data):
     username = data.get('username')
     job_id = data.get('job_id')
-    signature = data.get('signature')
+    password = data.get('password')
     star_rating = data.get('star_rating')
     
-    if not all([username, job_id, signature, star_rating]):
+    if not all([username, job_id, password, star_rating]):
         return {"error": "Missing required parameters"}, 400
     
     job = json.loads(redis_client.hget(REDHASH_ALL_WINS, job_id) or '{}')
@@ -112,9 +109,8 @@ def sign_job(data):
     if not user_data:
         return {"error": "User not found"}, 404
     
-    # Use generate_signature for verification
-    if signature != generate_signature(user_data['password'], job_id):
-        return {"error": "Invalid signature"}, 403
+    if not verify_password(user_data['password'], password):
+        return {"error": "Invalid password"}, 403
     
     if f"{user_type}_signed" in job:
         return {"error": "Job already signed by this user"}, 400
@@ -130,5 +126,6 @@ def sign_job(data):
     redis_client.hset(REDHASH_ACCOUNTS, counterparty, json.dumps(counterparty_data))
     
     return {"message": "Job signed successfully"}, 200
+
 if __name__ == "__main__":
     print("This is the main module. Run tests.py to execute the tests.")

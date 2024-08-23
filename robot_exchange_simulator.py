@@ -3,6 +3,9 @@ from concurrent.futures import ThreadPoolExecutor
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 API_URL = "http://127.0.0.1:5001"
 SERVICES = ["delivery", "cleaning", "security", "lawn_mowing", "pet_care"]
 
