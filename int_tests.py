@@ -120,7 +120,7 @@ def run_tests():
             seller_sign_response = requests.post(f"{API_URL}/sign_job", json=seller_sign_data, headers={"Authorization": f"Bearer {seller_token}"}, verify=False)
             
             return (buyer_sign_response.status_code == 200 and seller_sign_response.status_code == 200, 
-                f"Sign job: Buyer status {buyer_sign_response.status_code}, Seller status {seller_sign_response.status_code}")
+                f"Sign job: Buyer status {buyer_sign_response.content}, Seller status {seller_sign_response.status_code}")
 
         tests = [test_ping, test_buyer_registration, test_seller_registration, test_buyer_login, test_seller_login,
                  test_multiple_bid_submissions, test_nearby_activity, test_grab_job, test_sign_job]
