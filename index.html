@@ -12,6 +12,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #ffcccb;
         }
         h1, h2 {
             color: #2c3e50;
@@ -24,7 +25,7 @@
         }
         .method {
             font-weight: bold;
-            color: #e74c3c;
+            color: #4CAF50;
         }
         .path {
             font-family: monospace;
@@ -34,6 +35,7 @@
         table {
             border-collapse: collapse;
             width: 100%;
+            margin-bottom: 15px;
         }
         th, td {
             border: 1px solid #ddd;
@@ -54,7 +56,7 @@
             font-size: 16px;
             margin: 4px 2px;
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: 25px;
             transition: background-color 0.3s;
         }
         .api-button:hover {
@@ -89,7 +91,7 @@
 <body>
     <h1>Robot Services Exchange (RSX) API Documentation</h1>
     
-    <h3>The RSX API is currently running at http://100.26.236.1:5001</h3>
+    <h3>The RSX API is currently running at https://robotservicesauction.com/api</h3>
     
     <div id="response"></div>
     
@@ -98,6 +100,20 @@
     <div class="endpoint">
         <h3><span class="method">POST</span> <span class="path">/register</span></h3>
         <p>Register a new user account.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>username</td>
+                <td>Desired username for the new account</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>Password for the new account</td>
+            </tr>
+        </table>
         <form id="registerForm">
             <div class="form-group">
                 <label for="registerUsername">Username:</label>
@@ -114,6 +130,20 @@
     <div class="endpoint">
         <h3><span class="method">POST</span> <span class="path">/login</span></h3>
         <p>Authenticate a user and receive an access token.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>username</td>
+                <td>User's username</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>User's password</td>
+            </tr>
+        </table>
         <form id="loginForm">
             <div class="form-group">
                 <label for="loginUsername">Username:</label>
@@ -132,6 +162,20 @@
     <div class="endpoint">
         <h3><span class="method">GET</span> <span class="path">/account_data</span></h3>
         <p>Retrieve the account data for a user.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>username</td>
+                <td>User's username</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>User's password</td>
+            </tr>
+        </table>
         <form id="accountDataForm">
             <div class="form-group">
                 <label for="accountDataUsername">Username:</label>
@@ -150,6 +194,32 @@
     <div class="endpoint">
         <h3><span class="method">POST</span> <span class="path">/make_bid</span></h3>
         <p>Submit a new bid for a robot service.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>service</td>
+                <td>Type of service requested</td>
+            </tr>
+            <tr>
+                <td>lat</td>
+                <td>Latitude of the service location</td>
+            </tr>
+            <tr>
+                <td>lon</td>
+                <td>Longitude of the service location</td>
+            </tr>
+            <tr>
+                <td>price</td>
+                <td>Bid price for the service</td>
+            </tr>
+            <tr>
+                <td>end_time</td>
+                <td>Unix timestamp for the end of the service period</td>
+            </tr>
+        </table>
         <form id="makeBidForm">
             <div class="form-group">
                 <label for="bidService">Service:</label>
@@ -178,6 +248,20 @@
     <div class="endpoint">
         <h3><span class="method">POST</span> <span class="path">/nearby</span></h3>
         <p>Retrieve nearby robot service activities.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>lat</td>
+                <td>Latitude of the center point</td>
+            </tr>
+            <tr>
+                <td>lon</td>
+                <td>Longitude of the center point</td>
+            </tr>
+        </table>
         <form id="nearbyForm">
             <div class="form-group">
                 <label for="nearbyLat">Latitude:</label>
@@ -196,6 +280,28 @@
     <div class="endpoint">
         <h3><span class="method">POST</span> <span class="path">/grab_job</span></h3>
         <p>Attempt to accept an available job for a robot.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>services</td>
+                <td>List of services the robot can perform</td>
+            </tr>
+            <tr>
+                <td>lat</td>
+                <td>Current latitude of the robot</td>
+            </tr>
+            <tr>
+                <td>lon</td>
+                <td>Current longitude of the robot</td>
+            </tr>
+            <tr>
+                <td>max_distance</td>
+                <td>Maximum distance the robot is willing to travel</td>
+            </tr>
+        </table>
         <form id="grabJobForm">
             <div class="form-group">
                 <label for="jobServices">Services (comma-separated):</label>
@@ -226,7 +332,7 @@
     </div>
 
     <script>
-	const API_URL = 'https://robotservicesauction.com/api';
+        const API_URL = 'https://robotservicesauction.com/api';
         let accessToken = '';
 
         function updateButtonStates() {
@@ -315,18 +421,4 @@
             e.preventDefault();
             const data = {
                 services: document.getElementById('jobServices').value.split(','),
-                lat: parseFloat(document.getElementById('jobLat').value),
-                lon: parseFloat(document.getElementById('jobLon').value),
-                max_distance: parseFloat(document.getElementById('jobMaxDistance').value)
-            };
-            await makeRequest('/grab_job', 'POST', data);
-        });
-
-        document.getElementById('pingButton').addEventListener('click', async () => {
-            await makeRequest('/ping', 'GET');
-        });
-
-        updateButtonStates();
-    </script>
-</body>
-</html>
+                lat: parseFloat(document.getElementById('jobLat
