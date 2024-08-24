@@ -6,31 +6,46 @@
     <title>Robot Services Exchange (RSX) API Documentation</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             color: #333;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #ffcccb;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         h1, h2 {
-            color: #2c3e50;
+            color: #4a4a4a;
+            text-align: center;
+        }
+        .description {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #666;
         }
         .endpoint {
-            background-color: #f4f4f4;
+            background-color: #e8f4f8;
             border-left: 5px solid #3498db;
-            padding: 10px;
+            padding: 15px;
             margin-bottom: 20px;
+            border-radius: 5px;
         }
         .method {
             font-weight: bold;
-            color: #4CAF50;
+            color: #e74c3c;
         }
         .path {
             font-family: monospace;
             background-color: #ecf0f1;
             padding: 2px 4px;
+            border-radius: 3px;
         }
         table {
             border-collapse: collapse;
@@ -38,16 +53,17 @@
             margin-bottom: 15px;
         }
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            border: 1px solid #bdc3c7;
+            padding: 10px;
             text-align: left;
         }
         th {
-            background-color: #f2f2f2;
-        }
-        .api-button {
             background-color: #3498db;
             color: white;
+        }
+        .api-button {
+            background-color: #f1c40f;
+            color: #2c3e50;
             border: none;
             padding: 10px 20px;
             text-align: center;
@@ -57,368 +73,303 @@
             margin: 4px 2px;
             cursor: pointer;
             border-radius: 25px;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.1s;
+            box-shadow: 0 4px 0 #d35400;
         }
         .api-button:hover {
-            background-color: #2980b9;
+            background-color: #f39c12;
         }
-        .api-button:disabled {
-            background-color: #bdc3c7;
-            cursor: not-allowed;
+        .api-button:active {
+            background-color: #e67e22;
+            box-shadow: 0 2px 0 #d35400;
+            transform: translateY(2px);
         }
         .form-group {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
         .form-group label {
             display: block;
             margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
         }
         .form-group input {
             width: 100%;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
+            padding: 8px;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 14px;
         }
         #response {
             background-color: #f9f9f9;
             border: 1px solid #ddd;
-            padding: 10px;
+            padding: 15px;
             margin-top: 20px;
             white-space: pre-wrap;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <h1>Robot Services Exchange (RSX) API Documentation</h1>
-    
-    <h3>The RSX API is currently running at http://100.26.236.1:5001</h3>
-    
-    <div id="response"></div>
-    
-    <h2>Authentication Endpoints</h2>
-   
-    <div class="endpoint">
-        <h3><span class="method">POST</span> <span class="path">/register</span></h3>
-        <p>Register a new user account.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>username</td>
-                <td>Desired username for the new account</td>
-            </tr>
-            <tr>
-                <td>password</td>
-                <td>Password for the new account</td>
-            </tr>
-        </table>
-        <form id="registerForm">
-            <div class="form-group">
-                <label for="registerUsername">Username:</label>
-                <input type="text" id="registerUsername" required>
-            </div>
-            <div class="form-group">
-                <label for="registerPassword">Password:</label>
-                <input type="password" id="registerPassword" required>
-            </div>
-            <button class="api-button" type="submit">Register</button>
-        </form>
-    </div>
+    <div class="container">
+        <h1>Robot Services Exchange (RSX) API Documentation</h1>
+        
+        <p class="description">It's a way for people to buy robot services by bidding and a way for robots to get jobs.</p>
+        
+        <h3>The RSX API is currently running at http://100.26.236.1:5001</h3>
+        
+        <div id="response"></div>
+        
+        <h2>Authentication Endpoints</h2>
+       
+        <div class="endpoint">
+            <h3><span class="method">POST</span> <span class="path">/register</span></h3>
+            <p>Register a new user account.</p>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>username</td>
+                    <td>Desired username for the new account (3-20 characters)</td>
+                </tr>
+                <tr>
+                    <td>password</td>
+                    <td>Password for the new account (min 8 characters)</td>
+                </tr>
+                <tr>
+                    <td>user_type</td>
+                    <td>Type of user: "buyer" or "seller"</td>
+                </tr>
+            </table>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerUsername">Username:</label>
+                    <input type="text" id="registerUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password:</label>
+                    <input type="password" id="registerPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerUserType">User Type:</label>
+                    <select id="registerUserType" required>
+                        <option value="buyer">Buyer</option>
+                        <option value="seller">Seller</option>
+                    </select>
+                </div>
+                <button class="api-button" type="submit" onclick="alert('Registering user...')">Register</button>
+            </form>
+        </div>
 
-    <div class="endpoint">
-        <h3><span class="method">POST</span> <span class="path">/login</span></h3>
-        <p>Authenticate a user and receive an access token.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>username</td>
-                <td>User's username</td>
-            </tr>
-            <tr>
-                <td>password</td>
-                <td>User's password</td>
-            </tr>
-        </table>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="loginUsername">Username:</label>
-                <input type="text" id="loginUsername" required>
-            </div>
-            <div class="form-group">
-                <label for="loginPassword">Password:</label>
-                <input type="password" id="loginPassword" required>
-            </div>
-            <button class="api-button" type="submit">Login</button>
-        </form>
-    </div>
+        <div class="endpoint">
+            <h3><span class="method">POST</span> <span class="path">/login</span></h3>
+            <p>Authenticate a user and receive an access token.</p>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>username</td>
+                    <td>User's registered username</td>
+                </tr>
+                <tr>
+                    <td>password</td>
+                    <td>User's password</td>
+                </tr>
+            </table>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginUsername">Username:</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password:</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button class="api-button" type="submit" onclick="alert('Logging in...')">Login</button>
+            </form>
+        </div>
 
-    <h2>Account Management</h2>
+        <h2>Account Management</h2>
 
-    <div class="endpoint">
-        <h3><span class="method">GET</span> <span class="path">/account_data</span></h3>
-        <p>Retrieve the account data for a user.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>username</td>
-                <td>User's username</td>
-            </tr>
-            <tr>
-                <td>password</td>
-                <td>User's password</td>
-            </tr>
-        </table>
-        <form id="accountDataForm">
-            <div class="form-group">
-                <label for="accountDataUsername">Username:</label>
-                <input type="text" id="accountDataUsername" required>
-            </div>
-            <div class="form-group">
-                <label for="accountDataPassword">Password:</label>
-                <input type="password" id="accountDataPassword" required>
-            </div>
-            <button class="api-button" type="submit">View Account</button>
-        </form>
-    </div>
+        <div class="endpoint">
+            <h3><span class="method">GET</span> <span class="path">/account_data</span></h3>
+            <p>Retrieve the account data for a user.</p>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>username</td>
+                    <td>User's registered username</td>
+                </tr>
+                <tr>
+                    <td>password</td>
+                    <td>User's password</td>
+                </tr>
+            </table>
+            <form id="accountDataForm">
+                <div class="form-group">
+                    <label for="accountDataUsername">Username:</label>
+                    <input type="text" id="accountDataUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="accountDataPassword">Password:</label>
+                    <input type="password" id="accountDataPassword" required>
+                </div>
+                <button class="api-button" type="submit" onclick="alert('Fetching account data...')">View Account</button>
+            </form>
+        </div>
 
-    <h2>Buyer Endpoints</h2>
+        <h2>Buyer Endpoints</h2>
 
-    <div class="endpoint">
-        <h3><span class="method">POST</span> <span class="path">/make_bid</span></h3>
-        <p>Submit a new bid for a robot service.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>service</td>
-                <td>Type of service requested</td>
-            </tr>
-            <tr>
-                <td>lat</td>
-                <td>Latitude of the service location</td>
-            </tr>
-            <tr>
-                <td>lon</td>
-                <td>Longitude of the service location</td>
-            </tr>
-            <tr>
-                <td>price</td>
-                <td>Bid price for the service</td>
-            </tr>
-            <tr>
-                <td>end_time</td>
-                <td>Unix timestamp for the end of the service period</td>
-            </tr>
-        </table>
-        <form id="makeBidForm">
-            <div class="form-group">
-                <label for="bidService">Service:</label>
-                <input type="text" id="bidService" required>
-            </div>
-            <div class="form-group">
-                <label for="bidLat">Latitude:</label>
-                <input type="number" id="bidLat" step="any" required>
-            </div>
-            <div class="form-group">
-                <label for="bidLon">Longitude:</label>
-                <input type="number" id="bidLon" step="any" required>
-            </div>
-            <div class="form-group">
-                <label for="bidPrice">Price:</label>
-                <input type="number" id="bidPrice" step="0.01" required>
-            </div>
-            <div class="form-group">
-                <label for="bidEndTime">End Time (Unix Timestamp):</label>
-                <input type="number" id="bidEndTime" required>
-            </div>
-            <button class="api-button" type="submit">Place Bid</button>
-        </form>
-    </div>
+        <div class="endpoint">
+            <h3><span class="method">POST</span> <span class="path">/make_bid</span></h3>
+            <p>Submit a new bid for a robot service.</p>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>service</td>
+                    <td>Type of service requested (e.g., cleaning, delivery)</td>
+                </tr>
+                <tr>
+                    <td>lat</td>
+                    <td>Latitude of the service location (-90 to 90)</td>
+                </tr>
+                <tr>
+                    <td>lon</td>
+                    <td>Longitude of the service location (-180 to 180)</td>
+                </tr>
+                <tr>
+                    <td>price</td>
+                    <td>Bid price for the service (in USD)</td>
+                </tr>
+                <tr>
+                    <td>end_time</td>
+                    <td>Unix timestamp for the end of the service period</td>
+                </tr>
+            </table>
+            <form id="makeBidForm">
+                <div class="form-group">
+                    <label for="bidService">Service:</label>
+                    <input type="text" id="bidService" required>
+                </div>
+                <div class="form-group">
+                    <label for="bidLat">Latitude:</label>
+                    <input type="number" id="bidLat" step="any" min="-90" max="90" required>
+                </div>
+                <div class="form-group">
+                    <label for="bidLon">Longitude:</label>
+                    <input type="number" id="bidLon" step="any" min="-180" max="180" required>
+                </div>
+                <div class="form-group">
+                    <label for="bidPrice">Price (USD):</label>
+                    <input type="number" id="bidPrice" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="bidEndTime">End Time (Unix Timestamp):</label>
+                    <input type="number" id="bidEndTime" required>
+                </div>
+                <button class="api-button" type="submit" onclick="alert('Placing bid...')">Place Bid</button>
+            </form>
+        </div>
 
-    <div class="endpoint">
-        <h3><span class="method">POST</span> <span class="path">/nearby</span></h3>
-        <p>Retrieve nearby robot service activities.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>lat</td>
-                <td>Latitude of the center point</td>
-            </tr>
-            <tr>
-                <td>lon</td>
-                <td>Longitude of the center point</td>
-            </tr>
-        </table>
-        <form id="nearbyForm">
-            <div class="form-group">
-                <label for="nearbyLat">Latitude:</label>
-                <input type="number" id="nearbyLat" step="any" required>
-            </div>
-            <div class="form-group">
-                <label for="nearbyLon">Longitude:</label>
-                <input type="number" id="nearbyLon" step="any" required>
-            </div>
-            <button class="api-button" type="submit">Find Nearby Activities</button>
-        </form>
-    </div>
+        <div class="endpoint">
+            <h3><span class="method">POST</span> <span class="path">/nearby</span></h3>
+            <p>Retrieve nearby robot service activities.</p>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>lat</td>
+                    <td>Latitude of the center point (-90 to 90)</td>
+                </tr>
+                <tr>
+                    <td>lon</td>
+                    <td>Longitude of the center point (-180 to 180)</td>
+                </tr>
+            </table>
+            <form id="nearbyForm">
+                <div class="form-group">
+                    <label for="nearbyLat">Latitude:</label>
+                    <input type="number" id="nearbyLat" step="any" min="-90" max="90" required>
+                </div>
+                <div class="form-group">
+                    <label for="nearbyLon">Longitude:</label>
+                    <input type="number" id="nearbyLon" step="any" min="-180" max="180" required>
+                </div>
+                <button class="api-button" type="submit" onclick="alert('Finding nearby activities...')">Find Nearby Activities</button>
+            </form>
+        </div>
 
-    <h2>Seller Endpoints</h2>
+        <h2>Seller Endpoints</h2>
 
-    <div class="endpoint">
-        <h3><span class="method">POST</span> <span class="path">/grab_job</span></h3>
-        <p>Attempt to accept an available job for a robot.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>services</td>
-                <td>List of services the robot can perform</td>
-            </tr>
-            <tr>
-                <td>lat</td>
-                <td>Current latitude of the robot</td>
-            </tr>
-            <tr>
-                <td>lon</td>
-                <td>Current longitude of the robot</td>
-            </tr>
-            <tr>
-                <td>max_distance</td>
-                <td>Maximum distance the robot is willing to travel</td>
-            </tr>
-        </table>
-        <form id="grabJobForm">
-            <div class="form-group">
-                <label for="jobServices">Services (comma-separated):</label>
-                <input type="text" id="jobServices" required>
-            </div>
-            <div class="form-group">
-                <label for="jobLat">Latitude:</label>
-                <input type="number" id="jobLat" step="any" required>
-            </div>
-            <div class="form-group">
-                <label for="jobLon">Longitude:</label>
-                <input type="number" id="jobLon" step="any" required>
-            </div>
-            <div class="form-group">
-                <label for="jobMaxDistance">Max Distance:</label>
-                <input type="number" id="jobMaxDistance" step="any" required>
-            </div>
-            <button class="api-button" type="submit">Grab Job</button>
-        </form>
-    </div>
+        <div class="endpoint">
+            <h3><span class="method">POST</span> <span class="path">/grab_job</span></h3>
+            <p>Attempt to accept an available job for a robot.</p>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>services</td>
+                    <td>List of services the robot can perform (comma-separated)</td>
+                </tr>
+                <tr>
+                    <td>lat</td>
+                    <td>Current latitude of the robot (-90 to 90)</td>
+                </tr>
+                <tr>
+                    <td>lon</td>
+                    <td>Current longitude of the robot (-180 to 180)</td>
+                </tr>
+                <tr>
+                    <td>max_distance</td>
+                    <td>Maximum distance the robot is willing to travel (in miles)</td>
+                </tr>
+            </table>
+            <form id="grabJobForm">
+                <div class="form-group">
+                    <label for="jobServices">Services (comma-separated):</label>
+                    <input type="text" id="jobServices" required>
+                </div>
+                <div class="form-group">
+                    <label for="jobLat">Latitude:</label>
+                    <input type="number" id="jobLat" step="any" min="-90" max="90" required>
+                </div>
+                <div class="form-group">
+                    <label for="jobLon">Longitude:</label>
+                    <input type="number" id="jobLon" step="any" min="-180" max="180" required>
+                </div>
+                <div class="form-group">
+                    <label for="jobMaxDistance">Max Distance (miles):</label>
+                    <input type="number" id="jobMaxDistance" step="any" min="0" required>
+                </div>
+                <button class="api-button" type="submit" onclick="alert('Grabbing job...')">Grab Job</button>
+            </form>
+        </div>
 
-    <h2>System Check</h2>
+        <h2>System Check</h2>
 
-    <div class="endpoint">
-        <h3><span class="method">GET</span> <span class="path">/ping</span></h3>
-        <p>Check if the API is operational.</p>
-        <button id="pingButton" class="api-button">Ping API</button>
+        <div class="endpoint">
+            <h3><span class="method">GET</span> <span class="path">/ping</span></h3>
+            <p>Check if the API is operational.</p>
+            <button id="pingButton" class="api-button" onclick="alert('Pinging API...')">Ping API</button>
+        </div>
     </div>
 
     <script>
-        const API_URL = 'https://robotservicesauction.com/api';
-        let accessToken = '';
-
-        function updateButtonStates() {
-            const loggedIn = !!accessToken;
-            document.querySelectorAll('.api-button').forEach(button => {
-                if (button.id === 'pingButton' || button.closest('form').id === 'registerForm' || button.closest('form').id === 'loginForm') {
-                    button.disabled = false;
-                } else {
-                    button.disabled = !loggedIn;
-                }
-            });
-        }
-
-        function displayResponse(response) {
-            document.getElementById('response').textContent = JSON.stringify(response, null, 2);
-        }
-
-        async function makeRequest(endpoint, method, body = null) {
-            const headers = {
-                'Content-Type': 'application/json',
-            };
-            if (accessToken) {
-                headers['Authorization'] = `Bearer ${accessToken}`;
-            }
-            try {
-                const response = await fetch(`${API_URL}${endpoint}`, {
-                    method,
-                    headers,
-                    body: body ? JSON.stringify(body) : null
-                });
-                const data = await response.json();
-                displayResponse(data);
-                return data;
-            } catch (error) {
-                displayResponse({ error: error.message });
-            }
-        }
-
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('registerUsername').value;
-            const password = document.getElementById('registerPassword').value;
-            await makeRequest('/register', 'POST', { username, password });
-        });
-
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-            const response = await makeRequest('/login', 'POST', { username, password });
-            if (response.access_token) {
-                accessToken = response.access_token;
-                updateButtonStates();
-            }
-        });
-
-        document.getElementById('accountDataForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('accountDataUsername').value;
-            const password = document.getElementById('accountDataPassword').value;
-            await makeRequest(`/account_data?username=${username}&password=${password}`, 'GET');
-        });
-
-        document.getElementById('makeBidForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const bid = {
-                service: document.getElementById('bidService').value,
-                lat: parseFloat(document.getElementById('bidLat').value),
-                lon: parseFloat(document.getElementById('bidLon').value),
-                price: parseFloat(document.getElementById('bidPrice').value),
-                end_time: parseInt(document.getElementById('bidEndTime').value)
-            };
-            await makeRequest('/make_bid', 'POST', bid);
-        });
-
-        document.getElementById('nearbyForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const data = {
-                lat: parseFloat(document.getElementById('nearbyLat').value),
-                lon: parseFloat(document.getElementById('nearbyLon').value)
-            };
-            await makeRequest('/nearby', 'POST', data);
-        });
-
-        document.getElementById('grabJobForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const data = {
-                services: document.getElementById('jobServices').value.split(','),
-                lat: parseFloat(document.getElementById('jobLat
+        // JavaScript code will be added here in the future
+    </script>
+</body>
+</html>
