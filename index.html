@@ -138,10 +138,6 @@
                     <td>password</td>
                     <td>Password for the new account (min 8 characters)</td>
                 </tr>
-                <tr>
-                    <td>user_type</td>
-                    <td>Type of user: "buyer" or "seller"</td>
-                </tr>
             </table>
             <form id="registerForm">
                 <div class="form-group">
@@ -151,13 +147,6 @@
                 <div class="form-group">
                     <label for="registerPassword">Password:</label>
                     <input type="password" id="registerPassword" required>
-                </div>
-                <div class="form-group">
-                    <label for="registerUserType">User Type:</label>
-                    <select id="registerUserType" required>
-                        <option value="buyer">Buyer</option>
-                        <option value="seller">Seller</option>
-                    </select>
                 </div>
                 <button class="api-button" type="submit" onclick="alert('Registering user...')">Register</button>
             </form>
@@ -226,6 +215,7 @@
         </div>
 
         <h2>Buyer Endpoints</h2>
+        <p>Note: All buyer endpoints require a valid authentication token.</p>
 
         <div class="endpoint">
             <h3><span class="method">POST</span> <span class="path">/make_bid</span></h3>
@@ -283,7 +273,7 @@
 
         <div class="endpoint">
             <h3><span class="method">POST</span> <span class="path">/nearby</span></h3>
-            <p>Retrieve nearby robot service activities.</p>
+            <p>Retrieve a sample of recently completed jobs.</p>
             <table>
                 <tr>
                     <th>Parameter</th>
@@ -312,6 +302,7 @@
         </div>
 
         <h2>Seller Endpoints</h2>
+        <p>Note: All seller endpoints require a valid authentication token. A supplier seat is required to access the /grab_job route.</p>
 
         <div class="endpoint">
             <h3><span class="method">POST</span> <span class="path">/grab_job</span></h3>
@@ -356,6 +347,54 @@
                     <input type="number" id="jobMaxDistance" step="any" min="0" required>
                 </div>
                 <button class="api-button" type="submit" onclick="alert('Grabbing job...')">Grab Job</button>
+            </form>
+        </div>
+
+        <div class="endpoint">
+            <h3><span class="method">POST</span> <span class="path">/sign_job</span></h3>
+            <p>Sign off on a completed job and provide a rating.</p>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>username</td>
+                    <td>User's registered username</td>
+                </tr>
+                <tr>
+                    <td>job_id</td>
+                    <td>ID of the completed job</td>
+                </tr>
+                <tr>
+                    <td>password</td>
+                    <td>User's password</td>
+                </tr>
+                <tr>
+                    <td>star_rating</td>
+                    <td>Rating for the job (1-5 stars)</td>
+                </tr>
+            </table>
+            <form id="signJobForm">
+                <div class="form-group">
+                    <label for="signJobUsername">Username:</label>
+                    <input type="text" id="signJobUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="signJobId">Job ID:</label>
+                    <input type="text" id="signJobId" required>
+                </div>
+                <div class="form-group">
+                    <label for="signJobPassword">Password:</label>
+                    <input type="passwor<div class="form-group">
+                    <label for="signJobPassword">Password:</label>
+                    <input type="password" id="signJobPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="signJobRating">Star Rating (1-5):</label>
+                    <input type="number" id="signJobRating" min="1" max="5" step="1" required>
+                </div>
+                <button class="api-button" type="submit" onclick="alert('Signing job...')">Sign Job</button>
             </form>
         </div>
 
