@@ -34,7 +34,7 @@
                 <label for="register-password">Password:</label>
                 <input type="password" id="register-password">
             </div>
-            <button>Register</button>
+            <button onclick="makeApiRequest('/register', 'POST', {username: document.getElementById('register-username').value, password: document.getElementById('register-password').value})">Register</button>
         </div>
 
         <div class="endpoint">
@@ -53,7 +53,7 @@
                 <label for="login-password">Password:</label>
                 <input type="password" id="login-password">
             </div>
-            <button>Login</button>
+            <button onclick="makeApiRequest('/login', 'POST', {username: document.getElementById('login-username').value, password: document.getElementById('login-password').value})">Login</button>
         </div>
 
         <h2>Account Management</h2>
@@ -74,7 +74,7 @@
                 <label for="account-password">Password:</label>
                 <input type="password" id="account-password">
             </div>
-            <button>View Account</button>
+            <button disabled>View Account (Requires Authentication)</button>
         </div>
 
         <h2>Buyer Endpoints</h2>
@@ -111,26 +111,7 @@
                 <label for="bid-end-time">End Time (Unix Timestamp):</label>
                 <input type="number" id="bid-end-time">
             </div>
-            <button>Place Bid</button>
-        </div>
-
-        <div class="endpoint">
-            <h3><span class="method">POST</span> <span class="path">/nearby</span></h3>
-            <p>Retrieve a sample of recently completed jobs.</p>
-            <table>
-                <tr><th>Parameter</th><th>Description</th></tr>
-                <tr><td>lat</td><td>Latitude of the center point (-90 to 90)</td></tr>
-                <tr><td>lon</td><td>Longitude of the center point (-180 to 180)</td></tr>
-            </table>
-            <div class="form-group">
-                <label for="nearby-lat">Latitude:</label>
-                <input type="number" id="nearby-lat">
-            </div>
-            <div class="form-group">
-                <label for="nearby-lon">Longitude:</label>
-                <input type="number" id="nearby-lon">
-            </div>
-            <button>Find Nearby Activities</button>
+            <button disabled>Place Bid (Requires Authentication)</button>
         </div>
 
         <h2>Seller Endpoints</h2>
@@ -162,7 +143,29 @@
                 <label for="grab-max-distance">Max Distance (miles):</label>
                 <input type="number" id="grab-max-distance">
             </div>
-            <button>Grab Job</button>
+            <button disabled>Grab Job (Requires Authentication)</button>
+        </div>
+
+        <h2>Shared Endpoints</h2>
+        <p>Note: The following endpoints can be accessed by both buyers and sellers with valid authentication.</p>
+
+        <div class="endpoint">
+            <h3><span class="method">POST</span> <span class="path">/nearby</span></h3>
+            <p>Retrieve a sample of recently completed jobs.</p>
+            <table>
+                <tr><th>Parameter</th><th>Description</th></tr>
+                <tr><td>lat</td><td>Latitude of the center point (-90 to 90)</td></tr>
+                <tr><td>lon</td><td>Longitude of the center point (-180 to 180)</td></tr>
+            </table>
+            <div class="form-group">
+                <label for="nearby-lat">Latitude:</label>
+                <input type="number" id="nearby-lat">
+            </div>
+            <div class="form-group">
+                <label for="nearby-lon">Longitude:</label>
+                <input type="number" id="nearby-lon">
+            </div>
+            <button disabled>Find Nearby Activities (Requires Authentication)</button>
         </div>
 
         <div class="endpoint">
@@ -191,7 +194,7 @@
                 <label for="sign-rating">Star Rating (1-5):</label>
                 <input type="number" id="sign-rating" min="1" max="5">
             </div>
-            <button>Sign Job</button>
+            <button disabled>Sign Job (Requires Authentication)</button>
         </div>
 
         <h2>System Check</h2>
@@ -199,8 +202,9 @@
         <div class="endpoint">
             <h3><span class="method">GET</span> <span class="path">/ping</span></h3>
             <p>Check if the API is operational.</p>
-            <button>Ping API</button>
+            <button onclick="makeApiRequest('/ping', 'GET')">Ping API</button>
         </div>
     </div>
+    <script src="script.js"></script>
 </body>
 </html>
