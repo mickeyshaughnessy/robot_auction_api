@@ -7,7 +7,7 @@ cd /home/ubuntu/robot_auction_api
 git pull
 
 # Install or update dependencies
-pip3 install -r requirements.txt
+pip3 install -r requirements.txt --break-system-packages
 
 # Restart the service
 sudo systemctl restart robot-exchange-api.service

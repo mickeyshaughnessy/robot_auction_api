@@ -109,21 +109,7 @@ def sign_job(current_user):
 
 
 if __name__ == '__main__':
-    if os.environ.get('FLASK_ENV') == 'production':
-        print("Warning: Running in production mode without Gunicorn is not recommended.")
-        app.run(host='0.0.0.0', port=config.API_PORT)
-    else:
-        print("Running in development mode")
-        app.run(host='0.0.0.0', port=config.API_PORT, debug=True)
-
-if __name__ == '__main__':
-    try:
-        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        context.load_cert_chain('cert.pem', 'key.pem')
-        app.run(host='0.0.0.0', port=config.API_PORT, ssl_context=context)
-    except FileNotFoundError:
-        print("Warning: SSL certificates not found. Running in development mode without SSL.")
-        app.run(host='0.0.0.0', port=config.API_PORT, debug=True)
+    app.run(host='0.0.0.0', port=config.API_PORT, debug=True)
 
 # This line is for Gunicorn to find the application
 application = app
