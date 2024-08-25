@@ -34,7 +34,7 @@
                 <label for="register-password">Password:</label>
                 <input type="password" id="register-password">
             </div>
-            <button onclick="makeApiRequest('/register', 'POST', {username: document.getElementById('register-username').value, password: document.getElementById('register-password').value})">Register</button>
+            <button>Register</button>
         </div>
 
         <div class="endpoint">
@@ -53,7 +53,7 @@
                 <label for="login-password">Password:</label>
                 <input type="password" id="login-password">
             </div>
-            <button onclick="makeApiRequest('/login', 'POST', {username: document.getElementById('login-username').value, password: document.getElementById('login-password').value})">Login</button>
+            <button>Login</button>
         </div>
 
         <h2>Account Management</h2>
@@ -202,7 +202,7 @@
         <div class="endpoint">
             <h3><span class="method">GET</span> <span class="path">/ping</span></h3>
             <p>Check if the API is operational.</p>
-            <button onclick="makeApiRequest('/ping', 'GET')">Ping API</button>
+            <button>Ping API</button>
         </div>
     </div>
     <script src="script.js"></script>
