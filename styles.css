@@ -1,0 +1,111 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Open+Sans&display=swap');
+
+:root {
+    --grid-base: 4px;
+    --scale-ratio: 1.4;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    padding: calc(var(--grid-base) * 4);
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+h1, h2, h3 {
+    font-family: 'Merriweather', serif;
+    font-weight: 700;
+    margin-bottom: calc(var(--grid-base) * 4);
+}
+
+h1 {
+    font-size: calc(var(--scale-ratio) * var(--scale-ratio) * var(--scale-ratio) * 1rem);
+}
+
+h2 {
+    font-size: calc(var(--scale-ratio) * var(--scale-ratio) * 1rem);
+    margin-top: calc(var(--grid-base) * 8);
+}
+
+h3 {
+    font-size: calc(var(--scale-ratio) * 1rem);
+}
+
+p, table {
+    margin-bottom: calc(var(--grid-base) * 4);
+}
+
+.endpoint {
+    background-color: #f4f4f4;
+    border-radius: calc(var(--grid-base) * 2);
+    padding: calc(var(--grid-base) * 4);
+    margin-bottom: calc(var(--grid-base) * 6);
+}
+
+.method {
+    font-weight: bold;
+    color: #0066cc;
+}
+
+.path {
+    font-family: monospace;
+    background-color: #e0e0e0;
+    padding: calc(var(--grid-base) * 1) calc(var(--grid-base) * 2);
+    border-radius: calc(var(--grid-base) * 1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    text-align: left;
+    padding: calc(var(--grid-base) * 2);
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f0f0f0;
+}
+
+.form-group {
+    margin-bottom: calc(var(--grid-base) * 4);
+}
+
+label {
+    display: block;
+    margin-bottom: calc(var(--grid-base) * 2);
+}
+
+input {
+    width: 100%;
+    padding: calc(var(--grid-base) * 2);
+    border: 1px solid #ddd;
+    border-radius: calc(var(--grid-base) * 1);
+}
+
+button {
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    padding: calc(var(--grid-base) * 3) calc(var(--grid-base) * 6);
+    cursor: pointer;
+    border-radius: calc(var(--grid-base) * 1);
+    font-size: 1rem;
+}
+
+button:hover {
+    background-color: #0052a3;
+}
