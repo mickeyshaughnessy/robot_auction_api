@@ -6,7 +6,7 @@
     --color-primary: #ff4136;
     --color-secondary: #0074d9;
     --color-accent: #ffdc00;
-    --color-background: #f0f0f0;
+    --color-background: #f0f8ff;
     --color-text: #333;
     --color-button: #2ecc40;
 }
@@ -22,18 +22,24 @@ body {
     line-height: 1.6;
     color: var(--color-text);
     background-color: var(--color-background);
+    background-image: linear-gradient(45deg, #f0f8ff 25%, #e6f3ff 25%, #e6f3ff 50%, #f0f8ff 50%, #f0f8ff 75%, #e6f3ff 75%, #e6f3ff 100%);
+    background-size: 40px 40px;
     padding: calc(var(--grid-base) * 4);
 }
 
 .container {
     max-width: 800px;
     margin: 0 auto;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: calc(var(--grid-base) * 4);
+    border-radius: calc(var(--grid-base) * 2);
 }
 
 h1, h2, h3 {
-    font-family: 'Press Start 2P', cursive;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
     margin-bottom: calc(var(--grid-base) * 6);
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
 }
 
 h1 {
@@ -70,7 +76,8 @@ p, table {
 }
 
 .path {
-    font-family: 'Press Start 2P', cursive;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
     background-color: var(--color-accent);
     color: var(--color-text);
     padding: calc(var(--grid-base) * 1) calc(var(--grid-base) * 2);
@@ -101,8 +108,9 @@ th {
 label {
     display: block;
     margin-bottom: calc(var(--grid-base) * 2);
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.8rem;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
+    font-size: 0.9rem;
 }
 
 input {
@@ -121,7 +129,8 @@ button {
     cursor: pointer;
     border-radius: calc(var(--grid-base) * 1);
     font-size: 1rem;
-    font-family: 'Press Start 2P', cursive;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
     text-transform: uppercase;
     box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
     transition: all 0.1s ease-in-out;
