@@ -2,12 +2,10 @@ from flask import Flask, request, jsonify
 import redis, uuid, json, time, ssl
 from functools import wraps
 import handlers, config
-
-from flask import Flask
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['APPLICATION_ROOT'] = '/api'
 redis_client = redis.StrictRedis()
 
@@ -111,12 +109,9 @@ def sign_job(current_user):
 
 if __name__ == '__main__':
     try:
-        # Attempt to load SSL certificates (production assumed)
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         context.load_cert_chain('cert.pem', 'key.pem')
         app.run(host='0.0.0.0', port=config.API_PORT, ssl_context=context)
-
     except FileNotFoundError:
-        # Fallback to running without SSL if certificates not found
         print("Warning: SSL certificates not found. Running in development mode without SSL.")
         app.run(host='0.0.0.0', port=config.API_PORT, debug=True)

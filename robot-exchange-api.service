@@ -1,0 +1,14 @@
+[Unit]
+Description=Robot Exchange API Server
+After=network.target
+
+[Service]
+User=your_username
+Group=your_group
+WorkingDirectory=/path/to/your/api/directory
+Environment="PATH=/path/to/your/virtual/environment/bin"
+ExecStart=/path/to/your/virtual/environment/bin/gunicorn --config gunicorn.conf.py api_server:application
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
