@@ -2,7 +2,7 @@ import ssl, multiprocessing
 import config 
 
 #bind = ["0.0.0.0:80", "0.0.0.0:443"]
-bind = ["0.0.0.0:" % config.API_PORT]
+bind = ["0.0.0.0:%s" % config.API_PORT]
 workers = multiprocessing.cpu_count() * 2 + 1
 
 # SSL configuration
