@@ -36,24 +36,28 @@ body {
 }
 
 h1, h2, h3 {
-    font-family: 'Roboto', sans-serif;
     font-weight: bold;
     margin-bottom: calc(var(--grid-base) * 6);
     text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
 }
 
 h1 {
+    font-family: 'Roboto', sans-serif;
     font-size: calc(var(--scale-ratio) * var(--scale-ratio) * 1rem);
     color: var(--color-primary);
 }
 
 h2 {
-    font-size: calc(var(--scale-ratio) * 1rem);
+    font-family: 'Press Start 2P', cursive;
+    font-size: calc(var(--scale-ratio) * 0.8rem);
     margin-top: calc(var(--grid-base) * 8);
     color: var(--color-secondary);
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    letter-spacing: 1px;
 }
 
 h3 {
+    font-family: 'Roboto', sans-serif;
     font-size: 1rem;
 }
 
