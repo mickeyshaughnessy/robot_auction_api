@@ -6,8 +6,8 @@ bind = [f"0.0.0.0:{API_PORT}"]
 workers = multiprocessing.cpu_count() * 2 + 1
 
 # SSL configuration
-certfile = "/home/ubuntu/robot_auction_api/cert.pem"
-keyfile = "/home/ubuntu/robot_auction_api/key.pem"
+certfile = "/etc/letsencrypt/live/robotservicesauction.com/fullchain.pem"
+keyfile = "/etc/letsencrypt/live/robotservicesauction.com/privkey.pem"
 ssl_version = ssl.PROTOCOL_TLS
 do_handshake_on_connect = False
 
