@@ -40,7 +40,8 @@ def simulate_buyer(session, token):
         "lat": random.uniform(40.0, 41.0),
         "lon": random.uniform(-74.5, -73.5),
         "price": random.uniform(50, 200),
-        "end_time": int(time.time()) + random.randint(3600, 86400)
+        "end_time": int(time.time()) + random.randint(3600, 86400),
+        "simulated": True 
     }
     try:
         response = session.post(f"{API_URL}/make_bid", json=bid, headers=headers)
