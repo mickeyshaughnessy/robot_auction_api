@@ -1,8 +1,8 @@
 import uuid, redis, json, math, time, hashlib
-from config import SIMULATION_KEY, REDHASH_ALL_LIVE_BIDS, REDHASH_ALL_WINS, REDHASH_ACCOUNTS
+from config import SIMULATION_KEY, REDHASH_ALL_LIVE_BIDS, REDHASH_ALL_WINS, REDHASH_ACCOUNTS, REDHASH_SIMULATED_ALL_LIVE_BIDS, REDHASH_SIMULATED_ALL_WINS
 from match import matched_service
 
-redis_client = redis.StrictRedis()
+redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 def is_simulated(data): return data.get('simulated') == SIMULATION_KEY
 
@@ -26,9 +26,13 @@ def is_bid_matching(bid, robot_data):
 def grab_job(data):
     if not all(key in data for key in ['service', 'lat', 'lon', 'max_distance']):
         return {"error": "Missing required fields"}, 400
+
+    # Determine whether to query simulated bids or real bids
+    bids_hash = REDHASH_SIMULATED_ALL_LIVE_BIDS if is_simulated(data) else REDHASH_ALL_LIVE_BIDS
+    wins_hash = REDHASH_SIMULATED_ALL_WINS if is_simulated(data) else REDHASH_ALL_WINS
     
     matched_bids = []
-    for bid_id, bid_json in redis_client.hscan_iter(REDHASH_ALL_LIVE_BIDS):
+    for bid_id, bid_json in redis_client.hscan_iter(bids_hash):
         try:
             bid = json.loads(bid_json)
             if is_bid_matching(bid, data):
@@ -54,8 +58,8 @@ def grab_job(data):
         'seller_username': data['username']
     }
     
-    redis_client.hset(REDHASH_ALL_WINS, job_id, json.dumps(new_job))
-    redis_client.hdel(REDHASH_ALL_LIVE_BIDS, bid_id)
+    redis_client.hset(wins_hash, job_id, json.dumps(new_job))
+    redis_client.hdel(bids_hash, bid_id)
     
     return new_job, 200
 
@@ -69,7 +73,10 @@ def submit_bid(data):
     bid['username'] = data['username']
     bid["simulated"] = is_simulated(data)
     
-    redis_client.hset(REDHASH_ALL_LIVE_BIDS, bid_id, json.dumps(bid))
+    # Store simulated bids in a separate hash
+    bids_hash = REDHASH_SIMULATED_ALL_LIVE_BIDS if is_simulated(data) else REDHASH_ALL_LIVE_BIDS
+    redis_client.hset(bids_hash, bid_id, json.dumps(bid))
+    
     return {"bid_id": bid_id}, 200
 
 def nearby_activity(data):
@@ -98,7 +105,10 @@ def sign_job(data):
     if not all([username, job_id, password, star_rating]):
         return {"error": "Missing required parameters"}, 400
     
-    job = json.loads(redis_client.hget(REDHASH_ALL_WINS, job_id) or '{}')
+    # Determine whether to query simulated wins or real wins
+    wins_hash = REDHASH_SIMULATED_ALL_WINS if is_simulated(data) else REDHASH_ALL_WINS
+
+    job = json.loads(redis_client.hget(wins_hash, job_id) or '{}')
     if not job:
         return {"error": "Job not found"}, 404
     
@@ -122,7 +132,7 @@ def sign_job(data):
     counterparty_data['stars'] = counterparty_data.get('stars', 0) + star_rating
     counterparty_data['total_ratings'] = counterparty_data.get('total_ratings', 0) + 1
     
-    redis_client.hset(REDHASH_ALL_WINS, job_id, json.dumps(job))
+    redis_client.hset(wins_hash, job_id, json.dumps(job))
     redis_client.hset(REDHASH_ACCOUNTS, counterparty, json.dumps(counterparty_data))
     
     return {"message": "Job signed successfully"}, 200

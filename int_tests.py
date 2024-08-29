@@ -57,7 +57,7 @@ def run_tests():
                     "lon": -74.0060,
                     "price": 50,
                     "end_time": int(time.time()) + 3600,
-                    "simulated": config.SIMULATION_KEY 
+                    "simulated": config.SIMULATION_KEY
                 }
                 response = requests.post(f"{API_URL}/make_bid", json=bid_data, headers={"Authorization": f"Bearer {buyer_token}"}, verify=False)
                 if response.status_code != 200:
@@ -90,7 +90,7 @@ def run_tests():
         def test_sign_job():
             bid_data = {
                 "service": "cleaning", "lat": 40.7128, "lon": -74.0060, "price": 50, "end_time": int(time.time()) + 3600,
-                "simulated": config.SIMULATION_KEY 
+                "simulated": config.SIMULATION_KEY
             }
             bid_response = requests.post(f"{API_URL}/make_bid", json=bid_data, headers={"Authorization": f"Bearer {buyer_token}"}, verify=False)
             if bid_response.status_code != 200:
