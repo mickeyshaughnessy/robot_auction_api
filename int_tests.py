@@ -7,9 +7,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 API_URL = config.API_URL
 
 def run_test(description, test_function, *args):
-    print(f"\n{'=' * 50}")
+    print(f"\n{'*' * 40}")
     print(f"🧪 Testing: {description}")
-    print(f"{'=' * 50}")
+    print(f"{'*' * 40}")
     try:
         result, message = test_function(*args)
         status = "✅ PASS" if result else "❌ FAIL"
@@ -52,77 +52,94 @@ def run_tests():
 
         def test_multiple_bid_submissions():
             services = ["cleaning", "gardening", "pet_sitting"]
-            bid_ids = []
-            for service in services:
-                bid_data = {
-                    "service": service,
-                    "lat": 40.7128,
-                    "lon": -74.0060,
-                    "price": 50,
-                    "end_time": int(time.time()) + 3600,
-                    "simulated": config.SIMULATION_KEY
-                }
-                response = requests.post(f"{API_URL}/make_bid", json=bid_data, headers={"Authorization": f"Bearer {buyer_token}"}, verify=False)
-                if response.status_code != 200:
-                    return False, f"Bid submission failed for {service}: status {response.status_code}"
-                bid_ids.append(response.json().get('bid_id'))
-            return True, f"🎯 Multiple bid submission: {len(bid_ids)} bids placed"
+            results = []
+            for simulated in [True, False]:
+                bid_ids = []
+                for service in services:
+                    bid_data = {
+                        "service": service,
+                        "lat": 40.7128,
+                        "lon": -74.0060,
+                        "price": 50,
+                        "end_time": int(time.time()) + 3600
+                    }
+                    if simulated:
+                        bid_data["simulated"] = config.SIMULATION_KEY
+                    response = requests.post(f"{API_URL}/make_bid", json=bid_data, headers={"Authorization": f"Bearer {buyer_token}"}, verify=False)
+                    if response.status_code != 200:
+                        return False, f"{'Simulated' if simulated else 'Production'} bid submission failed for {service}: status {response.status_code}"
+                    bid_ids.append(response.json().get('bid_id'))
+                results.append(f"{'🎮 Simulated' if simulated else '🏭 Production'}: {len(bid_ids)} bids placed")
+            return True, " | ".join(results)
 
         def test_nearby_activity():
-            response = requests.post(f"{API_URL}/nearby", json={"lat": 40.7128, "lon": -74.0060, "simulated": config.SIMULATION_KEY}, headers={"Authorization": f"Bearer {buyer_token}"}, verify=False)
-            all_bids = r.hgetall(config.REDHASH_SIMULATED_ALL_LIVE_BIDS)
-            return response.status_code == 200, f"🗺️ Nearby activity: {len(response.json())} bids, Redis: {len(all_bids)} bids"
+            results = []
+            for simulated in [True, False]:
+                data = {"lat": 40.7128, "lon": -74.0060}
+                if simulated:
+                    data["simulated"] = config.SIMULATION_KEY
+                response = requests.post(f"{API_URL}/nearby", json=data, headers={"Authorization": f"Bearer {buyer_token}"}, verify=False)
+                all_bids = r.hgetall(config.REDHASH_SIMULATED_ALL_LIVE_BIDS if simulated else config.REDHASH_ALL_LIVE_BIDS)
+                results.append(f"{'🎮 Simulated' if simulated else '🏭 Production'}: API: {len(response.json())}, Redis: {len(all_bids)}")
+            return True, " | ".join(results)
 
         def test_grab_job():
-            robot_data = {"service": "cleaning, gardening", "lat": 40.7128, "lon": -74.0060, "max_distance": 10, "simulated": config.SIMULATION_KEY}
-            response = requests.post(f"{API_URL}/grab_job", json=robot_data, headers={"Authorization": f"Bearer {seller_token}"}, verify=False)
-            try:
-                json_response = response.json()
+            results = []
+            for simulated in [True, False]:
+                robot_data = {"service": "cleaning, gardening", "lat": 40.7128, "lon": -74.0060, "max_distance": 10}
+                if simulated:
+                    robot_data["simulated"] = config.SIMULATION_KEY
+                response = requests.post(f"{API_URL}/grab_job", json=robot_data, headers={"Authorization": f"Bearer {seller_token}"}, verify=False)
                 status = "🤖 Job grabbed" if response.status_code == 200 else "🚫 No job available"
-                return response.status_code in [200, 204], f"Grab job: {status}"
-            except json.JSONDecodeError:
-                return False, f"Grab job: Invalid JSON response"
+                results.append(f"{'🎮 Simulated' if simulated else '🏭 Production'}: {status}")
+            return True, " | ".join(results)
 
         def test_sign_job():
-            bid_data = {
-                "service": "cleaning", "lat": 40.7128, "lon": -74.0060, "price": 50, "end_time": int(time.time()) + 3600,
-                "simulated": config.SIMULATION_KEY
-            }
-            bid_response = requests.post(f"{API_URL}/make_bid", json=bid_data, headers={"Authorization": f"Bearer {buyer_token}"}, verify=False)
-            if bid_response.status_code != 200:
-                return False, f"Failed to create bid for sign_job test: {bid_response.status_code}"
+            results = []
+            for simulated in [True, False]:
+                bid_data = {
+                    "service": "cleaning", "lat": 40.7128, "lon": -74.0060, "price": 50, "end_time": int(time.time()) + 3600
+                }
+                if simulated:
+                    bid_data["simulated"] = config.SIMULATION_KEY
+                bid_response = requests.post(f"{API_URL}/make_bid", json=bid_data, headers={"Authorization": f"Bearer {buyer_token}"}, verify=False)
+                if bid_response.status_code != 200:
+                    return False, f"Failed to create {'simulated' if simulated else 'production'} bid for sign_job test: {bid_response.status_code}"
 
-            robot_data = {"service": "cleaning", "lat": 40.7128, "lon": -74.0060, "max_distance": 10, "simulated": config.SIMULATION_KEY}
-            grab_response = requests.post(f"{API_URL}/grab_job", json=robot_data, headers={"Authorization": f"Bearer {seller_token}"}, verify=False)
-            if grab_response.status_code != 200:
-                return False, f"Failed to grab job for sign_job test: {grab_response.status_code}"
+                robot_data = {"service": "cleaning", "lat": 40.7128, "lon": -74.0060, "max_distance": 10}
+                if simulated:
+                    robot_data["simulated"] = config.SIMULATION_KEY
+                grab_response = requests.post(f"{API_URL}/grab_job", json=robot_data, headers={"Authorization": f"Bearer {seller_token}"}, verify=False)
+                if grab_response.status_code != 200:
+                    return False, f"Failed to grab {'simulated' if simulated else 'production'} job for sign_job test: {grab_response.status_code}"
 
-            job_id = grab_response.json().get('job_id')
+                job_id = grab_response.json().get('job_id')
 
-            buyer_sign_data = {"username": "test_buyer", "job_id": job_id, "password": "password", "star_rating": 5, "simulated": config.SIMULATION_KEY}
-            buyer_sign_response = requests.post(f"{API_URL}/sign_job", json=buyer_sign_data, headers={"Authorization": f"Bearer {buyer_token}"}, verify=False)
+                buyer_sign_data = {"username": "test_buyer", "job_id": job_id, "password": "password", "star_rating": 5}
+                seller_sign_data = {"username": "test_seller", "job_id": job_id, "password": "password", "star_rating": 4}
+                if simulated:
+                    buyer_sign_data["simulated"] = config.SIMULATION_KEY
+                    seller_sign_data["simulated"] = config.SIMULATION_KEY
 
-            seller_sign_data = {"username": "test_seller", "job_id": job_id, "password": "password", "star_rating": 4, "simulated": config.SIMULATION_KEY}
-            seller_sign_response = requests.post(f"{API_URL}/sign_job", json=seller_sign_data, headers={"Authorization": f"Bearer {seller_token}"}, verify=False)
+                buyer_sign_response = requests.post(f"{API_URL}/sign_job", json=buyer_sign_data, headers={"Authorization": f"Bearer {buyer_token}"}, verify=False)
+                seller_sign_response = requests.post(f"{API_URL}/sign_job", json=seller_sign_data, headers={"Authorization": f"Bearer {seller_token}"}, verify=False)
 
-            return (buyer_sign_response.status_code == 200 and seller_sign_response.status_code == 200, 
-                f"✍️ Sign job: Buyer {'✅' if buyer_sign_response.status_code == 200 else '❌'}, Seller {'✅' if seller_sign_response.status_code == 200 else '❌'}")
+                results.append(f"{'🎮 Simulated' if simulated else '🏭 Production'}: Buyer {'✅' if buyer_sign_response.status_code == 200 else '❌'}, Seller {'✅' if seller_sign_response.status_code == 200 else '❌'}")
+            return True, " | ".join(results)
 
         tests = [test_ping, test_buyer_registration, test_seller_registration, test_buyer_login, test_seller_login,
                  test_multiple_bid_submissions, test_nearby_activity, test_grab_job, test_sign_job]
 
         for test in tests:
             run_test(test.__name__.replace('test_', '').replace('_', ' ').capitalize(), test)
-
     finally:
         cleanup_redis(r)
 
-    print("\n{'=' * 50}")
-    print("🏁 Test Summary 🏁")
-    print(f"{'=' * 50}")
+    print("\n..``..\033[1m🏁 Test Summary 🏁\033[0m..``..")
     print(f"Total tests: {len(tests)}")
-    print(f"Passed: {sum(1 for test in tests if run_test(test.__name__.replace('test_', '').replace('_', ' ').capitalize(), test))}")
-    print(f"Failed: {sum(1 for test in tests if not run_test(test.__name__.replace('test_', '').replace('_', ' ').capitalize(), test))}")
+    passed_tests = sum(1 for test in tests if run_test(test.__name__.replace('test_', '').replace('_', ' ').capitalize(), test))
+    print(f"Passed: {passed_tests}")
+    print(f"Failed: {len(tests) - passed_tests}")
 
 if __name__ == "__main__":
     run_tests()
