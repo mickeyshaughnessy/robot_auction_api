@@ -132,6 +132,7 @@ def run_tests():
 
         for test in tests:
             run_test(test.__name__.replace('test_', '').replace('_', ' ').capitalize(), test)
+
     finally:
         cleanup_redis(r)
 
