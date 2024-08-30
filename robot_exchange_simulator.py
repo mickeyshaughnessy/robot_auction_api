@@ -59,7 +59,8 @@ def simulate_seller(session, token):
         "service": ",".join(random.sample(SERVICES, random.randint(1, 3))),
         "lat": random.uniform(40.0, 41.0),
         "lon": random.uniform(-74.5, -73.5),
-        "max_distance": random.uniform(1, 10)
+        "max_distance": random.uniform(1, 10),
+        "simulated" : True
     }
     try:
         response = session.post(f"{API_URL}/grab_job", json=job_request, headers=headers)
