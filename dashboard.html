@@ -5,22 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Robot Services Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto&display=swap">
     <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-    <div class="dashboard">
+    <div class="container">
         <h1>RSX Activity Dashboard</h1>
         <div class="dashboard-grid">
             <div class="map-container">
                 <div id="map"></div>
+                <div class="map-controls">
+                    <label><input type="checkbox" id="show-bids" checked> Show Bids</label>
+                    <label><input type="checkbox" id="show-won-jobs" checked> Show Won Jobs</label>
+                    <label><input type="checkbox" id="show-completed-jobs" checked> Show Completed Jobs</label>
+                </div>
             </div>
             <div class="activity-feed">
                 <h2>Recent Activities</h2>
-                <ul id="activity-list">
-                    <!-- Activity items will be dynamically added here -->
-                </ul>
+                <pre id="activity-list"></pre>
             </div>
         </div>
+        <div class="button-container">
+            <button id="grab-job">Grab Job</button>
+            <button id="submit-bid">Submit Bid</button>
+        </div>
+        <div id="submission-data"></div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
     <script src="dashboard.js"></script>
