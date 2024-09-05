@@ -61,10 +61,11 @@ def run_tests():
                         "lat": 40.7128,
                         "lon": -74.0060,
                         "price": 50,
-                        "end_time": int(time.time()) + 3600
+                        "end_time": int(time.time()) + 3600,
+                        "simulated" : True
                     }
-                    if simulated:
-                        bid_data["simulated"] = config.SIMULATION_KEY
+                    #if simulated:
+                    #    bid_data["simulated"] = config.SIMULATION_KEY
                     response = requests.post(f"{API_URL}/make_bid", json=bid_data, headers={"Authorization": f"Bearer {buyer_token}"}, verify=False)
                     if response.status_code != 200:
                         return False, f"{'Simulated' if simulated else 'Production'} bid submission failed for {service}: status {response.status_code}"
