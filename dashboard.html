@@ -5,47 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Robot Services Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
-    <style>
-        body { 
-            margin: 0; 
-            padding: 20px; 
-            background-color: peachpuff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
-        }
-        .dashboard {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            padding: 20px;
-            width: 80%;
-            max-width: 1000px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        #map { 
-            height: 500px; 
-            width: 100%; 
-            border-radius: 5px;
-        }
-    </style>
+    <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
     <div class="dashboard">
-        <h1>RSX Activity</h1>
-        <div id="map"></div>
+        <h1>RSX Activity Dashboard</h1>
+        <div class="dashboard-grid">
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+            <div class="activity-feed">
+                <h2>Recent Activities</h2>
+                <ul id="activity-list">
+                    <!-- Activity items will be dynamically added here -->
+                </ul>
+            </div>
+        </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
-    <script>
-        const map = L.map('map').setView([40.7128, -74.0060], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-    </script>
+    <script src="dashboard.js"></script>
 </body>
 </html>
