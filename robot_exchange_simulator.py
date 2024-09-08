@@ -6,7 +6,7 @@ from requests.packages.urllib3.util.retry import Retry
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-API_URL = "http://127.0.0.1:5001"
+API_URL = "http://100.26.236.1:5001"
 SERVICES = ["delivery", "cleaning", "security", "lawn_mowing", "pet_care"]
 
 def create_session():
