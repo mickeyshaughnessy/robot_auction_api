@@ -2,7 +2,7 @@ import requests, json, time
 from utils import setup_redis, cleanup_redis
 import config
 
-API_URL = f"http://{config.API_HOST}:{config.API_PORT}"
+API_URL = config.API_URL 
 
 def run_test(description, test_function, *args):
     print(f"\n{'*' * 40}")
