@@ -1,0 +1,15 @@
+[Unit]
+Description=Robot Exchange API Server
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/robot_auction_api
+ExecStart=/usr/local/bin/gunicorn --config gunicorn.conf.py api_server:application
+StandardOutput=file:/var/log/robot-exchange-api.log
+StandardError=file:/var/log/robot-exchange-api.log
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
