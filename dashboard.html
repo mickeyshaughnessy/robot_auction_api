@@ -2,36 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>RSX Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Robot Services Dashboard</title>
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto&display=swap">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto&display=swap" rel="stylesheet">
+    <!-- Common Styles -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Dashboard Styles -->
     <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-    <div class="container">
-        <h1>RSX Activity Dashboard</h1>
-        <div class="dashboard-grid">
-            <div class="map-container">
-                <div id="map"></div>
-                <div class="map-controls">
-                    <label><input type="checkbox" id="show-bids" checked> Show Bids</label>
-                    <label><input type="checkbox" id="show-won-jobs" checked> Show Won Jobs</label>
-                    <label><input type="checkbox" id="show-completed-jobs" checked> Show Completed Jobs</label>
+    <header>
+        <div class="container">
+            <h1>RSX Activity Dashboard</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="api_docs.html">API Docs</a></li>
+                    <li><a href="demo.html">Demo</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <div class="dashboard-grid">
+                <div class="map-container">
+                    <div id="map"></div>
+                    <div class="map-controls">
+                        <label><input type="checkbox" id="show-bids" checked> Show Bids</label>
+                        <label><input type="checkbox" id="show-won-jobs" checked> Show Won Jobs</label>
+                        <label><input type="checkbox" id="show-completed-jobs" checked> Show Completed Jobs</label>
+                    </div>
+                </div>
+                <div class="activity-feed">
+                    <h2>Recent Activities</h2>
+                    <pre id="activity-list"></pre>
                 </div>
             </div>
-            <div class="activity-feed">
-                <h2>Recent Activities</h2>
-                <pre id="activity-list"></pre>
+            <div class="button-container">
+                <button id="grab-job">Grab Job</button>
+                <button id="submit-bid">Submit Bid</button>
             </div>
+            <div id="submission-data"></div>
         </div>
-        <div class="button-container">
-            <button id="grab-job">Grab Job</button>
-            <button id="submit-bid">Submit Bid</button>
+    </main>
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Robot Services Exchange. All rights reserved.</p>
         </div>
-        <div id="submission-data"></div>
-    </div>
+    </footer>
+    <!-- Leaflet JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <!-- Dashboard JS -->
     <script src="dashboard.js"></script>
 </body>
 </html>
