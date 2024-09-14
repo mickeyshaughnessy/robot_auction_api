@@ -1,8 +1,11 @@
-import requests, json, time
+import requests
+import json
+import time
 from utils import setup_redis, cleanup_redis
 import config
+import uuid
 
-API_URL = config.API_URL 
+API_URL = config.API_URL
 
 def run_test(description, test_function, *args):
     print(f"\n{'*' * 40}")
@@ -18,39 +21,62 @@ def run_test(description, test_function, *args):
         return False
 
 def run_tests():
-    r, buyer_token, seller_token = setup_redis(config.REDIS_HOST, config.REDIS_PORT, config.REDIS_DB), None, None
+    r = setup_redis(config.REDIS_HOST, config.REDIS_PORT, config.REDIS_DB)
     cleanup_redis(r)
+
+    # Generate unique usernames
+    test_buyer_username = f"test_buyer_{uuid.uuid4().hex[:8]}"
+    test_seller_username = f"test_seller_{uuid.uuid4().hex[:8]}"
+
+    # Tokens to be used across tests
+    buyer_token = None
+    seller_token = None
+
+    test_results = []
 
     try:
         def test_ping():
             response = requests.get(f"{API_URL}/ping")
-            return response.status_code == 200, f"Ping status: {response.status_code}"
+            success = response.status_code == 200
+            message = f"Ping status: {response.status_code}"
+            return success, message
 
         def test_buyer_registration():
-            response = requests.post(f"{API_URL}/register", json={"username": "test_buyer", "password": "password", "user_type": "buyer"})
-            return response.status_code == 201, f"Buyer registration status: {response.status_code}"
+            response = requests.post(f"{API_URL}/register", json={"username": test_buyer_username, "password": "password"})
+            success = response.status_code == 201
+            message = f"Buyer registration status: {response.status_code}, Response: {response.text}"
+            return success, message
 
         def test_seller_registration():
-            response = requests.post(f"{API_URL}/register", json={"username": "test_seller", "password": "password", "user_type": "seller"})
-            return response.status_code == 201, f"Seller registration status: {response.status_code}"
+            response = requests.post(f"{API_URL}/register", json={"username": test_seller_username, "password": "password"})
+            success = response.status_code == 201
+            message = f"Seller registration status: {response.status_code}, Response: {response.text}"
+            return success, message
 
         def test_buyer_login():
             nonlocal buyer_token
-            response = requests.post(f"{API_URL}/login", json={"username": "test_buyer", "password": "password"})
+            response = requests.post(f"{API_URL}/login", json={"username": test_buyer_username, "password": "password"})
             if response.status_code == 200:
                 buyer_token = response.json().get("access_token")
-            return response.status_code == 200, f"Buyer login: {'🔑 Token received' if buyer_token else '🚫 No token'}"
+            success = response.status_code == 200 and buyer_token is not None
+            message = f"Buyer login: {'🔑 Token received' if buyer_token else '🚫 No token'}, Status: {response.status_code}"
+            return success, message
 
         def test_seller_login():
             nonlocal seller_token
-            response = requests.post(f"{API_URL}/login", json={"username": "test_seller", "password": "password"})
+            response = requests.post(f"{API_URL}/login", json={"username": test_seller_username, "password": "password"})
             if response.status_code == 200:
                 seller_token = response.json().get("access_token")
-            return response.status_code == 200, f"Seller login: {'🔑 Token received' if seller_token else '🚫 No token'}"
+            success = response.status_code == 200 and seller_token is not None
+            message = f"Seller login: {'🔑 Token received' if seller_token else '🚫 No token'}, Status: {response.status_code}"
+            return success, message
 
         def test_multiple_bid_submissions():
+            if not buyer_token:
+                return False, "Buyer token not available. Cannot submit bids."
             services = ["cleaning", "gardening", "pet_sitting"]
             results = []
+            headers = {"Authorization": f"Bearer {buyer_token}"}
             for simulated in [True, False]:
                 bid_ids = []
                 for service in services:
@@ -59,75 +85,145 @@ def run_tests():
                         "lat": 40.7128,
                         "lon": -74.0060,
                         "price": 50,
-                        "end_time": int(time.time()) + 3600,
-                        "simulated": simulated
+                        "end_time": int(time.time()) + 3600
                     }
-                    response = requests.post(f"{API_URL}/make_bid", json=bid_data, headers={"Authorization": f"Bearer {buyer_token}"})
+                    if simulated:
+                        bid_data["simulated"] = config.SIMULATION_KEY
+                    response = requests.post(f"{API_URL}/make_bid", json=bid_data, headers=headers)
                     if response.status_code != 200:
-                        return False, f"{'Simulated' if simulated else 'Production'} bid submission failed for {service}: status {response.status_code}"
+                        return False, f"{'Simulated' if simulated else 'Production'} bid submission failed for {service}: status {response.status_code}, Response: {response.text}"
                     bid_ids.append(response.json().get('bid_id'))
                 results.append(f"{'🎮 Simulated' if simulated else '🏭 Production'}: {len(bid_ids)} bids placed")
             return True, " | ".join(results)
 
         def test_nearby_activity():
+            if not buyer_token:
+                return False, "Buyer token not available. Cannot check nearby activity."
             results = []
+            headers = {"Authorization": f"Bearer {buyer_token}"}
             for simulated in [True, False]:
-                data = {"lat": 40.7128, "lon": -74.0060, "simulated": simulated}
-                response = requests.post(f"{API_URL}/nearby", json=data, headers={"Authorization": f"Bearer {buyer_token}"})
+                data = {"lat": 40.7128, "lon": -74.0060}
+                if simulated:
+                    data["simulated"] = config.SIMULATION_KEY
+                response = requests.post(f"{API_URL}/nearby", json=data, headers=headers)
+                if response.status_code != 200:
+                    return False, f"Nearby activity request failed: status {response.status_code}, Response: {response.text}"
+                api_bids = response.json()
                 all_bids = r.hgetall(config.REDHASH_SIMULATED_ALL_LIVE_BIDS if simulated else config.REDHASH_ALL_LIVE_BIDS)
-                results.append(f"{'🎮 Simulated' if simulated else '🏭 Production'}: API: {len(response.json())}, Redis: {len(all_bids)}")
+                results.append(f"{'🎮 Simulated' if simulated else '🏭 Production'}: API returned {len(api_bids)} bids, Redis has {len(all_bids)} bids")
             return True, " | ".join(results)
 
         def test_grab_job():
+            if not seller_token:
+                return False, "Seller token not available. Cannot grab jobs."
             results = []
+            headers = {"Authorization": f"Bearer {seller_token}"}
             for simulated in [True, False]:
-                robot_data = {"service": "cleaning, gardening", "lat": 40.7128, "lon": -74.0060, "max_distance": 10, "simulated": simulated}
-                response = requests.post(f"{API_URL}/grab_job", json=robot_data, headers={"Authorization": f"Bearer {seller_token}"})
-                status = "🤖 Job grabbed" if response.status_code == 200 else "🚫 No job available"
+                robot_data = {
+                    "service": "cleaning, gardening",
+                    "lat": 40.7128,
+                    "lon": -74.0060,
+                    "max_distance": 10
+                }
+                if simulated:
+                    robot_data["simulated"] = config.SIMULATION_KEY
+                response = requests.post(f"{API_URL}/grab_job", json=robot_data, headers=headers)
+                status = "🤖 Job grabbed" if response.status_code == 200 else f"🚫 No job available (status code {response.status_code}, Response: {response.text})"
                 results.append(f"{'🎮 Simulated' if simulated else '🏭 Production'}: {status}")
             return True, " | ".join(results)
 
         def test_sign_job():
+            if not buyer_token or not seller_token:
+                return False, "Buyer or Seller token not available. Cannot sign jobs."
             results = []
+            buyer_headers = {"Authorization": f"Bearer {buyer_token}"}
+            seller_headers = {"Authorization": f"Bearer {seller_token}"}
             for simulated in [True, False]:
+                # Create a bid
                 bid_data = {
-                    "service": "cleaning", "lat": 40.7128, "lon": -74.0060, "price": 50, "end_time": int(time.time()) + 3600,
-                    "simulated": simulated
+                    "service": "cleaning",
+                    "lat": 40.7128,
+                    "lon": -74.0060,
+                    "price": 50,
+                    "end_time": int(time.time()) + 3600
                 }
-                bid_response = requests.post(f"{API_URL}/make_bid", json=bid_data, headers={"Authorization": f"Bearer {buyer_token}"})
+                if simulated:
+                    bid_data["simulated"] = config.SIMULATION_KEY
+                bid_response = requests.post(f"{API_URL}/make_bid", json=bid_data, headers=buyer_headers)
                 if bid_response.status_code != 200:
-                    return False, f"Failed to create {'simulated' if simulated else 'production'} bid for sign_job test: {bid_response.status_code}"
+                    return False, f"Failed to create {'simulated' if simulated else 'production'} bid: {bid_response.status_code}, Response: {bid_response.text}"
 
-                robot_data = {"service": "cleaning", "lat": 40.7128, "lon": -74.0060, "max_distance": 10, "simulated": simulated}
-                grab_response = requests.post(f"{API_URL}/grab_job", json=robot_data, headers={"Authorization": f"Bearer {seller_token}"})
+                # Grab the job
+                robot_data = {
+                    "service": "cleaning",
+                    "lat": 40.7128,
+                    "lon": -74.0060,
+                    "max_distance": 10
+                }
+                if simulated:
+                    robot_data["simulated"] = config.SIMULATION_KEY
+                grab_response = requests.post(f"{API_URL}/grab_job", json=robot_data, headers=seller_headers)
                 if grab_response.status_code != 200:
-                    return False, f"Failed to grab {'simulated' if simulated else 'production'} job for sign_job test: {grab_response.status_code}"
+                    return False, f"Failed to grab job: status {grab_response.status_code}, Response: {grab_response.text}"
 
                 job_id = grab_response.json().get('job_id')
+                if not job_id:
+                    return False, f"No job ID returned in grab_job response: {grab_response.text}"
 
-                buyer_sign_data = {"username": "test_buyer", "job_id": job_id, "password": "password", "star_rating": 5, "simulated": simulated}
-                seller_sign_data = {"username": "test_seller", "job_id": job_id, "password": "password", "star_rating": 4, "simulated": simulated}
+                # Buyer signs the job
+                buyer_sign_data = {
+                    "job_id": job_id,
+                    "password": "password",
+                    "star_rating": 5
+                }
+                if simulated:
+                    buyer_sign_data["simulated"] = config.SIMULATION_KEY
+                buyer_sign_response = requests.post(f"{API_URL}/sign_job", json=buyer_sign_data, headers=buyer_headers)
+                buyer_success = buyer_sign_response.status_code == 200
 
-                buyer_sign_response = requests.post(f"{API_URL}/sign_job", json=buyer_sign_data, headers={"Authorization": f"Bearer {buyer_token}"})
-                seller_sign_response = requests.post(f"{API_URL}/sign_job", json=seller_sign_data, headers={"Authorization": f"Bearer {seller_token}"})
+                # Seller signs the job
+                seller_sign_data = {
+                    "job_id": job_id,
+                    "password": "password",
+                    "star_rating": 4
+                }
+                if simulated:
+                    seller_sign_data["simulated"] = config.SIMULATION_KEY
+                seller_sign_response = requests.post(f"{API_URL}/sign_job", json=seller_sign_data, headers=seller_headers)
+                seller_success = seller_sign_response.status_code == 200
 
-                results.append(f"{'🎮 Simulated' if simulated else '🏭 Production'}: Buyer {'✅' if buyer_sign_response.status_code == 200 else '❌'}, Seller {'✅' if seller_sign_response.status_code == 200 else '❌'}")
+                results.append(f"{'🎮 Simulated' if simulated else '🏭 Production'}: Buyer {'✅' if buyer_success else '❌'}, Seller {'✅' if seller_success else '❌'}")
             return True, " | ".join(results)
 
-        tests = [test_ping, test_buyer_registration, test_seller_registration, test_buyer_login, test_seller_login,
-                 test_multiple_bid_submissions, test_nearby_activity, test_grab_job, test_sign_job]
+        tests = [
+            ("Ping", test_ping),
+            ("Buyer Registration", test_buyer_registration),
+            ("Seller Registration", test_seller_registration),
+            ("Buyer Login", test_buyer_login),
+            ("Seller Login", test_seller_login),
+            ("Multiple Bid Submissions", test_multiple_bid_submissions),
+            ("Nearby Activity", test_nearby_activity),
+            ("Grab Job", test_grab_job),
+            ("Sign Job", test_sign_job),
+        ]
 
-        for test in tests:
-            run_test(test.__name__.replace('test_', '').replace('_', ' ').capitalize(), test)
+        total_tests = len(tests)
+        passed_tests = 0
+
+        for description, test in tests:
+            result = run_test(description, test)
+            if result:
+                passed_tests += 1
+            test_results.append((description, result))
 
     finally:
         cleanup_redis(r)
 
+    # Test Summary
     print("\n..``..\033[1m🏁 Test Summary 🏁\033[0m..``..")
-    print(f"Total tests: {len(tests)}")
-    passed_tests = sum(1 for test in tests if run_test(test.__name__.replace('test_', '').replace('_', ' ').capitalize(), test))
+    print(f"Total tests: {total_tests}")
     print(f"Passed: {passed_tests}")
-    print(f"Failed: {len(tests) - passed_tests}")
+    print(f"Failed: {total_tests - passed_tests}")
 
 if __name__ == "__main__":
     run_tests()
