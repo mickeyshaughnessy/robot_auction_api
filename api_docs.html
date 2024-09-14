@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Services Exchange (RSX) API Documentation</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>Robot Services Exchange (RSX) API Documentation</h1>
+
+    <p>A way for people to buy robot services by bidding and a way for robots to get jobs.</p>
+
+    <h3>The RSX API is currently running at http://100.26.236.1:5001</h3>
+
+    <div id="response"></div>
+
+    <h2>Authentication Endpoints</h2>
+
+    <div class="endpoint">
+        <h3><span class="method">POST</span> <span class="path">/register</span></h3>
+        <p>Register a new user account.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>username</td>
+                <td>Desired username for the new account (3-20 characters)</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>Password for the new account (min 8 characters)</td>
+            </tr>
+        </table>
+        <div class="form-group">
+            <label for="register-username">Username:</label>
+            <input type="text" id="register-username" name="username">
+        </div>
+        <div class="form-group">
+            <label for="register-password">Password:</label>
+            <input type="password" id="register-password" name="password">
+        </div>
+        <button onclick="register()">Register</button>
+    </div>
+
+    <div class="endpoint">
+        <h3><span class="method">POST</span> <span class="path">/login</span></h3>
+        <p>Authenticate a user and receive an access token.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>username</td>
+                <td>User's registered username</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>User's password</td>
+            </tr>
+        </table>
+        <div class="form-group">
+            <label for="login-username">Username:</label>
+            <input type="text" id="login-username" name="username">
+        </div>
+        <div class="form-group">
+            <label for="login-password">Password:</label>
+            <input type="password" id="login-password" name="password">
+        </div>
+        <button onclick="login()">Login</button>
+    </div>
+
+    <h2>Account Management</h2>
+
+    <div class="endpoint">
+        <h3><span class="method">GET</span> <span class="path">/account_data</span></h3>
+        <p>Retrieve the account data for a user.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>username</td>
+                <td>User's registered username</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>User's password</td>
+            </tr>
+        </table>
+        <div class="form-group">
+            <label for="account-username">Username:</label>
+            <input type="text" id="account-username" name="username">
+        </div>
+        <div class="form-group">
+            <label for="account-password">Password:</label>
+            <input type="password" id="account-password" name="password">
+        </div>
+        <button onclick="viewAccount()">View Account (Requires Authentication)</button>
+    </div>
+
+    <h2>Buyer Endpoints</h2>
+    <p>Note: All buyer endpoints require a valid authentication token.</p>
+
+    <div class="endpoint">
+        <h3><span class="method">POST</span> <span class="path">/make_bid</span></h3>
+        <p>Submit a new bid for a robot service.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>service</td>
+                <td>Type of service requested (e.g., cleaning, delivery)</td>
+            </tr>
+            <tr>
+                <td>lat</td>
+                <td>Latitude of the service location (-90 to 90)</td>
+            </tr>
+            <tr>
+                <td>lon</td>
+                <td>Longitude of the service location (-180 to 180)</td>
+            </tr>
+            <tr>
+                <td>price</td>
+                <td>Bid price for the service (in USD)</td>
+            </tr>
+            <tr>
+                <td>end_time</td>
+                <td>Unix timestamp for the end of the service period</td>
+            </tr>
+        </table>
+        <div class="form-group">
+            <label for="bid-service">Service:</label>
+            <input type="text" id="bid-service" name="service">
+        </div>
+        <div class="form-group">
+            <label for="bid-lat">Latitude:</label>
+            <input type="text" id="bid-lat" name="lat">
+        </div>
+        <div class="form-group">
+            <label for="bid-lon">Longitude:</label>
+            <input type="text" id="bid-lon" name="lon">
+        </div>
+        <div class="form-group">
+            <label for="bid-price">Price (USD):</label>
+            <input type="text" id="bid-price" name="price">
+        </div>
+        <div class="form-group">
+            <label for="bid-end-time">End Time (Unix Timestamp):</label>
+            <input type="text" id="bid-end-time" name="end_time">
+        </div>
+        <button onclick="placeBid()">Place Bid (Requires Authentication)</button>
+    </div>
+
+    <h2>Seller Endpoints</h2>
+    <p>Note: All seller endpoints require a valid authentication token. A supplier seat is required to access the /grab_job route.</p>
+
+    <div class="endpoint">
+        <h3><span class="method">POST</span> <span class="path">/grab_job</span></h3>
+        <p>Attempt to accept an available job for a robot.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>services</td>
+                <td>List of services the robot can perform (comma-separated)</td>
+            </tr>
+            <tr>
+                <td>lat</td>
+                <td>Current latitude of the robot (-90 to 90)</td>
+            </tr>
+            <tr>
+                <td>lon</td>
+                <td>Current longitude of the robot (-180 to 180)</td>
+            </tr>
+            <tr>
+                <td>max_distance</td>
+                <td>Maximum distance the robot is willing to travel (in miles)</td>
+            </tr>
+        </table>
+        <div class="form-group">
+            <label for="grab-services">Services (comma-separated):</label>
+            <input type="text" id="grab-services" name="services">
+        </div>
+        <div class="form-group">
+            <label for="grab-lat">Latitude:</label>
+            <input type="text" id="grab-lat" name="lat">
+        </div>
+        <div class="form-group">
+            <label for="grab-lon">Longitude:</label>
+            <input type="text" id="grab-lon" name="lon">
+        </div>
+        <div class="form-group">
+            <label for="grab-max-distance">Max Distance (miles):</label>
+            <input type="text" id="grab-max-distance" name="max_distance">
+        </div>
+        <button onclick="grabJob()">Grab Job (Requires Authentication)</button>
+    </div>
+
+    <h2>Shared Endpoints</h2>
+    <p>Note: The following endpoints can be accessed by both buyers and sellers with valid authentication.</p>
+
+    <div class="endpoint">
+        <h3><span class="method">POST</span> <span class="path">/nearby</span></h3>
+        <p>Retrieve a sample of recently completed jobs.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>lat</td>
+                <td>Latitude of the center point (-90 to 90)</td>
+            </tr>
+            <tr>
+                <td>lon</td>
+                <td>Longitude of the center point (-180 to 180)</td>
+            </tr>
+        </table>
+        <div class="form-group">
+            <label for="nearby-lat">Latitude:</label>
+            <input type="text" id="nearby-lat" name="lat">
+        </div>
+        <div class="form-group">
+            <label for="nearby-lon">Longitude:</label>
+            <input type="text" id="nearby-lon" name="lon">
+        </div>
+        <button onclick="findNearbyActivities()">Find Nearby Activities (Requires Authentication)</button>
+    </div>
+
+    <div class="endpoint">
+        <h3><span class="method">POST</span> <span class="path">/sign_job</span></h3>
+        <p>Sign off on a completed job and provide a rating.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>username</td>
+                <td>User's registered username</td>
+            </tr>
+            <tr>
+                <td>job_id</td>
+                <td>ID of the completed job</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>User's password</td>
+            </tr>
+            <tr>
+                <td>star_rating</td>
+                <td>Rating for the job (1-5 stars)</td>
+            </tr>
+        </table>
+        <div class="form-group">
+            <label for="sign-username">Username:</label>
+            <input type="text" id="sign-username" name="username">
+        </div>
+        <div class="form-group">
+            <label for="sign-job-id">Job ID:</label>
+            <input type="text" id="sign-job-id" name="job_id">
+        </div>
+        <div class="form-group">
+            <label for="sign-password">Password:</label>
+            <input type="password" id="sign-password" name="password">
+        </div>
+        <div class="form-group">
+            <label for="sign-star-rating">Star Rating (1-5):</label>
+            <input type="number" id="sign-star-rating" name="star_rating" min="1" max="5">
+        </div>
+        <button onclick="signJob()">Sign Job (Requires Authentication)</button>
+    </div>
+
+    <h2>System Check</h2>
+
+    <div class="endpoint">
+        <h3><span class="method">GET</span> <span class="path">/ping</span></h3>
+        <p>Check if the API is operational.</p>
+        <button onclick="pingAPI()">Ping API</button>
+    </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
