@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+    --bg-color: #c7f0d8;
+    --text-color: #2c3e50;
+    --header-color: #3498db;
+    --button-color: #e74c3c;
+    --button-hover: #c0392b;
+    --shadow-color: #7f8c8d;
+}
+
+body {
+    font-family: 'Press Start 2P', cursive;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    padding: 20px;
+    font-size: 14px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    padding: 20px;
+    border: 4px solid var(--text-color);
+    box-shadow: 8px 8px 0 var(--shadow-color);
+}
+
+h1, h2 {
+    color: var(--header-color);
+    text-transform: uppercase;
+    text-shadow: 2px 2px 0 var(--shadow-color);
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 24px;
+    text-align: center;
+}
+
+h2 {
+    font-size: 18px;
+    border-bottom: 4px solid var(--header-color);
+    padding-bottom: 10px;
+}
+
+.question {
+    font-weight: bold;
+    color: var(--text-color);
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.question::before {
+    content: '► ';
+    color: var(--button-color);
+}
+
+.answer {
+    display: none;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #ecf0f1;
+    border: 2px solid var(--text-color);
+}
+
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--button-color);
+    color: #ffffff;
+    text-decoration: none;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 10px 0;
+    box-shadow: 4px 4px 0 var(--shadow-color);
+}
+
+.button:hover {
+    background-color: var(--button-hover);
+}
+
+.button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--shadow-color);
+}
+
+.pixelated-border {
+    border-image-source: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAnSURBVHgBzc4xDQAACAJA+f/QLA7AoGvaHk5RrfqfwAEZBDAAzCwi8rEDkBAZUyFxm5UAAAAASUVORK5CYII=');
+    border-image-repeat: repeat;
+    border-image-slice: 3;
+    border-image-width: 3px;
+    border-style: solid;
+}
+
+/* Add this script to your HTML file */
+<script>
+document.querySelectorAll('.question').forEach(question => {
+    question.addEventListener('click', () => {
+        const answer = question.nextElementSibling;
+        answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+    });
+});
+</script>
