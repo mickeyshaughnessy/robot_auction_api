@@ -2,48 +2,167 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>RSX FAQ</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Common Styles -->
-    <link rel="stylesheet" href="styles.css">
+    <title>Robot Services Exchange (RSX) FAQ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .question {
+            font-weight: bold;
+            color: #3498db;
+            margin-top: 20px;
+        }
+        .answer {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>RSX Frequently Asked Questions</h1>
-            <nav>
+    <h1>Robot Services Exchange (RSX) FAQ</h1>
+
+    <h2>General Information</h2>
+
+    <div class="question">Q: What is the Robot Services Exchange (RSX)?</div>
+    <div class="answer">
+        A: The Robot Services Exchange (RSX) is a platform designed to facilitate the buying and selling of robot services. It acts as an intermediary between robot owners (sellers) and people who need robot services (buyers). Think of it as a job board for robots, where tasks are posted and robots are assigned to complete them.
+    </div>
+
+    <div class="question">Q: How does RSX work?</div>
+    <div class="answer">
+        A: RSX works through a bidding system:
+        <ol>
+            <li>Buyers submit bids for specific services they need, including details like the type of service, location, price, and time frame.</li>
+            <li>Robot owners (sellers) can browse available jobs and accept those that match their robots' capabilities and location.</li>
+            <li>When a match is made, the buyer pays for the service, the robot performs the task, and then the seller is paid.</li>
+        </ol>
+        This system allows for dynamic pricing and efficient allocation of robot resources based on supply and demand.
+    </div>
+
+    <h2>For Buyers</h2>
+
+    <div class="question">Q: How do I place a bid for a robot service?</div>
+    <div class="answer">
+        A: To place a bid, you need to use the `/make_bid` endpoint of our API. Here's a step-by-step process:
+        <ol>
+            <li>Ensure you have registered an account and obtained an authentication token.</li>
+            <li>Prepare your bid data, including:
                 <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="dashboard.html">Dashboard</a></li>
-                    <li><a href="api_docs.html">API Docs</a></li>
-                    <li><a href="demo.html">Demo</a></li>
-                    <li><a href="faq.html">FAQ</a></li>
+                    <li>service: The type of service you need (e.g., cleaning, delivery)</li>
+                    <li>lat: Latitude of the service location</li>
+                    <li>lon: Longitude of the service location</li>
+                    <li>price: Your bid price for the service (in USD)</li>
+                    <li>end_time: The deadline for the service (in Unix timestamp format)</li>
                 </ul>
-            </nav>
-        </div>
-    </header>
-    <main>
-        <div class="container">
-            <h2>Frequently Asked Questions</h2>
-            <section>
-                <h3>What is RSX?</h3>
-                <p>RSX stands for Robot Services Exchange, a platform connecting people who need robot services with robots seeking jobs.</p>
-            </section>
-            <section>
-                <h3>How do I register?</h3>
-                <p>You can register by visiting the <a href="api_docs.html">API Documentation</a> page and using the `/register` endpoint.</p>
-            </section>
-            <section>
-                <h3>How does bidding work?</h3>
-                <p>Bidding allows users to submit offers for robot services. Robots can accept bids that match their capabilities and preferences.</p>
-            </section>
-            <!-- Add more FAQs as needed -->
-        </div>
-    </main>
-    <footer>
-        <div class="container">
-            <p>&copy; 2023 Robot Services Exchange. All rights reserved.</p>
-        </div>
-    </footer>
+            </li>
+            <li>Send a POST request to `https://100.26.236.1:5001/make_bid` with your bid data in JSON format, including your authentication token in the header.</li>
+        </ol>
+        The system will then process your bid and make it available for robot owners to accept.
+    </div>
+
+    <div class="question">Q: How do I know if my bid has been accepted?</div>
+    <div class="answer">
+        A: Currently, there isn't a direct notification system in place. However, you can check the status of your bid by using the `/nearby` endpoint. This will show you recent activities in your area, including accepted bids. In the future, we plan to implement a more robust tracking system for individual bids.
+    </div>
+
+    <h2>For Sellers (Robot Owners)</h2>
+
+    <div class="question">Q: How do I register my robot for services?</div>
+    <div class="answer">
+        A: Robot registration is handled through our client application. Here's how you can do it:
+        <ol>
+            <li>First, ensure you have the latest version of our RobotOwnerClient software.</li>
+            <li>Use the `register_robot` method to add your robot to the system. You'll need to provide:
+                <ul>
+                    <li>robot_id: A unique identifier for your robot</li>
+                    <li>services: A list of services your robot can perform</li>
+                    <li>lat: The current latitude of your robot</li>
+                    <li>lon: The current longitude of your robot</li>
+                    <li>max_distance: The maximum distance your robot is willing to travel for a job</li>
+                </ul>
+            </li>
+            <li>Once registered, your robot will be eligible to receive job offers in its area.</li>
+        </ol>
+        Remember to keep your robot's location updated if it moves to ensure it receives relevant job offers.
+    </div>
+
+    <div class="question">Q: How does my robot get assigned to jobs?</div>
+    <div class="answer">
+        A: Job assignment in RSX is proactive on the seller's side. Here's how it works:
+        <ol>
+            <li>Our system continuously checks for available jobs that match your robot's capabilities and location.</li>
+            <li>When a matching job is found, it's offered to your robot through the `/grab_job` endpoint.</li>
+            <li>If your robot accepts the job (which is automated in the RobotOwnerClient), it's assigned to complete the task.</li>
+            <li>After completing the job, make sure to update the job status using the `/sign_job` endpoint.</li>
+        </ol>
+        This system ensures that your robot can quickly find and accept suitable jobs in its area.
+    </div>
+
+    <h2>Technical Information</h2>
+
+    <div class="question">Q: What technologies does RSX use?</div>
+    <div class="answer">
+        A: RSX is built using a variety of modern technologies:
+        <ul>
+            <li>Backend: The core API is built with Python using the Flask framework.</li>
+            <li>Database: We use Redis for fast, in-memory data storage and retrieval.</li>
+            <li>Server: The application is served using Gunicorn, a Python WSGI HTTP Server.</li>
+            <li>Frontend: The dashboard uses HTML, CSS, and JavaScript with the Leaflet library for mapping.</li>
+            <li>API Communication: RESTful API endpoints are used for all client-server communication.</li>
+            <li>Authentication: We use JWT (JSON Web Tokens) for secure user authentication.</li>
+        </ul>
+        This tech stack allows for a scalable, efficient, and secure platform for robot service exchange.
+    </div>
+
+    <div class="question">Q: Is there an API documentation available?</div>
+    <div class="answer">
+        A: Yes, we have comprehensive API documentation available. You can find detailed information about all our endpoints, including required parameters and response formats, in our `index.html` file. This documentation covers:
+        <ul>
+            <li>Authentication endpoints (/register, /login)</li>
+            <li>Account management endpoints (/account_data)</li>
+            <li>Buyer endpoints (/make_bid)</li>
+            <li>Seller endpoints (/grab_job)</li>
+            <li>Shared endpoints (/nearby, /sign_job)</li>
+        </ul>
+        For the most up-to-date information, always refer to the official documentation or contact our support team.
+    </div>
+
+    <h2>Security and Privacy</h2>
+
+    <div class="question">Q: How secure is the RSX platform?</div>
+    <div class="answer">
+        A: Security is a top priority for RSX. We've implemented several measures to ensure the safety of our users and their data:
+        <ol>
+            <li>Authentication: We use secure token-based authentication for all API requests.</li>
+            <li>Password Security: User passwords are hashed before storage, ensuring that even in the unlikely event of a data breach, passwords remain secure.</li>
+            <li>HTTPS: All communication with our API is encrypted using HTTPS.</li>
+            <li>Rate Limiting: We implement rate limiting to prevent abuse of our API.</li>
+            <li>Regular Audits: Our system undergoes regular security audits to identify and address potential vulnerabilities.</li>
+        </ol>
+        However, it's important to note that no system is 100% secure. We continuously work on improving our security measures and encourage users to follow best practices, such as using strong, unique passwords and not sharing their authentication tokens.
+    </div>
+
+    <div class="question">Q: How is my personal data handled?</div>
+    <div class="answer">
+        A: We take data privacy very seriously. Here's how we handle personal data:
+        <ol>
+            <li>Data Collection: We only collect information that's necessary for the functioning of the platform, such as usernames, encrypted passwords, and service-related data.</li>
+            <li>Data Usage: Your data is used solely for the purpose of facilitating robot services and improving our platform.</li>
+            <li>Data Storage: We use secure, encrypted databases to store user information.</li>
+            <li>Data Sharing: We do not sell or share your personal data with third parties.</li>
+            <li>Data Access: You can view your account data using the `/account_data` endpoint.</li>
+            <li>Data Deletion: If you wish to delete your account and associated data, please contact our support team.</li>
+        </ol>
+        For more detailed information, please refer to our privacy policy.
+    </div>
+
 </body>
 </html>
