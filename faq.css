@@ -1,12 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 :root {
-    --bg-color: #c7f0d8;
-    --text-color: #2c3e50;
-    --header-color: #3498db;
-    --button-color: #e74c3c;
-    --button-hover: #c0392b;
-    --shadow-color: #7f8c8d;
+    --bg-color: #4a148c;
+    --text-color: #ffffff;
+    --header-color: #ffeb3b;
+    --question-color: #4caf50;
+    --answer-bg-color: #1a237e;
+    --button-color: #f44336;
+    --button-hover: #d32f2f;
+    --shadow-color: #000000;
 }
 
 body {
@@ -14,6 +16,12 @@ body {
     line-height: 1.6;
     color: var(--text-color);
     background-color: var(--bg-color);
+    background-image: 
+        linear-gradient(45deg, #6a1b9a 25%, transparent 25%), 
+        linear-gradient(-45deg, #6a1b9a 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #6a1b9a 75%), 
+        linear-gradient(-45deg, transparent 75%, #6a1b9a 75%);
+    background-size: 20px 20px;
     padding: 20px;
     font-size: 14px;
 }
@@ -21,9 +29,9 @@ body {
 .container {
     max-width: 800px;
     margin: 0 auto;
-    background-color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.7);
     padding: 20px;
-    border: 4px solid var(--text-color);
+    border: 4px solid var(--header-color);
     box-shadow: 8px 8px 0 var(--shadow-color);
 }
 
@@ -37,6 +45,18 @@ h1, h2 {
 h1 {
     font-size: 24px;
     text-align: center;
+    animation: rainbow 5s linear infinite;
+}
+
+@keyframes rainbow {
+    0% { color: #ff0000; }
+    14% { color: #ff7f00; }
+    28% { color: #ffff00; }
+    42% { color: #00ff00; }
+    57% { color: #0000ff; }
+    71% { color: #8b00ff; }
+    85% { color: #ff00ff; }
+    100% { color: #ff0000; }
 }
 
 h2 {
@@ -47,9 +67,14 @@ h2 {
 
 .question {
     font-weight: bold;
-    color: var(--text-color);
+    color: var(--question-color);
     margin-top: 20px;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.question:hover {
+    transform: translateX(10px);
 }
 
 .question::before {
@@ -61,26 +86,29 @@ h2 {
     display: none;
     margin-bottom: 20px;
     padding: 10px;
-    background-color: #ecf0f1;
+    background-color: var(--answer-bg-color);
     border: 2px solid var(--text-color);
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
 .button {
     display: inline-block;
     padding: 10px 20px;
     background-color: var(--button-color);
-    color: #ffffff;
+    color: var(--text-color);
     text-decoration: none;
     text-transform: uppercase;
     border: none;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
     margin: 10px 0;
     box-shadow: 4px 4px 0 var(--shadow-color);
 }
 
 .button:hover {
     background-color: var(--button-hover);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--shadow-color);
 }
 
 .button:active {
@@ -96,12 +124,10 @@ h2 {
     border-style: solid;
 }
 
-/* Add this script to your HTML file */
-<script>
-document.querySelectorAll('.question').forEach(question => {
-    question.addEventListener('click', () => {
-        const answer = question.nextElementSibling;
-        answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
-    });
-});
-</script>
+pre {
+    background-color: #263238;
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+}
