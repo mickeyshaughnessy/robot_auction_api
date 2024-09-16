@@ -19,6 +19,10 @@
     padding: 0;
 }
 
+nav ul li a.active {
+    color: #ffeb3b; /* Highlight color */
+}
+
 body {
     font-family: 'Roboto', sans-serif;
     line-height: 1.6;
