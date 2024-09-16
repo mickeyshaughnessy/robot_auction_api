@@ -8,199 +8,264 @@
 </head>
 <body>
     <div class="container pixelated-border">
-        <h1>Robot Services Exchange (RSX) FAQ</h1>
+        <h1>🤖 Robot Services Exchange (RSX) FAQ</h1>
 
         <h2>General Information</h2>
 
         <div class="question">What is the Robot Services Exchange (RSX)?</div>
         <div class="answer">
-            The Robot Services Exchange (RSX) is a platform designed to facilitate the buying and selling of robot services. It acts as an intermediary between robot owners (sellers) and people who need robot services (buyers). Think of it as a job board for robots, where tasks are posted and robots are assigned to complete them.
+            The Robot Services Exchange (RSX) is a new platform that connects individuals or businesses in need of robot services (buyers) with robot owners or operators (sellers). It serves as a marketplace where buyers can post service requests, and sellers can offer their robots' capabilities to fulfill these requests. RSX streamlines the process of finding, hiring, and managing robot services across various industries, enabling efficient and cost-effective solutions.
         </div>
 
         <div class="question">How does RSX work?</div>
         <div class="answer">
-            RSX works through a bidding system:
+            RSX operates through a dynamic bidding and matching system:
             <ol>
-                <li>Buyers submit bids for specific services they need, including details like the type of service, location, price, and time frame.</li>
-                <li>Robot owners (sellers) can browse available jobs and accept those that match their robots' capabilities and location.</li>
-                <li>When a match is made, the buyer pays for the service, the robot performs the task, and then the seller is paid.</li>
+                <li><strong>Bid Submission:</strong> Buyers post service requests by submitting bids, specifying details such as the type of service required, location, desired price, and the deadline for completion.</li>
+                <li><strong>Job Search:</strong> Robot owners (sellers) can search for available bids that match their robots' services and operational area.</li>
+                <li><strong>Matching and Acceptance:</strong> The system matches bids to robots based on service compatibility, location proximity, and pricing.</li>
+                <li><strong>Job Execution:</strong> Once matched, the robot is dispatched to perform the requested service as per the agreed terms.</li>
+                <li><strong>Completion and Rating:</strong> Upon completion, both buyers and sellers can rate each other, providing feedback to maintain quality and trust within the platform.</li>
             </ol>
-            This system allows for dynamic pricing and efficient allocation of robot resources based on supply and demand.
+            This system ensures efficient allocation of robot services, competitive pricing, and transparent transactions between buyers and sellers.
         </div>
 
-        <h2>For Buyers</h2>
-
-        <div class="question">How do I place a bid for a robot service?</div>
+        <div class="question">What types of robot services are available on RSX?</div>
         <div class="answer">
-            To place a bid, you need to use the `/make_bid` endpoint of our API. Here's a step-by-step process:
+            RSX supports a wide range of robot services across multiple industries, including but not limited to:
+            <ul>
+                <li>🧹 <strong>Cleaning and Maintenance:</strong> Floor cleaning, window washing, waste disposal.</li>
+                <li>📦 <strong>Delivery and Logistics:</strong> Package delivery, inventory management, warehouse operations.</li>
+                <li>🔒 <strong>Security and Surveillance:</strong> Patrol services, monitoring, threat detection.</li>
+                <li>🌾 <strong>Agriculture:</strong> Crop monitoring, planting, harvesting.</li>
+                <li>🏗️ <strong>Construction:</strong> Site surveying, material handling.</li>
+                <li>🛍️ <strong>Personal Services:</strong> Tutoring, personal shopping, event assistance.</li>
+            </ul>
+            The platform is continually expanding to include more service categories as robotic technology advances.
+        </div>
+
+        <h2>Getting Started</h2>
+
+        <div class="question">How do I get started with RSX?</div>
+        <div class="answer">
+            To get started, you need to create an account on RSX:
             <ol>
-                <li>Ensure you have registered an account and obtained an authentication token.</li>
+                <li><strong>Registration:</strong> Sign up by providing your username and password via the <code>/register</code> endpoint.</li>
+                <li><strong>Authentication:</strong> Log in using your credentials through the <code>/login</code> endpoint to obtain an authentication token.</li>
+                </li>
+                <li><strong>Start Using RSX:</strong> Begin posting bids for services or searching for available jobs.</li>
+            </ol>
+        </div>
+
+        <h2>For Buyers and Sellers</h2>
+
+        <div class="question">How do buyers place a bid for a robot service?</div>
+        <div class="answer">
+            Buyers can place a bid using the <code>/make_bid</code> endpoint. Here's how:
+            <ol>
+                <li>Ensure you have registered and logged in to obtain an authentication token.</li>
                 <li>Prepare your bid data, including:
                     <ul>
-                        <li>service: The type of service you need (e.g., cleaning, delivery)</li>
-                        <li>lat: Latitude of the service location</li>
-                        <li>lon: Longitude of the service location</li>
-                        <li>price: Your bid price for the service (in USD)</li>
-                        <li>end_time: The deadline for the service (in Unix timestamp format)</li>
+                        <li><strong>service:</strong> The type of service you need (e.g., "cleaning", "delivery").</li>
+                        <li><strong>lat:</strong> Latitude of the service location.</li>
+                        <li><strong>lon:</strong> Longitude of the service location.</li>
+                        <li><strong>price:</strong> Your bid price for the service (in USD).</li>
+                        <li><strong>end_time:</strong> The deadline for the service (Unix timestamp).</li>
                     </ul>
                 </li>
-                <li>Send a POST request to `http://100.26.236.1:5001/make_bid` with your bid data in JSON format, including your authentication token in the header.</li>
+                <li>Send a POST request to <code>/make_bid</code> with your bid data in JSON format, including your authentication token in the header.</li>
             </ol>
-            The system will then process your bid and make it available for robot owners to accept.
+            Example bid payload:
+            <pre>
+{
+    "service": "delivery",
+    "lat": 37.7749,
+    "lon": -122.4194,
+    "price": 75.00,
+    "end_time": 1700000000
+}
+            </pre>
+        </div>
+
+        <div class="question">How do sellers find and accept jobs?</div>
+        <div class="answer">
+            Sellers can find jobs using the <code>/grab_job</code> endpoint. Here's how:
+            <ol>
+                <li>Ensure you have registered and logged in to obtain an authentication token.</li>
+                <li>Prepare your robot's data, including:
+                    <ul>
+                        <li><strong>service:</strong> The services your robot can perform (comma-separated if multiple).</li>
+                        <li><strong>lat:</strong> Current latitude of your robot.</li>
+                        <li><strong>lon:</strong> Current longitude of your robot.</li>
+                        <li><strong>max_distance:</strong> Maximum distance (in miles) your robot can travel for a job.</li>
+                    </ul>
+                </li>
+                <li>Send a POST request to <code>/grab_job</code> with your robot's data in JSON format, including your authentication token in the header.</li>
+            </ol>
+            Example grab job request:
+            <pre>
+{
+    "service": "cleaning,delivery",
+    "lat": 34.0522,
+    "lon": -118.2437,
+    "max_distance": 15
+}
+            </pre>
+            If a matching job is found, the response will include job details:
+            <pre>
+{
+    "job_id": "987f6543-e21b-65d4-c321-654987321000",
+    "service": "cleaning",
+    "lat": 34.0500,
+    "lon": -118.2500,
+    "price": 100.00,
+    "end_time": 1700005000,
+    "buyer_username": "client_123",
+    "status": "won"
+}
+            </pre>
+        </div>
+
+        <div class="question">How do I rate or provide feedback after a job?</div>
+        <div class="answer">
+            After a job is completed, both buyers and sellers can rate each other using the <code>/sign_job</code> endpoint. Here's how:
+            <ol>
+                <li>Ensure you have your authentication token.</li>
+                <li>Prepare your rating data, including:
+                    <ul>
+                        <li><strong>job_id:</strong> The ID of the job you are rating.</li>
+                        <li><strong>password:</strong> Your account password (for verification).</li>
+                        <li><strong>star_rating:</strong> Your rating (e.g., 1 to 5 stars).</li>
+                        <li><strong>comments:</strong> (Optional) Additional feedback.</li>
+                    </ul>
+                </li>
+                <li>Send a POST request to <code>/sign_job</code> with your rating data in JSON format, including your authentication token in the header.</li>
+            </ol>
+            Example rating submission:
+            <pre>
+POST /sign_job
+Headers: Authorization: Bearer &lt;your_token&gt;
+{
+    "job_id": "abc123def456ghi789",
+    "password": "your_password",
+    "star_rating": 5,
+    "comments": "Excellent service! Highly recommended."
+}
+            </pre>
         </div>
 
         <h2>RSX Protocol Details</h2>
 
-        <div class="question">How does a buyer client interact with the RSX protocol?</div>
-        <div class="answer">
-            A buyer client interacts with the RSX protocol through the following steps:
-            <ol>
-                <li><strong>Authentication:</strong> 
-                    <ul>
-                        <li>Register using POST request to `/register` with username and password.</li>
-                        <li>Login using POST request to `/login` to receive an authentication token.</li>
-                    </ul>
-                </li>
-                <li><strong>Placing a Bid:</strong>
-                    <ul>
-                        <li>Send a POST request to `/make_bid` with the following JSON data:
-                            <pre>
-{
-    "service": "cleaning",
-    "lat": 40.7128,
-    "lon": -74.0060,
-    "price": 50.00,
-    "end_time": 1632528000
-}
-                            </pre>
-                        </li>
-                        <li>Include the authentication token in the request header.</li>
-                    </ul>
-                </li>
-                <li><strong>Checking Bid Status:</strong>
-                    <ul>
-                        <li>Use the `/nearby` endpoint to view recent activities, including bid status.</li>
-                    </ul>
-                </li>
-                <li><strong>Job Completion:</strong>
-                    <ul>
-                        <li>Once the job is done, use the `/sign_job` endpoint to rate the service and complete the transaction.</li>
-                    </ul>
-                </li>
-            </ol>
-        </div>
-
-        <div class="question">How does a seller (robot owner) client interact with the RSX protocol?</div>
-        <div class="answer">
-            A seller client interacts with the RSX protocol as follows:
-            <ol>
-                <li><strong>Authentication:</strong> 
-                    <ul>
-                        <li>Register and login similar to the buyer client to obtain an authentication token.</li>
-                    </ul>
-                </li>
-                <li><strong>Robot Registration:</strong>
-                    <ul>
-                        <li>Use the RobotOwnerClient to register robots with the following information:
-                            <pre>
-client.register_robot(
-    "robot1", 
-    ["cleaning", "delivery"], 
-    40.7128, 
-    -74.0060, 
-    10
-)
-                            </pre>
-                        </li>
-                    </ul>
-                </li>
-                <li><strong>Job Searching:</strong>
-                    <ul>
-                        <li>Periodically send POST requests to the `/grab_job` endpoint with the robot's capabilities and location:
-                            <pre>
-{
-    "services": ["cleaning", "delivery"],
-    "lat": 40.7128,
-    "lon": -74.0060,
-    "max_distance": 10
-}
-                            </pre>
-                        </li>
-                    </ul>
-                </li>
-                <li><strong>Job Execution:</strong>
-                    <ul>
-                        <li>When a job is received, the client handles the job execution logic.</li>
-                    </ul>
-                </li>
-                <li><strong>Job Completion:</strong>
-                    <ul>
-                        <li>After completing the job, use the `/sign_job` endpoint to update the job status.</li>
-                    </ul>
-                </li>
-            </ol>
-        </div>
-
-        <div class="question">What are the key differences between buyer and seller interactions in the RSX protocol?</div>
-        <div class="answer">
-            The key differences are:
-            <ul>
-                <li><strong>Bid vs. Job:</strong> Buyers create bids for services, while sellers search for and accept jobs.</li>
-                <li><strong>Proactive vs. Reactive:</strong> Buyers proactively place bids, while sellers reactively search for available jobs.</li>
-                <li><strong>Data Provided:</strong> Buyers specify service details and price, while sellers provide robot capabilities and location.</li>
-                <li><strong>Endpoints Used:</strong> Buyers primarily use `/make_bid` and `/nearby`, while sellers mainly use `/grab_job`.</li>
-                <li><strong>Client Implementation:</strong> Buyer clients are typically user-facing applications, while seller clients (like RobotOwnerClient) often run autonomously.</li>
-            </ul>
-        </div>
-
-        <div class="question">How does the RSX protocol handle matching bids to robots?</div>
+        <div class="question">How does the RSX protocol match bids to robots?</div>
         <div class="answer">
             The RSX protocol matches bids to robots through the following process:
             <ol>
-                <li><strong>Bid Storage:</strong> When a buyer submits a bid, it's stored in the system with its details (service, location, price, etc.).</li>
-                <li><strong>Job Search:</strong> When a seller's robot searches for jobs, the system:
+                <li><strong>Bid Storage:</strong> Buyers' bids are stored with details like service type, location, price, and end time.</li>
+                <li><strong>Seller Search:</strong> Sellers use <code>/grab_job</code> to search for jobs matching their robots' capabilities and location.</li>
+                <li><strong>Matching Criteria:</strong> The system filters bids based on:
                     <ul>
-                        <li>Filters bids based on the robot's capabilities (services it can perform).</li>
-                        <li>Checks if the bid's location is within the robot's specified max_distance.</li>
-                        <li>Considers the bid's end_time to ensure the robot can complete the job in time.</li>
+                        <li><strong>Service Compatibility:</strong> The robot's services must match the bid's service requirements.</li>
+                        <li><strong>Location Proximity:</strong> The job must be within the robot's maximum travel distance.</li>
+                        <li><strong>Time Constraints:</strong> The robot must be able to complete the job before the bid's end time.</li>
                     </ul>
                 </li>
-                <li><strong>Price Matching:</strong> If multiple robots qualify for a job, the one accepting the lowest price gets the job.</li>
-                <li><strong>Job Assignment:</strong> Once a match is found, the job is assigned to the robot and removed from the available bids.</li>
             </ol>
-            This process ensures efficient matching of services to capable robots while respecting location constraints and competitive pricing.
         </div>
 
-        <div class="question">How does the RSX protocol ensure fair competition among sellers?</div>
+        <div class="question">What are the key API endpoints and their usage?</div>
         <div class="answer">
-            The RSX protocol promotes fair competition through several mechanisms:
+            RSX provides several RESTful API endpoints:
+            <ul>
+                <li><strong>Authentication:</strong>
+                    <ul>
+                        <li><code>/register</code> (POST): Register a new user account.</li>
+                        <li><code>/login</code> (POST): Authenticate and receive an access token.</li>
+                    </ul>
+                </li>
+                <li><strong>Buyer Actions:</strong>
+                    <ul>
+                        <li><code>/make_bid</code> (POST): Submit a new bid for a service.</li>
+                        <li><code>/nearby</code> (POST): View recent activities and bid status.</li>
+                        <li><code>/sign_job</code> (POST): Confirm job completion and rate the counterparty.</li>
+                    </ul>
+                </li>
+                <li><strong>Seller Actions:</strong>
+                    <ul>
+                        <li><code>/grab_job</code> (POST): Search for and accept available jobs.</li>
+                        <li><code>/sign_job</code> (POST): Confirm job completion and rate the counterparty.</li>
+                    </ul>
+                </li>
+                <li><strong>Utility:</strong>
+                    <ul>
+                        <li><code>/ping</code> (GET/POST): Check API connectivity.</li>
+                    </ul>
+                </li>
+            </ul>
+            Remember to include your authentication token in the request headers where required.
+        </div>
+
+        <div class="question">How is authentication handled in RSX?</div>
+        <div class="answer">
+            RSX uses token-based authentication:
             <ol>
-                <li><strong>Price-based Assignment:</strong> Jobs are typically assigned to the robot accepting the lowest price, encouraging competitive pricing.</li>
-                <li><strong>Location-based Matching:</strong> By considering robot locations and max_distance, the system ensures that distant robots don't unfairly compete with local ones.</li>
-                <li><strong>Capability Filtering:</strong> Only robots with the required capabilities are considered for each job, ensuring fair competition among qualified robots.</li>
-                <li><strong>Rating System:</strong> The `/sign_job` endpoint allows buyers to rate services, which can influence future job assignments, encouraging high-quality service.</li>
-                <li><strong>Equal Access to Jobs:</strong> The `/grab_job` endpoint provides all registered robots equal opportunity to search for and accept available jobs.</li>
+                <li><strong>Register:</strong> Create an account via the <code>/register</code> endpoint.</li>
+                <li><strong>Login:</strong> Obtain an access token using the <code>/login</code> endpoint.</li>
+                <li><strong>Token Usage:</strong> Include the access token in the <code>Authorization</code> header of API requests:
+                    <pre>
+Authorization: Bearer your_access_token
+                    </pre>
+                </li>
+                <li><strong>Token Expiry:</strong> Tokens are valid for a limited time and can be renewed by logging in again.</li>
             </ol>
         </div>
 
-        <!-- ... Remaining content ... -->
         <h2>Technical Information</h2>
 
         <div class="question">What technologies does RSX use?</div>
         <div class="answer">
-            RSX is built using a variety of modern technologies:
+            RSX is built using modern technologies:
             <ul>
-                <li>Backend: The core API is built with Python using the Flask framework.</li>
-                <li>Database: We use Redis for fast, in-memory data storage and retrieval.</li>
-                <li>Server: The application is served using Gunicorn, a Python WSGI HTTP Server.</li>
-                <li>Frontend: The dashboard uses HTML, CSS, and JavaScript with the Leaflet library for mapping.</li>
-                <li>API Communication: RESTful API endpoints are used for all client-server communication.</li>
-                <li>Authentication: We use JWT (JSON Web Tokens) for secure user authentication.</li>
+                <li><strong>Backend:</strong> Python with the Flask framework.</li>
+                <li><strong>Database:</strong> Redis for fast, in-memory data storage.</li>
+                <li><strong>Server:</strong> Gunicorn as the WSGI HTTP server.</li>
+                <li><strong>Frontend:</strong> HTML, CSS, and JavaScript with Leaflet for mapping.</li>
+                <li><strong>API Communication:</strong> RESTful API endpoints for client-server interactions.</li>
+                <li><strong>Authentication:</strong> Token-based authentication for secure access.</li>
             </ul>
-            This tech stack allows for a scalable, efficient, and secure platform for robot service exchange.
+            This stack ensures scalability, efficiency, and security for the RSX platform.
         </div>
 
-        <!-- ... More questions and answers ... -->
+        <div class="question">How can I integrate my application with RSX?</div>
+        <div class="answer">
+            To integrate your application:
+            <ol>
+                <li><strong>Obtain API Access:</strong> Register and log in to get an access token.</li>
+                <li><strong>Review Documentation:</strong> Familiarize yourself with the API endpoints and data formats.</li>
+                <li><strong>Use SDKs:</strong> Utilize available SDKs or build your own client to interact with the API.</li>
+                <li><strong>Testing:</strong> Test your integration in the sandbox environment.</li>
+            </ol>
+        </div>
+
+        <h2>Troubleshooting and Support</h2>
+
+        <div class="question">I'm experiencing issues with the API. What should I do?</div>
+        <div class="answer">
+            If you're encountering API issues:
+            <ol>
+                <li><strong>Check Your Code:</strong> Ensure your requests comply with the API documentation.</li>
+                <li><strong>Validate Data:</strong> Verify that you're sending the correct data formats and required fields.</li>
+                <li><strong>Use /ping Endpoint:</strong> Test connectivity using the <code>/ping</code> endpoint.</li>
+                <li><strong>Contact Support:</strong> If issues persist, seek assistance from the RSX support team.</li>
+            </ol>
+        </div>
+
+        <div class="question">Where can I find more information or updates about RSX?</div>
+        <div class="answer">
+            Stay informed by:
+            <ul>
+                <li><strong>Website:</strong> Visit our official website at <a href="https://www.robotservicesauction.com">www.robotservicesauction.com</a>.</li>
+            </ul>
+        </div>
 
         <a href="#" class="button">Back to Top</a>
     </div>
