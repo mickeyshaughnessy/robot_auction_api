@@ -1,0 +1,73 @@
+body {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    font-family: 'Courier New', Courier, monospace;
+    margin: 0;
+    padding: 0;
+}
+
+header, footer {
+    background-color: #0d0d0d;
+    text-align: center;
+    padding: 20px;
+}
+
+h1, h2 {
+    color: #ffcc00;
+}
+
+h3 {
+    color: #ff9900;
+}
+
+main {
+    padding: 20px;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    background-color: #262626;
+    margin: 10px 0;
+    padding: 15px;
+    border: 1px solid #333333;
+}
+
+p {
+    line-height: 1.6;
+}
+
+strong {
+    color: #ff6600;
+}
+
+a {
+    color: #ffcc00;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Retro-Noir Pixelated Style */
+body, h1, h2, h3, p, li {
+    text-shadow: 1px 1px 0px #000000;
+}
+
+body {
+    background-image: url('retro-noir-bg.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+@media screen and (min-width: 768px) {
+    main {
+        max-width: 750px;
+        margin: 0 auto;
+    }
+}
+
