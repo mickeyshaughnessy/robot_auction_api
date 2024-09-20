@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <title>Robot Services Exchange (RSX)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Common Styles -->
     <link rel="stylesheet" href="styles.css">
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -25,10 +24,35 @@
         </div>
     </header>
     <main>
+        <div class="container two-column">
+            <div class="column description">
+                <h2>Welcome to RSX</h2>
+                <p>Your platform for buying robot services and getting robots jobs.</p>
+                <p>Navigate through our site to learn more about how RSX can help you connect with robot services efficiently.</p>
+            </div>
+            <div class="column bid-submission">
+                <h3>Create a Robot Service</h3>
+                <div class="bid-form">
+                    <div class="input-group">
+                        <label for="service-description">Service Description:</label>
+                        <textarea id="service-description" rows="5" placeholder="Describe the service you want..."></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label for="bid-price">Bid Price (USD):</label>
+                        <input type="number" id="bid-price" min="0" step="0.01" placeholder="Enter the maximum price you'll pay">
+                    </div>
+                    <div class="input-group">
+                        <label for="location">Location:</label>
+                        <input type="text" id="latitude" placeholder="Latitude" readonly>
+                        <input type="text" id="longitude" placeholder="Longitude" readonly>
+                        <button id="add-location"><i class="fas fa-compass"></i> Add Location</button>
+                    </div>
+                    <button id="submit-bid">Submit Bid</button>
+                </div>
+            </div>
+        </div>
         <div class="container">
-            <h2>Welcome to RSX</h2>
-            <p>Your one-stop platform for buying robot services and getting robots jobs.</p>
-            <p>Navigate through our site to learn more about how RSX can help you connect with robot services efficiently.</p>
+            <div id="response"></div>
         </div>
     </main>
     <footer>
@@ -36,5 +60,6 @@
             <p>&copy; 2023 Robot Services Exchange. All rights reserved.</p>
         </div>
     </footer>
+    <script src="script.js"></script>
 </body>
 </html>

@@ -51,6 +51,56 @@ function getEndpointData(button) {
     return { path, method, data };
 }
 
+function getRandomCoordinates() {
+    const lat = (Math.random() * 180 - 90).toFixed(6);
+    const lon = (Math.random() * 360 - 180).toFixed(6);
+    return { lat, lon };
+}
+
+function addLocationHandler() {
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                document.getElementById('latitude').value = position.coords.latitude.toFixed(6);
+                document.getElementById('longitude').value = position.coords.longitude.toFixed(6);
+            },
+            (error) => {
+                console.error("Error getting location:", error);
+                const { lat, lon } = getRandomCoordinates();
+                document.getElementById('latitude').value = lat;
+                document.getElementById('longitude').value = lon;
+            }
+        );
+    } else {
+        console.log("Geolocation is not available");
+        const { lat, lon } = getRandomCoordinates();
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lon;
+    }
+}
+
+function submitBidHandler() {
+    const serviceDescription = document.getElementById('service-description').value;
+    const bidPrice = document.getElementById('bid-price').value;
+    const latitude = document.getElementById('latitude').value;
+    const longitude = document.getElementById('longitude').value;
+
+    if (!serviceDescription || !bidPrice || !latitude || !longitude) {
+        alert("Please fill in all fields");
+        return;
+    }
+
+    const bidData = {
+        service: serviceDescription,
+        price: parseFloat(bidPrice),
+        lat: parseFloat(latitude),
+        lon: parseFloat(longitude),
+        end_time: Math.floor(Date.now() / 1000) + 86400 // 24 hours from now
+    };
+
+    makeApiRequest('/make_bid', 'POST', bidData);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const buttons = document.querySelectorAll('button');
     buttons.forEach(button => {
@@ -59,4 +109,14 @@ document.addEventListener('DOMContentLoaded', () => {
             makeApiRequest(path, method, Object.keys(data).length ? data : null);
         });
     });
+
+    const addLocationButton = document.getElementById('add-location');
+    if (addLocationButton) {
+        addLocationButton.addEventListener('click', addLocationHandler);
+    }
+
+    const submitBidButton = document.getElementById('submit-bid');
+    if (submitBidButton) {
+        submitBidButton.addEventListener('click', submitBidHandler);
+    }
 });
