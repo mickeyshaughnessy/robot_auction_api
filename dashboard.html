@@ -7,7 +7,8 @@
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto&display=swap"
+rel="stylesheet">
     <!-- Common Styles -->
     <link rel="stylesheet" href="styles.css">
     <!-- Dashboard Styles -->
@@ -36,12 +37,13 @@
                     <div class="map-controls">
                         <label><input type="checkbox" id="show-bids" checked> Show Bids</label>
                         <label><input type="checkbox" id="show-won-jobs" checked> Show Won Jobs</label>
-                        <label><input type="checkbox" id="show-completed-jobs" checked> Show Completed Jobs</label>
+                        <label><input type="checkbox" id="show-completed-jobs" checked> Show Completed
+Jobs</label>
                     </div>
                 </div>
                 <div class="activity-feed">
                     <h2>Recent Activities</h2>
-                    <pre id="activity-list"></pre>
+                    <pre id="activity-log"></pre>
                 </div>
             </div>
             <div class="button-container">
@@ -49,16 +51,43 @@
                 <button id="submit-bid">Submit Bid</button>
             </div>
             <div id="submission-data"></div>
-        </div>
-    </main>
-    <footer>
-        <div class="container">
-            <p>&copy; 2023 Robot Services Exchange. All rights reserved.</p>
-        </div>
-    </footer>
-    <!-- Leaflet JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
-    <!-- Dashboard JS -->
-    <script src="dashboard.js"></script>
+        </main>
+
+    <!-- Add this script tag at the end of the file -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+integrity="sha256-/xUj+3OJU5yExlq6GSYGSHkIl+hWEEBJweTrofM1eSg=" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            // Set the interval for making AJAX requests
+            setInterval(makeNearbyRequest, 30000); // 30 seconds
+
+            function makeNearbyRequest() {
+                $.ajax({
+                    url: '/nearby',
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        // Update the map with the new nearby jobs
+                        updateMap(data);
+                    }
+                });
+            }
+
+            // Function to update the map with new data
+            function updateMap(nearbyJobs) {
+                // Assuming you have a Leaflet map object named `map`
+                var map = $('#map').data('leafletMap');
+
+                // Clear any existing markers on the map
+                map.clearMarkers();
+
+                // Add new markers for each nearby job
+                $.each(nearbyJobs, function(index, job) {
+                    var marker = L.marker([job.latitude, job.longitude]).addTo(map);
+                    marker.bindPopup(job.name + ' - ' + job.description);
+                });
+            }
+        });
+    </script>
 </body>
 </html>

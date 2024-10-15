@@ -21,6 +21,7 @@
                     <li><a href="about.html">About</a></li>
                 </ul>
             </nav>
+            <button id="login-btn" class="login-btn">Login</button>
         </div>
     </header>
     <main>
@@ -29,6 +30,10 @@
                 <h2>Welcome to RSX</h2>
                 <p>Your platform for buying robot services and getting robots jobs.</p>
                 <p>Navigate through our site to learn more about how RSX can help you connect with robot services efficiently.</p>
+                <h3>My Bids</h3>
+                <div id="my-bids"></div>
+                <h3>Recent Nearby Bids</h3>
+                <div id="recent-bids"></div>
             </div>
             <div class="column bid-submission">
                 <h3>Create a Robot Service</h3>
@@ -46,6 +51,14 @@
                         <input type="text" id="latitude" placeholder="Latitude" readonly>
                         <input type="text" id="longitude" placeholder="Longitude" readonly>
                         <button id="add-location"><i class="fas fa-compass"></i> Add Location</button>
+                    </div>
+                    <div class="input-group">
+                        <label for="start-time">Start Time:</label>
+                        <input type="datetime-local" id="start-time">
+                    </div>
+                    <div class="input-group">
+                        <label for="end-time">End Time:</label>
+                        <input type="datetime-local" id="end-time">
                     </div>
                     <button id="submit-bid">Submit Bid</button>
                 </div>
