@@ -25,36 +25,60 @@ async function makeApiRequest(endpoint, method, data = null) {
         
         if (endpoint === '/login' && response.ok) {
             authToken = result.access_token;
-            updateButtonStates();
+            updateUI();
         }
+        return result;
     } catch (error) {
         document.getElementById('response').innerHTML = `<pre>Error: ${error.message}</pre>`;
     }
 }
 
-function updateButtonStates() {
-    const authButtons = document.querySelectorAll('button[disabled]');
-    authButtons.forEach(button => {
-        button.disabled = !authToken;
-    });
+function updateUI() {
+    const loginBtn = document.getElementById('login-btn');
+    
+    if (authToken) {
+        loginBtn.textContent = 'Logout';
+        fetchMyBids();
+        fetchRecentBids();
+    } else {
+        loginBtn.textContent = 'Login';
+        document.getElementById('my-bids').innerHTML = '';
+        document.getElementById('recent-bids').innerHTML = '';
+    }
 }
 
-function getEndpointData(button) {
-    const endpoint = button.closest('.endpoint');
-    const path = endpoint.querySelector('.path').textContent.trim();
-    const method = endpoint.querySelector('.method').textContent.trim();
-    const inputs = endpoint.querySelectorAll('input');
-    const data = {};
-    inputs.forEach(input => {
-        data[input.id.split('-').pop()] = input.value;
-    });
-    return { path, method, data };
+async function fetchMyBids() {
+    const result = await makeApiRequest('/my_bids', 'GET');
+    if (result && result.bids) {
+        const bidsHtml = result.bids.map(bid => `
+            <div class="bid">
+                <p>Service: ${bid.service}</p>
+                <p>Price: $${bid.price}</p>
+                <p>Status: ${bid.status}</p>
+            </div>
+        `).join('');
+        document.getElementById('my-bids').innerHTML = bidsHtml;
+    }
+}
+
+async function fetchRecentBids() {
+    const { lat, lon } = getRandomCoordinates();
+    const result = await makeApiRequest('/nearby', 'POST', { lat, lon });
+    if (result && result.activities) {
+        const bidsHtml = result.activities.map(bid => `
+            <div class="bid">
+                <p>Service: ${bid.service}</p>
+                <p>Location: (${bid.lat.toFixed(4)}, ${bid.lon.toFixed(4)})</p>
+            </div>
+        `).join('');
+        document.getElementById('recent-bids').innerHTML = bidsHtml;
+    }
 }
 
 function getRandomCoordinates() {
     const lat = (Math.random() * 180 - 90).toFixed(6);
     const lon = (Math.random() * 360 - 180).toFixed(6);
-    return { lat, lon };
+    return { lat: parseFloat(lat), lon: parseFloat(lon) };
 }
 
 function addLocationHandler() {
@@ -84,8 +108,10 @@ function submitBidHandler() {
     const bidPrice = document.getElementById('bid-price').value;
     const latitude = document.getElementById('latitude').value;
     const longitude = document.getElementById('longitude').value;
+    const startTime = document.getElementById('start-time').value;
+    const endTime = document.getElementById('end-time').value;
 
-    if (!serviceDescription || !bidPrice || !latitude || !longitude) {
+    if (!serviceDescription || !bidPrice || !latitude || !longitude || !startTime || !endTime) {
         alert("Please fill in all fields");
         return;
     }
@@ -95,21 +121,27 @@ function submitBidHandler() {
         price: parseFloat(bidPrice),
         lat: parseFloat(latitude),
         lon: parseFloat(longitude),
-        end_time: Math.floor(Date.now() / 1000) + 86400 // 24 hours from now
+        start_time: Math.floor(new Date(startTime).getTime() / 1000),
+        end_time: Math.floor(new Date(endTime).getTime() / 1000)
     };
 
     makeApiRequest('/make_bid', 'POST', bidData);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const buttons = document.querySelectorAll('button');
-    buttons.forEach(button => {
-        button.addEventListener('click', (event) => {
-            const { path, method, data } = getEndpointData(event.target);
-            makeApiRequest(path, method, Object.keys(data).length ? data : null);
-        });
-    });
+function loginHandler() {
+    if (authToken) {
+        authToken = null;
+        updateUI();
+    } else {
+        const username = prompt("Enter your username:");
+        const password = prompt("Enter your password:");
+        if (username && password) {
+            makeApiRequest('/login', 'POST', { username, password });
+        }
+    }
+}
 
+document.addEventListener('DOMContentLoaded', () => {
     const addLocationButton = document.getElementById('add-location');
     if (addLocationButton) {
         addLocationButton.addEventListener('click', addLocationHandler);
@@ -119,4 +151,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (submitBidButton) {
         submitBidButton.addEventListener('click', submitBidHandler);
     }
+
+    const loginButton = document.getElementById('login-btn');
+    if (loginButton) {
+        loginButton.addEventListener('click', loginHandler);
+    }
+
+    updateUI();
 });
