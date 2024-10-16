@@ -13,7 +13,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = flask.Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
-app.config['APPLICATION_ROOT'] = '/api'
 redis_client = redis.Redis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=config.REDIS_DB)
 
 def simulation_traffic_middleware(request):
