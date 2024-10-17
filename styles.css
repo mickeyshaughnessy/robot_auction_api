@@ -45,6 +45,7 @@ header {
     border-bottom: 2px solid var(--color-accent);
     padding: calc(var(--grid-base) * 2) 0;
     margin-bottom: calc(var(--grid-base) * 4);
+    position: relative;
 }
 
 header h1 {
@@ -74,7 +75,16 @@ nav ul li a.active {
     color: var(--color-accent);
 }
 
-.login-btn {
+.auth-buttons {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: calc(var(--grid-base) * 2);
+}
+
+.login-btn,
+.signup-btn {
     background-color: var(--color-button-auth);
     color: var(--color-white);
     border: none;
@@ -86,14 +96,20 @@ nav ul li a.active {
     font-weight: bold;
     text-transform: uppercase;
     transition: background-color 0.3s ease, transform 0.1s ease-in-out;
-    position: absolute;
-    top: 20px;
-    right: 20px;
 }
 
-.login-btn:hover {
+.signup-btn {
+    background-color: var(--color-secondary);
+}
+
+.login-btn:hover,
+.signup-btn:hover {
     background-color: #2980b9;
     transform: translateY(-2px);
+}
+
+.signup-btn:hover {
+    background-color: #0056b3;
 }
 
 main {
@@ -290,10 +306,16 @@ footer {
         flex-direction: column;
     }
 
-    .login-btn {
+    .auth-buttons {
         position: static;
-        display: block;
-        margin: calc(var(--grid-base) * 2) auto 0 auto;
+        display: flex;
+        justify-content: center;
+        margin-top: calc(var(--grid-base) * 2);
+    }
+
+    .login-btn,
+    .signup-btn {
+        width: 150px;
     }
 }
 
@@ -317,7 +339,7 @@ footer {
     padding: calc(var(--grid-base) * 4);
     border: 1px solid #888;
     width: 90%; 
-    max-width: 400px;
+    max-width: 500px;
     border-radius: calc(var(--grid-base) * 2);
     position: relative;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
@@ -340,11 +362,13 @@ footer {
     text-decoration: none;
 }
 
-#login-form button {
+#login-form button,
+#signup-form button {
     background-color: var(--color-button-auth);
     width: 100%;
 }
 
-#login-form button:hover {
+#login-form button:hover,
+#signup-form button:hover {
     background-color: #2980b9;
 }
