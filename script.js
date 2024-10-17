@@ -1,6 +1,27 @@
-const API_URL = 'http://100.26.236.1:5001';
+const API_URL = 'https://100.26.236.1:5001'; // Changed to HTTPS
 let authToken = null;
 
+// DOM Elements
+const loginBtn = document.getElementById('login-btn');
+const loginModal = document.getElementById('login-modal');
+const closeModalBtn = document.querySelector('.close-button');
+const loginForm = document.getElementById('login-form');
+const bidForm = document.getElementById('bid-form');
+const addLocationButton = document.getElementById('add-location');
+const responseDiv = document.getElementById('response');
+
+// Show Login Modal
+function showLoginModal() {
+    loginModal.style.display = 'block';
+}
+
+// Hide Login Modal
+function hideLoginModal() {
+    loginModal.style.display = 'none';
+    loginForm.reset();
+}
+
+// Make API Request
 async function makeApiRequest(endpoint, method, data = null) {
     const url = `${API_URL}${endpoint}`;
     const options = {
@@ -21,21 +42,36 @@ async function makeApiRequest(endpoint, method, data = null) {
     try {
         const response = await fetch(url, options);
         const result = await response.json();
-        document.getElementById('response').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
-        
-        if (endpoint === '/login' && response.ok) {
+
+        if (!response.ok) {
+            throw new Error(result.message || 'An error occurred');
+        }
+
+        displayResponse(result);
+
+        if (endpoint === '/login') {
             authToken = result.access_token;
             updateUI();
         }
+
         return result;
     } catch (error) {
-        document.getElementById('response').innerHTML = `<pre>Error: ${error.message}</pre>`;
+        displayResponse({ error: error.message });
+        console.error("API Request Error:", error);
     }
 }
 
+// Display API Response
+function displayResponse(data) {
+    if (data.error) {
+        responseDiv.innerHTML = `<pre style="color: red;">Error: ${data.error}</pre>`;
+    } else {
+        responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+    }
+}
+
+// Update UI Based on Authentication
 function updateUI() {
-    const loginBtn = document.getElementById('login-btn');
-    
     if (authToken) {
         loginBtn.textContent = 'Logout';
         fetchMyBids();
@@ -47,40 +83,55 @@ function updateUI() {
     }
 }
 
+// Fetch User's Bids
 async function fetchMyBids() {
     const result = await makeApiRequest('/my_bids', 'GET');
-    if (result && result.bids) {
+    if (result && result.bids && result.bids.length > 0) {
         const bidsHtml = result.bids.map(bid => `
             <div class="bid">
-                <p>Service: ${bid.service}</p>
-                <p>Price: $${bid.price}</p>
-                <p>Status: ${bid.status}</p>
+                <p><strong>Service:</strong> ${sanitizeHTML(bid.service)}</p>
+                <p><strong>Price:</strong> $${bid.price.toFixed(2)}</p>
+                <p><strong>Status:</strong> ${sanitizeHTML(bid.status)}</p>
             </div>
         `).join('');
         document.getElementById('my-bids').innerHTML = bidsHtml;
+    } else {
+        document.getElementById('my-bids').innerHTML = '<p>No bids found.</p>';
     }
 }
 
+// Fetch Recent Nearby Bids
 async function fetchRecentBids() {
     const { lat, lon } = getRandomCoordinates();
     const result = await makeApiRequest('/nearby', 'POST', { lat, lon });
-    if (result && result.activities) {
+    if (result && result.activities && result.activities.length > 0) {
         const bidsHtml = result.activities.map(bid => `
             <div class="bid">
-                <p>Service: ${bid.service}</p>
-                <p>Location: (${bid.lat.toFixed(4)}, ${bid.lon.toFixed(4)})</p>
+                <p><strong>Service:</strong> ${sanitizeHTML(bid.service)}</p>
+                <p><strong>Location:</strong> (${bid.lat.toFixed(4)}, ${bid.lon.toFixed(4)})</p>
             </div>
         `).join('');
         document.getElementById('recent-bids').innerHTML = bidsHtml;
+    } else {
+        document.getElementById('recent-bids').innerHTML = '<p>No recent bids nearby.</p>';
     }
 }
 
+// Sanitize HTML to prevent XSS
+function sanitizeHTML(str) {
+    const temp = document.createElement('div');
+    temp.textContent = str;
+    return temp.innerHTML;
+}
+
+// Generate Random Coordinates (Fallback)
 function getRandomCoordinates() {
     const lat = (Math.random() * 180 - 90).toFixed(6);
     const lon = (Math.random() * 360 - 180).toFixed(6);
     return { lat: parseFloat(lat), lon: parseFloat(lon) };
 }
 
+// Handle Location Addition
 function addLocationHandler() {
     if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
@@ -89,73 +140,108 @@ function addLocationHandler() {
                 document.getElementById('longitude').value = position.coords.longitude.toFixed(6);
             },
             (error) => {
-                console.error("Error getting location:", error);
+                console.warn("Geolocation error:", error.message);
                 const { lat, lon } = getRandomCoordinates();
                 document.getElementById('latitude').value = lat;
                 document.getElementById('longitude').value = lon;
+                alert("Unable to retrieve your location. Using random coordinates.");
             }
         );
     } else {
-        console.log("Geolocation is not available");
+        console.warn("Geolocation is not supported by this browser.");
         const { lat, lon } = getRandomCoordinates();
         document.getElementById('latitude').value = lat;
         document.getElementById('longitude').value = lon;
+        alert("Geolocation is not supported by your browser. Using random coordinates.");
     }
 }
 
-function submitBidHandler() {
-    const serviceDescription = document.getElementById('service-description').value;
-    const bidPrice = document.getElementById('bid-price').value;
-    const latitude = document.getElementById('latitude').value;
-    const longitude = document.getElementById('longitude').value;
+// Handle Bid Submission
+function submitBidHandler(event) {
+    event.preventDefault();
+    const serviceDescription = document.getElementById('service-description').value.trim();
+    const bidPrice = parseFloat(document.getElementById('bid-price').value);
+    const latitude = parseFloat(document.getElementById('latitude').value);
+    const longitude = parseFloat(document.getElementById('longitude').value);
     const startTime = document.getElementById('start-time').value;
     const endTime = document.getElementById('end-time').value;
 
-    if (!serviceDescription || !bidPrice || !latitude || !longitude || !startTime || !endTime) {
-        alert("Please fill in all fields");
+    // Basic Validation
+    if (!serviceDescription || isNaN(bidPrice) || isNaN(latitude) || isNaN(longitude) || !startTime || !endTime) {
+        alert("Please fill in all fields correctly.");
+        return;
+    }
+
+    const startTimestamp = Math.floor(new Date(startTime).getTime() / 1000);
+    const endTimestamp = Math.floor(new Date(endTime).getTime() / 1000);
+
+    if (startTimestamp >= endTimestamp) {
+        alert("Start time must be before end time.");
         return;
     }
 
     const bidData = {
         service: serviceDescription,
-        price: parseFloat(bidPrice),
-        lat: parseFloat(latitude),
-        lon: parseFloat(longitude),
-        start_time: Math.floor(new Date(startTime).getTime() / 1000),
-        end_time: Math.floor(new Date(endTime).getTime() / 1000)
+        price: bidPrice,
+        lat: latitude,
+        lon: longitude,
+        start_time: startTimestamp,
+        end_time: endTimestamp
     };
 
-    makeApiRequest('/make_bid', 'POST', bidData);
+    makeApiRequest('/make_bid', 'POST', bidData).then(response => {
+        if (response && !response.error) {
+            bidForm.reset();
+            fetchMyBids();
+            fetchRecentBids();
+            alert("Bid submitted successfully!");
+        }
+    });
 }
 
+// Handle Login/Logout
 function loginHandler() {
     if (authToken) {
+        // Logout
         authToken = null;
         updateUI();
+        alert("Logged out successfully.");
     } else {
-        const username = prompt("Enter your username:");
-        const password = prompt("Enter your password:");
-        if (username && password) {
-            makeApiRequest('/login', 'POST', { username, password });
-        }
+        // Show Login Modal
+        showLoginModal();
     }
 }
 
+// Handle Login Form Submission
+loginForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    const username = loginForm.username.value.trim();
+    const password = loginForm.password.value.trim();
+
+    if (!username || !password) {
+        alert("Please enter both username and password.");
+        return;
+    }
+
+    makeApiRequest('/login', 'POST', { username, password }).then(response => {
+        if (response && !response.error) {
+            hideLoginModal();
+            alert("Logged in successfully.");
+        }
+    });
+});
+
+// Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
-    const addLocationButton = document.getElementById('add-location');
-    if (addLocationButton) {
-        addLocationButton.addEventListener('click', addLocationHandler);
-    }
-
-    const submitBidButton = document.getElementById('submit-bid');
-    if (submitBidButton) {
-        submitBidButton.addEventListener('click', submitBidHandler);
-    }
-
-    const loginButton = document.getElementById('login-btn');
-    if (loginButton) {
-        loginButton.addEventListener('click', loginHandler);
-    }
+    addLocationButton.addEventListener('click', addLocationHandler);
+    bidForm.addEventListener('submit', submitBidHandler);
+    loginBtn.addEventListener('click', loginHandler);
+    closeModalBtn.addEventListener('click', hideLoginModal);
+    window.addEventListener('click', (event) => {
+        if (event.target === loginModal) {
+            hideLoginModal();
+        }
+    });
 
     updateUI();
 });
