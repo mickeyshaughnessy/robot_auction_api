@@ -1,11 +1,15 @@
-const API_URL = 'https://100.26.236.1:5001'; // Changed to HTTPS
+const API_URL = 'https://100.26.236.1:5001'; // Ensure this uses HTTPS
 let authToken = null;
 
 // DOM Elements
 const loginBtn = document.getElementById('login-btn');
+const signupBtn = document.getElementById('signup-btn');
 const loginModal = document.getElementById('login-modal');
-const closeModalBtn = document.querySelector('.close-button');
+const signupModal = document.getElementById('signup-modal');
+const closeLoginModalBtn = document.getElementById('close-login-modal');
+const closeSignupModalBtn = document.getElementById('close-signup-modal');
 const loginForm = document.getElementById('login-form');
+const signupForm = document.getElementById('signup-form');
 const bidForm = document.getElementById('bid-form');
 const addLocationButton = document.getElementById('add-location');
 const responseDiv = document.getElementById('response');
@@ -19,6 +23,17 @@ function showLoginModal() {
 function hideLoginModal() {
     loginModal.style.display = 'none';
     loginForm.reset();
+}
+
+// Show Sign-Up Modal
+function showSignupModal() {
+    signupModal.style.display = 'block';
+}
+
+// Hide Sign-Up Modal
+function hideSignupModal() {
+    signupModal.style.display = 'none';
+    signupForm.reset();
 }
 
 // Make API Request
@@ -64,7 +79,7 @@ async function makeApiRequest(endpoint, method, data = null) {
 // Display API Response
 function displayResponse(data) {
     if (data.error) {
-        responseDiv.innerHTML = `<pre style="color: red;">Error: ${data.error}</pre>`;
+        responseDiv.innerHTML = `<pre style="color: red;">Error: ${sanitizeHTML(data.error)}</pre>`;
     } else {
         responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
     }
@@ -74,10 +89,12 @@ function displayResponse(data) {
 function updateUI() {
     if (authToken) {
         loginBtn.textContent = 'Logout';
+        signupBtn.style.display = 'none';
         fetchMyBids();
         fetchRecentBids();
     } else {
         loginBtn.textContent = 'Login';
+        signupBtn.style.display = 'inline-block';
         document.getElementById('my-bids').innerHTML = '';
         document.getElementById('recent-bids').innerHTML = '';
     }
@@ -212,6 +229,11 @@ function loginHandler() {
     }
 }
 
+// Handle Sign-Up Button Click
+function signupHandler() {
+    showSignupModal();
+}
+
 // Handle Login Form Submission
 loginForm.addEventListener('submit', function(event) {
     event.preventDefault();
@@ -231,15 +253,59 @@ loginForm.addEventListener('submit', function(event) {
     });
 });
 
+// Handle Sign-Up Form Submission
+signupForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    const username = signupForm['signup-username'].value.trim();
+    const email = signupForm['signup-email'].value.trim();
+    const password = signupForm['signup-password'].value.trim();
+    const confirmPassword = signupForm['signup-confirm-password'].value.trim();
+
+    // Basic Validation
+    if (!username || !email || !password || !confirmPassword) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        alert("Passwords do not match.");
+        return;
+    }
+
+    // Password Strength Validation (optional)
+    if (password.length < 6) {
+        alert("Password must be at least 6 characters long.");
+        return;
+    }
+
+    const signupData = {
+        username,
+        email,
+        password
+    };
+
+    makeApiRequest('/signup', 'POST', signupData).then(response => {
+        if (response && !response.error) {
+            hideSignupModal();
+            alert("Account created successfully. You can now log in.");
+        }
+    });
+});
+
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
     addLocationButton.addEventListener('click', addLocationHandler);
     bidForm.addEventListener('submit', submitBidHandler);
     loginBtn.addEventListener('click', loginHandler);
-    closeModalBtn.addEventListener('click', hideLoginModal);
+    signupBtn.addEventListener('click', signupHandler);
+    closeLoginModalBtn.addEventListener('click', hideLoginModal);
+    closeSignupModalBtn.addEventListener('click', hideSignupModal);
     window.addEventListener('click', (event) => {
         if (event.target === loginModal) {
             hideLoginModal();
+        }
+        if (event.target === signupModal) {
+            hideSignupModal();
         }
     });
 
