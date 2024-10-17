@@ -13,6 +13,51 @@ const signupForm = document.getElementById('signup-form');
 const bidForm = document.getElementById('bid-form');
 const addLocationButton = document.getElementById('add-location');
 const responseDiv = document.getElementById('response');
+const serviceDescriptionTextarea = document.getElementById('service-description');
+const startTimeInput = document.getElementById('start-time');
+const endTimeInput = document.getElementById('end-time');
+
+// Initialize Default Times and Placeholder
+function initializeForm() {
+    setDefaultTimes();
+    setRandomServiceDescriptionPlaceholder();
+}
+
+// Set Default Start and End Times
+function setDefaultTimes() {
+    const now = new Date();
+    const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    // Format to 'YYYY-MM-DDTHH:MM'
+    const formatDateTimeLocal = (date) => {
+        const pad = (num) => num.toString().padStart(2, '0');
+        const year = date.getFullYear();
+        const month = pad(date.getMonth() + 1);
+        const day = pad(date.getDate());
+        const hours = pad(date.getHours());
+        const minutes = pad(date.getMinutes());
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
+    startTimeInput.value = formatDateTimeLocal(now);
+    endTimeInput.value = formatDateTimeLocal(sevenDaysFromNow);
+}
+
+// Set Random Service Description Placeholder
+function setRandomServiceDescriptionPlaceholder() {
+    try {
+        const placeholders = JSON.parse(serviceDescriptionTextarea.getAttribute('data-placeholders'));
+        if (Array.isArray(placeholders) && placeholders.length > 0) {
+            const randomIndex = Math.floor(Math.random() * placeholders.length);
+            serviceDescriptionTextarea.setAttribute('placeholder', placeholders[randomIndex]);
+        } else {
+            serviceDescriptionTextarea.setAttribute('placeholder', 'Describe the service you want...');
+        }
+    } catch (error) {
+        console.error("Error parsing service descriptions:", error);
+        serviceDescriptionTextarea.setAttribute('placeholder', 'Describe the service you want...');
+    }
+}
 
 // Show Login Modal
 function showLoginModal() {
@@ -209,6 +254,8 @@ function submitBidHandler(event) {
     makeApiRequest('/make_bid', 'POST', bidData).then(response => {
         if (response && !response.error) {
             bidForm.reset();
+            setDefaultTimes(); // Reset times to defaults after submission
+            setRandomServiceDescriptionPlaceholder(); // Reset placeholder
             fetchMyBids();
             fetchRecentBids();
             alert("Bid submitted successfully!");
@@ -229,85 +276,4 @@ function loginHandler() {
     }
 }
 
-// Handle Sign-Up Button Click
-function signupHandler() {
-    showSignupModal();
-}
-
-// Handle Login Form Submission
-loginForm.addEventListener('submit', function(event) {
-    event.preventDefault();
-    const username = loginForm.username.value.trim();
-    const password = loginForm.password.value.trim();
-
-    if (!username || !password) {
-        alert("Please enter both username and password.");
-        return;
-    }
-
-    makeApiRequest('/login', 'POST', { username, password }).then(response => {
-        if (response && !response.error) {
-            hideLoginModal();
-            alert("Logged in successfully.");
-        }
-    });
-});
-
-// Handle Sign-Up Form Submission
-signupForm.addEventListener('submit', function(event) {
-    event.preventDefault();
-    const username = signupForm['signup-username'].value.trim();
-    const email = signupForm['signup-email'].value.trim();
-    const password = signupForm['signup-password'].value.trim();
-    const confirmPassword = signupForm['signup-confirm-password'].value.trim();
-
-    // Basic Validation
-    if (!username || !email || !password || !confirmPassword) {
-        alert("Please fill in all fields.");
-        return;
-    }
-
-    if (password !== confirmPassword) {
-        alert("Passwords do not match.");
-        return;
-    }
-
-    // Password Strength Validation (optional)
-    if (password.length < 6) {
-        alert("Password must be at least 6 characters long.");
-        return;
-    }
-
-    const signupData = {
-        username,
-        email,
-        password
-    };
-
-    makeApiRequest('/signup', 'POST', signupData).then(response => {
-        if (response && !response.error) {
-            hideSignupModal();
-            alert("Account created successfully. You can now log in.");
-        }
-    });
-});
-
-// Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-    addLocationButton.addEventListener('click', addLocationHandler);
-    bidForm.addEventListener('submit', submitBidHandler);
-    loginBtn.addEventListener('click', loginHandler);
-    signupBtn.addEventListener('click', signupHandler);
-    closeLoginModalBtn.addEventListener('click', hideLoginModal);
-    closeSignupModalBtn.addEventListener('click', hideSignupModal);
-    window.addEventListener('click', (event) => {
-        if (event.target === loginModal) {
-            hideLoginModal();
-        }
-        if (event.target === signupModal) {
-            hideSignupModal();
-        }
-    });
-
-    updateUI();
-});
+// Handle Si
