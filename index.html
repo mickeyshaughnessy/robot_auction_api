@@ -14,7 +14,7 @@
 <body>
     <!-- Header -->
     <header>
-        <div class="container">
+        <div class="container header-container">
             <h1>Robot Services Exchange (RSX)</h1>
             <nav>
                 <ul>
@@ -39,12 +39,12 @@
             <h2>Login</h2>
             <form id="login-form">
                 <div class="input-group">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" required>
+                    <label for="login-email">Email:</label>
+                    <input type="email" id="login-email" name="login-email" required>
                 </div>
                 <div class="input-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required>
+                    <label for="login-password">Password:</label>
+                    <input type="password" id="login-password" name="login-password" required>
                 </div>
                 <button type="submit">Login</button>
             </form>
@@ -58,11 +58,7 @@
             <h2>Create New Account</h2>
             <form id="signup-form">
                 <div class="input-group">
-                    <label for="signup-username">Username:</label>
-                    <input type="text" id="signup-username" name="signup-username" required>
-                </div>
-                <div class="input-group">
-                    <label for="signup-email">Email:</label>
+                    <label for="signup-email">Email Address:</label>
                     <input type="email" id="signup-email" name="signup-email" required>
                 </div>
                 <div class="input-group">
