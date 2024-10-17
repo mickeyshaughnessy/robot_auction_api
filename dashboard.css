@@ -7,6 +7,117 @@
     --color-background: #f0f8ff;
     --color-text: #333;
     --color-button: #2ecc40;
+    
+    /* Default Theme Variables */
+    --nav-background: rgba(255, 255, 255, 0.9);
+    --nav-text-color: var(--color-text);
+    --nav-link-color: var(--color-primary);
+    --header-background: rgba(255, 255, 255, 0.9);
+    --header-text-color: var(--color-primary);
+    --activity-feed-background: rgba(0, 0, 0, 0.8);
+    --activity-feed-text-color: #00FF00;
+    --activity-feed-border-color: #00FF00;
+    --activity-feed-shadow-color: #00FF00;
+}
+
+/* Theme: Aztec Wrestler */
+body.theme-aztec-wrestler {
+    --color-primary: #D4AF37; /* Gold */
+    --color-secondary: #8B0000; /* Dark Red */
+    --color-accent: #228B22; /* Forest Green */
+    --color-background: #F5F5DC; /* Beige */
+    --color-text: #333333;
+    --color-button: #B22222; /* Firebrick */
+    
+    --nav-background: rgba(212, 175, 55, 0.9);
+    --nav-text-color: #fff;
+    --nav-link-color: #8B0000;
+    --header-background: rgba(212, 175, 55, 0.9);
+    --header-text-color: #fff;
+    --activity-feed-background: rgba(0, 0, 0, 0.85);
+    --activity-feed-text-color: #FFD700;
+    --activity-feed-border-color: #FFD700;
+    --activity-feed-shadow-color: #FFD700;
+}
+
+/* Theme: TMNT */
+body.theme-tmnt {
+    --color-primary: #39FF14; /* Neon Green */
+    --color-secondary: #FFD700; /* Yellow */
+    --color-accent: #FF1493; /* Deep Pink */
+    --color-background: #000000; /* Black */
+    --color-text: #39FF14;
+    --color-button: #FF1493;
+    
+    --nav-background: rgba(0, 0, 0, 0.9);
+    --nav-text-color: #39FF14;
+    --nav-link-color: #FFD700;
+    --header-background: rgba(0, 0, 0, 0.9);
+    --header-text-color: #39FF14;
+    --activity-feed-background: rgba(0, 0, 0, 0.9);
+    --activity-feed-text-color: #39FF14;
+    --activity-feed-border-color: #FFD700;
+    --activity-feed-shadow-color: #FFD700;
+}
+
+/* Theme: Icewind Dale */
+body.theme-icewind-dale {
+    --color-primary: #1E90FF; /* Dodger Blue */
+    --color-secondary: #00CED1; /* Dark Turquoise */
+    --color-accent: #FFFFFF; /* White */
+    --color-background: #2F4F4F; /* Dark Slate Gray */
+    --color-text: #F0F8FF; /* Alice Blue */
+    --color-button: #4682B4; /* Steel Blue */
+    
+    --nav-background: rgba(47, 79, 79, 0.9);
+    --nav-text-color: #F0F8FF;
+    --nav-link-color: #1E90FF;
+    --header-background: rgba(47, 79, 79, 0.9);
+    --header-text-color: #1E90FF;
+    --activity-feed-background: rgba(0, 0, 0, 0.7);
+    --activity-feed-text-color: #00CED1;
+    --activity-feed-border-color: #1E90FF;
+    --activity-feed-shadow-color: #1E90FF;
+}
+
+/* Theme: Classic SNES */
+body.theme-classic-snes {
+    --color-primary: #FF69B4; /* Hot Pink */
+    --color-secondary: #ADFF2F; /* Green Yellow */
+    --color-accent: #00FFFF; /* Aqua */
+    --color-background: #000080; /* Navy */
+    --color-text: #FFFFFF; /* White */
+    --color-button: #FF4500; /* Orange Red */
+    
+    --nav-background: rgba(0, 0, 128, 0.9);
+    --nav-text-color: #FFFFFF;
+    --nav-link-color: #FF69B4;
+    --header-background: rgba(0, 0, 128, 0.9);
+    --header-text-color: #FF69B4;
+    --activity-feed-background: rgba(0, 0, 128, 0.8);
+    --activity-feed-text-color: #ADFF2F;
+    --activity-feed-border-color: #00FFFF;
+    --activity-feed-shadow-color: #00FFFF;
+}
+
+/* Theme: CyberNinja */
+body.theme-cyberninja {
+    --color-primary: #00FFEF; /* Cyber Blue */
+    --color-secondary: #FF00F0; /* Cyber Pink */
+    --color-accent: #FFD700; /* Gold */
+    --color-background: #1A1A1A; /* Very Dark Gray */
+    --color-text: #00FFEF;
+    --color-button: #FF00F0;
+    
+    --nav-background: rgba(26, 26, 26, 0.95);
+    --nav-text-color: #00FFEF;
+    --nav-link-color: #FFD700;
+    --header-background: rgba(26, 26, 26, 0.95);
+    --header-text-color: #00FFEF;
+    --activity-feed-background: rgba(0, 0, 0, 0.85);
+    --activity-feed-text-color: #00FFEF;
+    --activity-feed-border-color: #FFD700;
+    --activity-feed-shadow-color: #FFD700;
 }
 
 body {
@@ -14,46 +125,74 @@ body {
     line-height: 1.6;
     color: var(--color-text);
     background-color: var(--color-background);
-    background-image: linear-gradient(45deg, #f0f8ff 25%, #e6f3ff 25%, #e6f3ff 50%, #f0f8ff 50%, #f0f8ff 75%, #e6f3ff 75%, #e6f3ff 100%);
+    background-image: linear-gradient(45deg, var(--color-background) 25%, #e6f3ff 25%, #e6f3ff 50%, var(--color-background) 50%, var(--color-background) 75%, #e6f3ff 75%, #e6f3ff 100%);
     background-size: 40px 40px;
     padding: calc(var(--grid-base) * 4);
     margin: 0;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: var(--nav-background);
     padding: calc(var(--grid-base) * 4);
     border-radius: calc(var(--grid-base) * 2);
     box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+    transition: background-color 0.3s, color 0.3s;
 }
 
-h1, h2 {
-    font-weight: bold;
+header {
     margin-bottom: calc(var(--grid-base) * 6);
-    text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
 }
 
-h1 {
-    font-family: 'Roboto', sans-serif;
-    font-size: calc(var(--scale-ratio) * var(--scale-ratio) * 1rem);
-    color: var(--color-primary);
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: calc(var(--grid-base) * 4);
+    padding: 0;
+    margin: 0 0 calc(var(--grid-base) * 4) 0;
 }
 
-h2 {
-    font-family: 'Press Start 2P', cursive;
-    font-size: calc(var(--scale-ratio) * 0.8rem);
+nav ul li a {
+    text-decoration: none;
+    color: var(--nav-link-color);
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+nav ul li a:hover,
+nav ul li a.active {
+    text-decoration: underline;
     color: var(--color-secondary);
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
-    letter-spacing: 1px;
+}
+
+.style-picker {
+    margin-top: calc(var(--grid-base) * 2);
+    display: flex;
+    align-items: center;
+    gap: calc(var(--grid-base) * 2);
+}
+
+.style-picker label {
+    font-weight: bold;
+    color: var(--nav-text-color);
+}
+
+.style-picker select {
+    padding: calc(var(--grid-base) * 1) calc(var(--grid-base) * 2);
+    border: 1px solid var(--color-accent);
+    border-radius: calc(var(--grid-base) * 1);
+    background-color: var(--color-background);
+    color: var(--color-text);
+    cursor: pointer;
 }
 
 .dashboard-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 20px;
-    margin-bottom: calc(var(--grid-base) * 4);
+    position: relative;
 }
 
 .map-container {
@@ -61,10 +200,11 @@ h2 {
     border-radius: calc(var(--grid-base) * 2);
     overflow: hidden;
     box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+    background-color: var(--color-background);
 }
 
 #map {
-    height: 500px;
+    height: 600px;
     width: 100%;
 }
 
@@ -72,24 +212,45 @@ h2 {
     background-color: rgba(255, 255, 255, 0.8);
     padding: calc(var(--grid-base) * 2);
     border-top: 1px solid var(--color-accent);
+    display: flex;
+    gap: calc(var(--grid-base) * 4);
 }
 
 .map-controls label {
-    margin-right: calc(var(--grid-base) * 4);
+    margin-right: calc(var(--grid-base) * 2);
+    font-weight: bold;
+}
+
+.console-container {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--grid-base) * 4);
 }
 
 .activity-feed {
-    background-color: #000;
+    background-color: var(--activity-feed-background);
     border-radius: calc(var(--grid-base) * 2);
     padding: calc(var(--grid-base) * 4);
     box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+    color: var(--activity-feed-text-color);
+    border: 2px solid var(--activity-feed-border-color);
+    box-shadow: 0 0 10px var(--activity-feed-shadow-color);
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
-#activity-list {
+.activity-feed h2 {
+    margin: 0 0 calc(var(--grid-base) * 2) 0;
+    font-size: 1.2rem;
+    color: var(--activity-feed-text-color);
+    text-align: center;
+    text-decoration: underline;
+}
+
+#activity-log {
     font-family: 'Courier New', monospace;
     font-size: 14px;
-    color: #0f0;
-    background-color: #000;
+    color: var(--activity-feed-text-color);
+    background-color: transparent;
     border: none;
     padding: 0;
     margin: 0;
@@ -99,10 +260,23 @@ h2 {
     word-wrap: break-word;
 }
 
+#activity-log::-webkit-scrollbar {
+    width: 8px;
+}
+
+#activity-log::-webkit-scrollbar-track {
+    background: #222;
+}
+
+#activity-log::-webkit-scrollbar-thumb {
+    background-color: var(--activity-feed-text-color);
+    border-radius: 4px;
+}
+
 .button-container {
     display: flex;
     justify-content: space-around;
-    margin-top: calc(var(--grid-base) * 4);
+    gap: calc(var(--grid-base) * 4);
 }
 
 button {
@@ -115,7 +289,7 @@ button {
     cursor: pointer;
     border-radius: calc(var(--grid-base) * 1);
     box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
-    transition: all 0.1s ease-in-out;
+    transition: all 0.1s ease-in-out, background-color 0.3s;
 }
 
 button:hover {
@@ -135,4 +309,25 @@ button:active {
     border: 1px solid #ddd;
     padding: calc(var(--grid-base) * 2);
     border-radius: calc(var(--grid-base) * 1);
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: var(--color-text);
+}
+
+/* Custom Icon Styling */
+.custom-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .map-container, .console-container {
+        width: 100%;
+    }
 }

@@ -8,58 +8,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto&display=swap" rel="stylesheet">
-
+    
     <!-- Custom Stylesheets -->
-    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="dashboard.css">
-
-    <!-- Inline Styles for NES-style Activity Feed -->
-    <style>
-        /* NES-Style Activity Feed */
-        .activity-feed {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            width: 300px;
-            max-height: 200px;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: #00FF00;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 10px;
-            padding: 10px;
-            border: 2px solid #00FF00;
-            overflow-y: auto;
-            box-shadow: 0 0 10px #00FF00;
-            z-index: 1000;
-        }
-
-        .activity-feed h2 {
-            margin: 0 0 10px 0;
-            font-size: 12px;
-            color: #00FF00;
-            text-align: center;
-            text-decoration: underline;
-        }
-
-        .activity-log div {
-            margin-bottom: 5px;
-            white-space: pre-wrap;
-        }
-
-        /* Optional: Custom Scrollbar for Better Aesthetics */
-        .activity-feed::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .activity-feed::-webkit-scrollbar-track {
-            background: #222;
-        }
-
-        .activity-feed::-webkit-scrollbar-thumb {
-            background-color: #00FF00;
-            border-radius: 4px;
-        }
-    </style>
+    
+    <!-- Inline Styles for Initial Setup (Removed NES-Style Activity Feed Inline) -->
 </head>
 <body>
     <header>
@@ -68,39 +21,49 @@
             <nav>
                 <ul>
                     <li><a href="index.html">Home</a></li>
-                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="dashboard.html" class="active">Dashboard</a></li>
                     <li><a href="api_docs.html">API Docs</a></li>
                     <li><a href="demo.html">Demo</a></li>
                     <li><a href="faq.html">FAQ</a></li>
                 </ul>
             </nav>
+            <div class="style-picker">
+                <label for="theme-select">Style:</label>
+                <select id="theme-select">
+                    <option value="default">Default</option>
+                    <option value="aztec-wrestler">Aztec Wrestler</option>
+                    <option value="tmnt">TMNT</option>
+                    <option value="icewind-dale">Icewind Dale</option>
+                    <option value="classic-snes">Classic SNES</option>
+                    <option value="cyberninja">CyberNinja</option>
+                </select>
+            </div>
         </div>
     </header>
     <main>
-        <div class="container">
-            <div class="dashboard-grid" style="position: relative;">
+        <div class="container dashboard-container">
+            <div class="dashboard-grid">
                 <div class="map-container">
-                    <div id="map" style="height: 600px;"></div> <!-- Increased height for better visibility -->
+                    <div id="map"></div>
                     <div class="map-controls">
                         <label><input type="checkbox" id="show-bids" checked> Show Bids</label>
                         <label><input type="checkbox" id="show-won-jobs" checked> Show Won Jobs</label>
                         <label><input type="checkbox" id="show-completed-jobs" checked> Show Completed Jobs</label>
                     </div>
-                    <!-- NES-Style Activity Feed Overlay -->
+                </div>
+                <div class="console-container">
                     <div class="activity-feed">
                         <h2>Activity Log</h2>
                         <div id="activity-log"></div>
                     </div>
+                    <div class="button-container">
+                        <button id="grab-job">Grab Job</button>
+                        <button id="submit-bid">Submit Bid</button>
+                    </div>
+                    <div id="submission-data">
+                        <!-- Submission data will appear here -->
+                    </div>
                 </div>
-                <!-- You can keep or remove the activity-feed section on the right -->
-                <!-- <div class="activity-feed">
-                    <h2>Simulated Nearby Activities</h2>
-                    <div id="activity-log"></div>
-                </div> -->
-            </div>
-            <div class="button-container">
-                <button id="grab-job">Grab Job</button>
-                <button id="submit-bid">Submit Bid</button>
             </div>
         </div>
     </main>
@@ -108,6 +71,15 @@
     <!-- Leaflet JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
     <script>
+        // Theme Switching Logic
+        const themeSelect = document.getElementById('theme-select');
+        themeSelect.addEventListener('change', (e) => {
+            document.body.className = ''; // Reset any existing theme classes
+            if (e.target.value !== 'default') {
+                document.body.classList.add(`theme-${e.target.value}`);
+            }
+        });
+
         // Initialize the map
         const map = L.map('map').setView([40.7128, -74.0060], 13); // Default to New York City
 
