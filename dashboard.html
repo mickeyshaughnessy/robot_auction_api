@@ -6,13 +6,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto&display=swap"
-rel="stylesheet">
-    <!-- Common Styles -->
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto&display=swap" rel="stylesheet">
+
+    <!-- Custom Stylesheets -->
     <link rel="stylesheet" href="styles.css">
-    <!-- Dashboard Styles -->
     <link rel="stylesheet" href="dashboard.css">
+
+    <!-- Inline Styles for NES-style Activity Feed -->
+    <style>
+        /* NES-Style Activity Feed */
+        .activity-feed {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 300px;
+            max-height: 200px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #00FF00;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            padding: 10px;
+            border: 2px solid #00FF00;
+            overflow-y: auto;
+            box-shadow: 0 0 10px #00FF00;
+            z-index: 1000;
+        }
+
+        .activity-feed h2 {
+            margin: 0 0 10px 0;
+            font-size: 12px;
+            color: #00FF00;
+            text-align: center;
+            text-decoration: underline;
+        }
+
+        .activity-log div {
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+        }
+
+        /* Optional: Custom Scrollbar for Better Aesthetics */
+        .activity-feed::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .activity-feed::-webkit-scrollbar-track {
+            background: #222;
+        }
+
+        .activity-feed::-webkit-scrollbar-thumb {
+            background-color: #00FF00;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -31,62 +78,188 @@ rel="stylesheet">
     </header>
     <main>
         <div class="container">
-            <div class="dashboard-grid">
+            <div class="dashboard-grid" style="position: relative;">
                 <div class="map-container">
-                    <div id="map"></div>
+                    <div id="map" style="height: 600px;"></div> <!-- Increased height for better visibility -->
                     <div class="map-controls">
                         <label><input type="checkbox" id="show-bids" checked> Show Bids</label>
                         <label><input type="checkbox" id="show-won-jobs" checked> Show Won Jobs</label>
-                        <label><input type="checkbox" id="show-completed-jobs" checked> Show Completed
-Jobs</label>
+                        <label><input type="checkbox" id="show-completed-jobs" checked> Show Completed Jobs</label>
+                    </div>
+                    <!-- NES-Style Activity Feed Overlay -->
+                    <div class="activity-feed">
+                        <h2>Activity Log</h2>
+                        <div id="activity-log"></div>
                     </div>
                 </div>
-                <div class="activity-feed">
-                    <h2>Recent Activities</h2>
-                    <pre id="activity-log"></pre>
-                </div>
+                <!-- You can keep or remove the activity-feed section on the right -->
+                <!-- <div class="activity-feed">
+                    <h2>Simulated Nearby Activities</h2>
+                    <div id="activity-log"></div>
+                </div> -->
             </div>
             <div class="button-container">
                 <button id="grab-job">Grab Job</button>
                 <button id="submit-bid">Submit Bid</button>
             </div>
-            <div id="submission-data"></div>
-        </main>
+        </div>
+    </main>
+    
+    <!-- Leaflet JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([40.7128, -74.0060], 13); // Default to New York City
 
-    <!-- Add this script tag at the end of the file -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
-integrity="sha256-/xUj+3OJU5yExlq6GSYGSHkIl+hWEEBJweTrofM1eSg=" crossorigin="anonymous"></script>
-    <script type="text/javascript">
-        $(document).ready(function() {
-            // Set the interval for making AJAX requests
-            setInterval(makeNearbyRequest, 30000); // 30 seconds
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
 
-            function makeNearbyRequest() {
-                $.ajax({
-                    url: '/nearby',
-                    method: 'GET',
-                    dataType: 'json',
-                    success: function(data) {
-                        // Update the map with the new nearby jobs
-                        updateMap(data);
-                    }
-                });
+        // Geolocation: Center map on user's location if permission granted
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userLat = position.coords.latitude;
+                    const userLon = position.coords.longitude;
+                    map.setView([userLat, userLon], 13);
+                    L.marker([userLat, userLon]).addTo(map)
+                        .bindPopup("You are here").openPopup();
+                },
+                (error) => {
+                    console.warn(`Geolocation error (${error.code}): ${error.message}`);
+                    // Optional: You can inform the user that default location is used
+                }
+            );
+        } else {
+            console.warn("Geolocation is not supported by this browser.");
+        }
+
+        // Activity Log Element
+        const activityLog = document.getElementById('activity-log');
+
+        // Predefined Service Requests and Robot Names
+        const serviceRequests = [
+            "Aerial photography of solar farm",
+            "Autonomous lawn mowing for golf course",
+            "Underwater pipeline inspection",
+            "Rooftop HVAC maintenance",
+            "Traffic flow optimization",
+            "Agricultural crop spraying",
+            "Search and rescue in wilderness",
+            "Warehouse inventory management",
+            "Construction site surveying",
+            "Automated parking assistance",
+            "Wildlife population monitoring",
+            "Waste sorting and recycling",
+            "Building facade cleaning",
+            "Autonomous security patrol",
+            "Tree health assessment in urban areas",
+            "Package delivery to remote locations",
+            "Automated harvesting of fruits",
+            "Snow removal from solar panels",
+            "Disaster area assessment",
+            "Underground utility mapping"
+        ];
+
+        const robotNames = [
+            "SkyEye-X1", "TurfMaster 3000", "AquaProbe Delta", "ClimboCraft Pro", "UrbanFlow AI",
+            "CropCare Quad", "WildernessScout", "StockBot Express", "GeoMapper Plus", "ParkAssist 2.0",
+            "EcoTracker", "RecycleMatic", "SkyWash Ultra", "SecuriGuard X3", "ArborHealth Scanner",
+            "DeliverEagle", "FruitHarvester Pro", "SnowSweep Bot", "DisasterRecon", "SubTerra Mapper",
+            "MarineSentry", "SkySprayer Eco", "RoadMender AI", "PowerLine Inspector", "FireFighter Assist"
+        ];
+
+        // Function to get a random location within current map bounds
+        function getRandomLocation() {
+            const bounds = map.getBounds();
+            const southWest = bounds.getSouthWest();
+            const northEast = bounds.getNorthEast();
+            const lat = Math.random() * (northEast.lat - southWest.lat) + southWest.lat;
+            const lon = Math.random() * (northEast.lng - southWest.lng) + southWest.lng;
+            return [lat, lon];
+        }
+
+        // Function to create a custom Leaflet icon
+        function createCustomIcon(color) {
+            return L.divIcon({
+                className: 'custom-icon',
+                html: `<div style="background-color:${color};width:12px;height:12px;border-radius:50%; border: 2px solid white;"></div>`,
+                iconSize: [12, 12],
+                iconAnchor: [6, 6]
+            });
+        }
+
+        // Define different icons for services, completed jobs, and robots
+        const serviceIcon = createCustomIcon('blue');
+        const completedJobIcon = createCustomIcon('green');
+        const robotIcon = createCustomIcon('red');
+
+        // Function to add a simulated activity
+        function addSimulatedActivity() {
+            // Determine activity type based on probabilities
+            const rand = Math.random();
+            let activityType;
+            if (rand < 0.6) {
+                activityType = 'service';
+            } else if (rand < 0.8) {
+                activityType = 'completed';
+            } else {
+                activityType = 'robot';
             }
 
-            // Function to update the map with new data
-            function updateMap(nearbyJobs) {
-                // Assuming you have a Leaflet map object named `map`
-                var map = $('#map').data('leafletMap');
+            // Get a random location within current map bounds
+            const [lat, lon] = getRandomLocation();
+            const timestamp = new Date().toLocaleTimeString();
 
-                // Clear any existing markers on the map
-                map.clearMarkers();
+            let logEntry, markerIcon, popupContent;
 
-                // Add new markers for each nearby job
-                $.each(nearbyJobs, function(index, job) {
-                    var marker = L.marker([job.latitude, job.longitude]).addTo(map);
-                    marker.bindPopup(job.name + ' - ' + job.description);
-                });
+            switch(activityType) {
+                case 'service':
+                    const service = serviceRequests[Math.floor(Math.random() * serviceRequests.length)];
+                    logEntry = `[${timestamp}] Simulated service request: ${service} (simulated) at (${lat.toFixed(4)}, ${lon.toFixed(4)})`;
+                    markerIcon = serviceIcon;
+                    popupContent = `Service: ${service} (simulated)`;
+                    break;
+                case 'completed':
+                    const completedService = serviceRequests[Math.floor(Math.random() * serviceRequests.length)];
+                    logEntry = `[${timestamp}] Simulated completed job: ${completedService} (simulated) at (${lat.toFixed(4)}, ${lon.toFixed(4)})`;
+                    markerIcon = completedJobIcon;
+                    popupContent = `Completed Job: ${completedService} (simulated)`;
+                    break;
+                case 'robot':
+                    const robot = robotNames[Math.floor(Math.random() * robotNames.length)];
+                    logEntry = `[${timestamp}] Simulated robot location: ${robot} (simulated) at (${lat.toFixed(4)}, ${lon.toFixed(4)})`;
+                    markerIcon = robotIcon;
+                    popupContent = `Robot: ${robot} (simulated)`;
+                    break;
             }
+
+            // Add the log entry to the activity feed
+            const logItem = document.createElement('div');
+            logItem.textContent = logEntry;
+            activityLog.appendChild(logItem);
+
+            // Scroll to the bottom to show the latest entry
+            activityLog.scrollTop = activityLog.scrollHeight;
+
+            // Limit the activity log to the latest 100 entries
+            if (activityLog.children.length > 100) {
+                activityLog.removeChild(activityLog.firstChild);
+            }
+
+            // Add a marker to the map with a popup
+            L.marker([lat, lon], {icon: markerIcon}).addTo(map)
+                .bindPopup(popupContent);
+        }
+
+        // Start adding simulated activities every 2 seconds
+        setInterval(addSimulatedActivity, 2000);
+
+        // Optional: Adjust simulated activities when the map view changes (e.g., on zoom or pan)
+        // This ensures that new activities are always within the current view
+        map.on('moveend', () => {
+            // You can implement additional logic here if needed when the map view changes
         });
     </script>
 </body>
