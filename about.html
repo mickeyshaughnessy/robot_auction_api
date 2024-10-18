@@ -3,28 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About RSX</title>
+    <title>About RSX - Mickey Shaughnessy</title>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; text-align: center; }
-        img { width: 200px; height: 200px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; }
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #000;
+            color: #7bf7ff;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://mithrilmedia.s3.amazonaws.com/halo-bg.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 2px solid #7bf7ff;
+            box-shadow: 0 0 20px #7bf7ff;
+        }
+        h1 {
+            color: #fff;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #7bf7ff;
+        }
+        img {
+            display: block;
+            margin: 0 auto;
+            border: 2px solid #7bf7ff;
+            box-shadow: 0 0 10px #7bf7ff;
+        }
+        p {
+            line-height: 1.6;
+            text-align: justify;
+        }
+        .nav {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 10px 0;
+            text-align: center;
+        }
+        .nav a {
+            color: #7bf7ff;
+            text-decoration: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: 1px solid #7bf7ff;
+            transition: all 0.3s ease;
+        }
+        .nav a:hover {
+            background-color: #7bf7ff;
+            color: #000;
+        }
     </style>
 </head>
 <body>
-    <img src="https://mithrilmedia.s3.amazonaws.com/mickey.png" alt="Headshot">
-    <p> My name is Mickey Shaughnessy and I'm the creator of the Robot Services Exchange. I did it so that you and yours could get cheap and easy access to robot services. I thought to myself "The reason I don't want to buy a robot is that it would sit idle most of the time.". What if there was a way for people to place bids for the services they wanted, so that robot owners could get their robots things to do? Enter The Robot Services Exchange and the RSX protocol... </p>
-</body>
-<header>
+    <div class="nav">
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="api_docs.html">API Docs</a>
+        <a href="faq.html">FAQ</a>
+        <a href="about.html">About</a>
+    </div>
     <div class="container">
         <h1>Robot Services Exchange (RSX)</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="api_docs.html">API Docs</a></li>
-                <li><a href="faq.html">FAQ</a></li>
-                <li><a href="about.html">About</a></li>
-            </ul>
-        </nav>
+        <img src="https://mithrilmedia.s3.amazonaws.com/mickey.png" alt="Mickey Shaughnessy" width="200">
+        <p>
+            Greetings, I'm Mickey Shaughnessy, the creator of the Robot Services Exchange and the RSX protocol. My mission? To revolutionize your access to robotic services of all kinds, making it affordable and effortless.
+        </p>
+        <p> I live in Lakewood, CO 🇺🇲with my wife and 4 kids and I've built things all my life. 
+        <p>
+            I realized the main barrier to personal robot ownership is idle robots, not earning their owners money. I thought, "What if we could create a marketplace where people bid for robot services, keeping these mechanical marvels productively engaged?" Thus, the Robot Services Exchange and the new RSX protocol were born.
+        </p>
+        <p>
+            Join us in this robotic revolution. With RSX, the future of accessible, efficient robot services is not just a possibility - it's here, now, waiting for you to take part.
+        </p>
     </div>
-</header>
+</body>
 </html>
