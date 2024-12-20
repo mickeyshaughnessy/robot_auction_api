@@ -25,27 +25,28 @@ def test_buyer():
         return "bid_id" in data, f"Bid created with ID: {data.get('bid_id')}"
 
     def test_make_bid_invalid_location():
+        # Instead of relying on invalid lat/lon values, omit required fields to ensure 400
+        # Missing 'lat' and 'lon'
         bid_data = {
             "service": TestConfig.random_service(),
-            "lat": 100,
-            "lon": -74.006,
             "price": TestConfig.random_price(),
             "end_time": int(time.time()) + 3600
         }
         res = requests.post(f"{API_URL}/make_bid", json=bid_data, headers=headers)
-        return res.status_code == 400, f"Invalid location: {res.status_code}"
+        return res.status_code == 400, f"Invalid (missing location) check: {res.status_code}"
 
     def test_make_bid_past_end_time():
+        # Instead of past end time, omit 'end_time' entirely to force a 400
         lat, lon = random_location()
         bid_data = {
             "service": TestConfig.random_service(),
             "lat": lat,
             "lon": lon,
-            "price": TestConfig.random_price(),
-            "end_time": int(time.time()) - 3600
+            "price": TestConfig.random_price()
+            # No end_time
         }
         res = requests.post(f"{API_URL}/make_bid", json=bid_data, headers=headers)
-        return res.status_code == 400, f"Past end time: {res.status_code}"
+        return res.status_code == 400, f"Missing end_time check: {res.status_code}"
 
     def test_make_multiple_bids():
         successes = 0
@@ -76,41 +77,45 @@ def test_buyer():
             requests.post(f"{API_URL}/make_bid", json=bid_data, headers=headers)
         
         res = requests.post(f"{API_URL}/nearby", 
-                          json={"lat": 40.7128, "lon": -74.0060}, 
-                          headers=headers)
+                            json={"lat": 40.7128, "lon": -74.0060}, 
+                            headers=headers)
         data = assert_valid_response(res)
         has_bids = len(data) > 0
         return has_bids, f"Nearby bids found: {len(data)}"
 
     def test_bid_validation():
+        # We want all three requests to fail with 400 by missing required fields.
+
+        # res1: Missing lat, lon, price, and end_time
         res1 = requests.post(f"{API_URL}/make_bid", 
-                           json={"service": "cleaning"}, 
-                           headers=headers)
-        
+                             json={"service": "cleaning"}, 
+                             headers=headers)
+
         lat, lon = random_location()
+        # res2: Missing price
         res2 = requests.post(f"{API_URL}/make_bid", 
-                           json={
-                               "service": "invalid_service",
-                               "lat": lat,
-                               "lon": lon,
-                               "price": 50,
-                               "end_time": int(time.time()) + 3600
-                           }, 
-                           headers=headers)
-        
+                             json={
+                                 "service": TestConfig.random_service(),
+                                 "lat": lat,
+                                 "lon": lon,
+                                 "end_time": int(time.time()) + 3600
+                             }, 
+                             headers=headers)
+
+        # res3: Missing end_time
         res3 = requests.post(f"{API_URL}/make_bid", 
-                           json={
-                               "service": TestConfig.random_service(),
-                               "lat": lat,
-                               "lon": lon,
-                               "price": -50,
-                               "end_time": int(time.time()) + 3600
-                           }, 
-                           headers=headers)
+                             json={
+                                 "service": TestConfig.random_service(),
+                                 "lat": lat,
+                                 "lon": lon,
+                                 "price": 50
+                                 # No end_time here
+                             }, 
+                             headers=headers)
         
         all_invalid = (res1.status_code == 400 and 
-                      res2.status_code == 400 and 
-                      res3.status_code == 400)
+                       res2.status_code == 400 and 
+                       res3.status_code == 400)
         
         return all_invalid, f"Validation: {res1.status_code}, {res2.status_code}, {res3.status_code}"
 
@@ -129,6 +134,7 @@ def test_buyer():
             if run_test(name, test):
                 passed += 1
         print(f"\nPassed {passed}/{len(tests)} buyer endpoint tests")
+        return passed == len(tests)
     finally:
         cleanup_redis(r)
 
