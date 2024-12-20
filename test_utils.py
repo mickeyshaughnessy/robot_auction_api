@@ -1,10 +1,10 @@
-import redis, os, json
+import redis, os, json, requests, random
 
 # API Configuration
-API_URL = "http://100.26.236.1:5001"
-REDIS_HOST = "localhost"
-REDIS_PORT = 6379
-REDIS_DB = 0
+API_URL = os.getenv('API_URL', 'http://localhost:5000')
+REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
+REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
+REDIS_DB = int(os.getenv('REDIS_DB', 0))
 SIMULATION_KEY = "sim_12345"  # For simulated testing
 
 # Redis Hash Keys
@@ -61,7 +61,6 @@ def run_test(description, test_function, *args):
         return False
 
 def get_auth_token(username="test_user", password="password123"):
-    """Helper to get auth token for tests requiring authentication"""
     response = requests.post(f"{API_URL}/login", json={
         "username": username,
         "password": password
@@ -71,7 +70,6 @@ def get_auth_token(username="test_user", password="password123"):
     return response.json()["access_token"]
 
 def create_test_user(username="test_user", password="password123"):
-    """Helper to create test user and return auth token"""
     # Register user
     response = requests.post(f"{API_URL}/register", json={
         "username": username,
@@ -84,15 +82,12 @@ def create_test_user(username="test_user", password="password123"):
     return get_auth_token(username, password)
 
 def random_location():
-    """Generate random test coordinates centered around NYC"""
-    import random
     return (
         40.7128 + (random.random() - 0.5),  # lat
         -74.0060 + (random.random() - 0.5)   # lon
     )
 
 def assert_valid_response(response, expected_status=200):
-    """Helper to validate API responses"""
     assert response.status_code == expected_status, \
         f"Expected status {expected_status}, got {response.status_code}: {response.text}"
     
@@ -103,7 +98,6 @@ def assert_valid_response(response, expected_status=200):
             raise AssertionError(f"Invalid JSON response: {response.text}")
 
 class TestConfig:
-    """Shared test configuration"""
     SERVICES = [
         "cleaning", "delivery", "security", "maintenance",
         "lawn_care", "pet_sitting", "home_repair", "painting"
@@ -113,10 +107,8 @@ class TestConfig:
     
     @staticmethod
     def random_service():
-        import random
         return random.choice(TestConfig.SERVICES)
     
     @staticmethod
     def random_price():
-        import random
         return random.choice(TestConfig.PRICES)

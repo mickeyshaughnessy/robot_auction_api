@@ -1,26 +1,25 @@
 import time, sys
 from test_utils import setup_redis, cleanup_redis
-from auth_tests import run_auth_tests
-from account_tests import run_account_tests
-from buyer_tests import run_buyer_tests
-from seller_tests import run_seller_tests
-from shared_tests import run_shared_tests
+from auth_tests import test_auth
+from account_tests import test_account
+from buyer_tests import test_buyer
+from seller_tests import test_seller 
+from shared_tests import test_shared
 
 def run_all_tests():
     start_time = time.time()
     print("\n🚀 Starting RSX API Test Suite")
     print("=" * 50)
     
-    # Initialize Redis
     r = setup_redis()
     
     try:
         test_modules = [
-            ("Authentication", run_auth_tests),
-            ("Account Management", run_account_tests),
-            ("Buyer Endpoints", run_buyer_tests),
-            ("Seller Endpoints", run_seller_tests),
-            ("Shared Endpoints", run_shared_tests)
+            ("Authentication", test_auth),
+            ("Account Management", test_account),
+            ("Buyer Endpoints", test_buyer),
+            ("Seller Endpoints", test_seller),
+            ("Shared Endpoints", test_shared)
         ]
         
         results = []
@@ -38,7 +37,6 @@ def run_all_tests():
     finally:
         cleanup_redis(r)
     
-    # Print summary
     duration = time.time() - start_time
     print("\n📊 Test Suite Summary")
     print("=" * 50)
@@ -51,7 +49,6 @@ def run_all_tests():
     print(f"\nPassed {passed}/{total} test modules")
     print(f"Duration: {duration:.2f} seconds")
     
-    # Set exit code
     if passed != total:
         sys.exit(1)
 

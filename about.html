@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About RSX - Mickey Shaughnessy</title>
+    <title>About RSX - The Founders</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -23,18 +23,34 @@
             border: 2px solid #7bf7ff;
             box-shadow: 0 0 20px #7bf7ff;
         }
-        h1 {
+        h1, h2 {
             color: #fff;
             text-align: center;
             text-transform: uppercase;
             letter-spacing: 2px;
             text-shadow: 0 0 10px #7bf7ff;
         }
+        .founders {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .founder {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            border: 1px solid #7bf7ff;
+            box-shadow: 0 0 10px rgba(123, 247, 255, 0.3);
+        }
         img {
             display: block;
             margin: 0 auto;
             border: 2px solid #7bf7ff;
             box-shadow: 0 0 10px #7bf7ff;
+            max-width: 200px;
+            height: auto;
         }
         p {
             line-height: 1.6;
@@ -69,14 +85,25 @@
     </div>
     <div class="container">
         <h1>Robot Services Exchange (RSX)</h1>
-        <img src="https://mithrilmedia.s3.amazonaws.com/mickey.png" alt="Mickey Shaughnessy" width="200">
-        <p>
-            Greetings, I'm Mickey Shaughnessy, the creator of the Robot Services Exchange and the RSX protocol. My mission? To revolutionize your access to robotic services of all kinds, making it affordable and effortless.
-        </p>
-        <p> I live in Lakewood, CO 🇺🇲with my wife and 4 kids and I've built things all my life. 
-        <p>
-            I realized the main barrier to personal robot ownership is idle robots, not earning their owners money. I thought, "What if we could create a marketplace where people bid for robot services, keeping these mechanical marvels productively engaged?" Thus, the Robot Services Exchange and the new RSX protocol were born.
-        </p>
+        <div class="founders">
+            <div class="founder">
+                <img src="https://mithrilmedia.s3.amazonaws.com/mickey.png" alt="Mickey Shaughnessy" width="200">
+                <h2>Mickey Shaughnessy</h2>
+                <p>
+                    Greetings, I'm Mickey Shaughnessy, co-founder of the Robot Services Exchange and creator of the RSX protocol. I live in Lakewood, CO 🇺🇲 with my wife and 4 kids and I've built things all my life.
+                </p>
+                <p>
+                    I realized the main barrier to personal robot ownership is idle robots, not earning their owners money. The Robot Services Exchange and RSX protocol were born from this insight, creating a marketplace where people bid for robot services.
+                </p>
+            </div>
+            <div class="founder">
+                <img src="aftab.png" alt="Dr. Aftab Ahmed">
+                <h2>Dr. Aftab Ahmed</h2>
+                <p>
+                    Dr. Aftab Ahmed is an experienced scientist and small business owner/operator  
+                </p>
+            </div>
+        </div>
         <p>
             Join us in this robotic revolution. With RSX, the future of accessible, efficient robot services is not just a possibility - it's here, now, waiting for you to take part.
         </p>

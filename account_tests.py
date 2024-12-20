@@ -1,122 +1,85 @@
-import redis, os, json
+import requests, json, time, uuid
+from test_utils import (run_test, API_URL, setup_redis, cleanup_redis, 
+                       create_test_user, assert_valid_response)
 
-# API Configuration
-API_URL = "http://100.26.236.1:5001"
-REDIS_HOST = "localhost"
-REDIS_PORT = 6379
-REDIS_DB = 0
-SIMULATION_KEY = "sim_12345"  # For simulated testing
+def test_account():
+    r = setup_redis()
+    print("\n=== 👤 Account Management Tests ===")
+    
+    test_user = f"test_user_{uuid.uuid4().hex[:8]}"
+    test_token = create_test_user(test_user, "password123")
+    headers = {"Authorization": f"Bearer {test_token}"}
 
-# Redis Hash Keys
-REDHASH_ACCOUNTS = "accounts"
-REDHASH_ALL_LIVE_BIDS = "live_bids"
-REDHASH_SIMULATED_ALL_LIVE_BIDS = "sim_live_bids"
-REDHASH_ALL_ACTIVE_JOBS = "active_jobs"
-REDHASH_SIMULATED_ACTIVE_JOBS = "sim_active_jobs"
+    def test_get_account_data():
+        res = requests.get(f"{API_URL}/account_data", headers=headers)
+        data = assert_valid_response(res)
+        required_fields = ["created_on", "stars"]
+        has_fields = all(field in data for field in required_fields)
+        return has_fields, f"Account data fields present: {has_fields}"
 
-def setup_redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB):
-    r = redis.StrictRedis(host=host, port=port, db=db, decode_responses=True)
-    try:
-        r.ping()
-        return r
-    except redis.ConnectionError:
-        print(f"❌ Failed to connect to Redis at {host}:{port}")
-        raise
+    def test_get_account_no_auth():
+        res = requests.get(f"{API_URL}/account_data")
+        return res.status_code == 401, f"No auth check: {res.status_code}"
 
-def cleanup_redis(r):
-    test_keys = [
-        REDHASH_SIMULATED_ALL_LIVE_BIDS,
-        REDHASH_SIMULATED_ACTIVE_JOBS
+    def test_get_account_bad_token():
+        bad_headers = {"Authorization": "Bearer bad_token"}
+        res = requests.get(f"{API_URL}/account_data", headers=bad_headers)
+        return res.status_code == 401, f"Bad token check: {res.status_code}"
+
+    def test_account_star_rating_update():
+        bid_data = {
+            "service": "cleaning",
+            "lat": 40.7128,
+            "lon": -74.0060,
+            "price": 50,
+            "end_time": int(time.time()) + 3600
+        }
+        bid_res = requests.post(f"{API_URL}/make_bid", json=bid_data, headers=headers)
+        assert_valid_response(bid_res)
+        
+        robot_data = {
+            "services": "cleaning",
+            "lat": 40.7128,
+            "lon": -74.0060,
+            "max_distance": 10
+        }
+        grab_res = requests.post(f"{API_URL}/grab_job", json=robot_data, headers=headers)
+        job = assert_valid_response(grab_res)
+        
+        sign_data = {
+            "job_id": job["job_id"],
+            "password": "password123",
+            "star_rating": 5
+        }
+        sign_res = requests.post(f"{API_URL}/sign_job", json=sign_data, headers=headers)
+        assert_valid_response(sign_res)
+        
+        res = requests.get(f"{API_URL}/account_data", headers=headers)
+        data = assert_valid_response(res)
+        has_new_rating = data["stars"] > 0
+        return has_new_rating, f"Star rating updated: {data['stars']}"
+
+    def test_account_data_readonly():
+        data = {"stars": 100}
+        res = requests.post(f"{API_URL}/account_data", json=data, headers=headers)
+        return res.status_code in [405, 404], f"Read-only check: {res.status_code}"
+
+    tests = [
+        ("Get Account Data", test_get_account_data),
+        ("Account No Auth", test_get_account_no_auth),
+        ("Account Bad Token", test_get_account_bad_token),
+        ("Star Rating Update", test_account_star_rating_update),
+        ("Account Data Readonly", test_account_data_readonly)
     ]
-    
-    for key in test_keys:
-        r.delete(key)
-    
-    # Clean up test user accounts
-    accounts = r.hgetall(REDHASH_ACCOUNTS)
-    for username, data in accounts.items():
-        if username.startswith("test_"):
-            r.hdel(REDHASH_ACCOUNTS, username)
-    
-    # Clean up test auth tokens
-    token_pattern = "auth_token:*"
-    tokens = r.keys(token_pattern)
-    for token in tokens:
-        username = r.get(token)
-        if username and username.startswith("test_"):
-            r.delete(token)
 
-def run_test(description, test_function, *args):
-    print(f"\n{'='*40}")
-    print(f"Testing: {description}")
-    print(f"{'='*40}")
-    
     try:
-        result, message = test_function(*args)
-        status = "✅ PASS" if result else "❌ FAIL"
-        print(f"{status}: {message}")
-        return result
-    except Exception as e:
-        print(f"❌ ERROR: {str(e)}")
-        return False
+        passed = 0
+        for name, test in tests:
+            if run_test(name, test):
+                passed += 1
+        print(f"\nPassed {passed}/{len(tests)} account management tests")
+    finally:
+        cleanup_redis(r)
 
-def get_auth_token(username="test_user", password="password123"):
-    """Helper to get auth token for tests requiring authentication"""
-    response = requests.post(f"{API_URL}/login", json={
-        "username": username,
-        "password": password
-    })
-    if response.status_code != 200:
-        raise Exception(f"Failed to get auth token: {response.status_code}")
-    return response.json()["access_token"]
-
-def create_test_user(username="test_user", password="password123"):
-    """Helper to create test user and return auth token"""
-    # Register user
-    response = requests.post(f"{API_URL}/register", json={
-        "username": username,
-        "password": password
-    })
-    if response.status_code != 201:
-        raise Exception(f"Failed to create test user: {response.status_code}")
-    
-    # Get auth token
-    return get_auth_token(username, password)
-
-def random_location():
-    """Generate random test coordinates centered around NYC"""
-    import random
-    return (
-        40.7128 + (random.random() - 0.5),  # lat
-        -74.0060 + (random.random() - 0.5)   # lon
-    )
-
-def assert_valid_response(response, expected_status=200):
-    """Helper to validate API responses"""
-    assert response.status_code == expected_status, \
-        f"Expected status {expected_status}, got {response.status_code}: {response.text}"
-    
-    if response.status_code != 204:  # No content
-        try:
-            return response.json()
-        except json.JSONDecodeError:
-            raise AssertionError(f"Invalid JSON response: {response.text}")
-
-class TestConfig:
-    """Shared test configuration"""
-    SERVICES = [
-        "cleaning", "delivery", "security", "maintenance",
-        "lawn_care", "pet_sitting", "home_repair", "painting"
-    ]
-    
-    PRICES = [25, 50, 75, 100, 150, 200]
-    
-    @staticmethod
-    def random_service():
-        import random
-        return random.choice(TestConfig.SERVICES)
-    
-    @staticmethod
-    def random_price():
-        import random
-        return random.choice(TestConfig.PRICES)
+if __name__ == "__main__":
+    test_account()
