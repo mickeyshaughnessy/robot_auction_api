@@ -3,7 +3,7 @@ from test_utils import setup_redis, cleanup_redis
 from auth_tests import test_auth
 from account_tests import test_account
 from buyer_tests import test_buyer
-from seller_tests import test_seller 
+from seller_tests import test_seller
 from shared_tests import test_shared
 
 def run_all_tests():
@@ -12,28 +12,35 @@ def run_all_tests():
     print("=" * 50)
     
     r = setup_redis()
-    
+    results = []
+    fail_fast = "--fail-fast" in sys.argv
+
+    # Note: Each test_func should return True if all tests pass, False otherwise.
+    test_modules = [
+        ("Authentication", test_auth),
+        ("Account Management", test_account),
+        ("Buyer Endpoints", test_buyer),
+        ("Seller Endpoints", test_seller),
+        ("Shared Endpoints", test_shared)
+    ]
+
     try:
-        test_modules = [
-            ("Authentication", test_auth),
-            ("Account Management", test_account),
-            ("Buyer Endpoints", test_buyer),
-            ("Seller Endpoints", test_seller),
-            ("Shared Endpoints", test_shared)
-        ]
-        
-        results = []
         for name, test_func in test_modules:
             print(f"\n▶️  Running {name} Tests...")
             try:
-                test_func()
-                results.append((name, True))
+                passed = test_func()
+                if not passed:
+                    print(f"❌ {name} module reported failures internally.")
+                    results.append((name, False))
+                    if fail_fast:
+                        sys.exit(1)
+                else:
+                    results.append((name, True))
             except Exception as e:
                 print(f"❌ Error in {name} tests: {str(e)}")
                 results.append((name, False))
-                if "--fail-fast" in sys.argv:
-                    raise
-    
+                if fail_fast:
+                    sys.exit(1)
     finally:
         cleanup_redis(r)
     
@@ -44,12 +51,12 @@ def run_all_tests():
         status = "✅ PASS" if passed else "❌ FAIL"
         print(f"{status} {name}")
     
-    passed = sum(1 for _, p in results if p)
+    passed_count = sum(1 for _, p in results if p)
     total = len(results)
-    print(f"\nPassed {passed}/{total} test modules")
+    print(f"\nPassed {passed_count}/{total} test modules")
     print(f"Duration: {duration:.2f} seconds")
     
-    if passed != total:
+    if passed_count != total:
         sys.exit(1)
 
 if __name__ == "__main__":
