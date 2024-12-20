@@ -1,7 +1,6 @@
-const API_URL = 'https://100.26.236.1:5001'; // Ensure this uses HTTPS
+const API_URL = 'http://100.26.236.1:5001';
 let authToken = null;
 
-// DOM Elements
 const loginBtn = document.getElementById('login-btn');
 const signupBtn = document.getElementById('signup-btn');
 const loginModal = document.getElementById('login-modal');
@@ -17,18 +16,26 @@ const serviceDescriptionTextarea = document.getElementById('service-description'
 const startTimeInput = document.getElementById('start-time');
 const endTimeInput = document.getElementById('end-time');
 
-// Initialize Default Times and Placeholder
+async function pingAPI() {
+    const responseDiv = document.getElementById('response')
+    try {
+        const response = await fetch(`${API_URL}/ping`)
+        const data = await response.json()
+        responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`
+    } catch (error) {
+        responseDiv.innerHTML = `<pre style="color: red;">Error: ${error.message}</pre>`
+    }
+}
+
 function initializeForm() {
     setDefaultTimes();
     setRandomServiceDescriptionPlaceholder();
 }
 
-// Set Default Start and End Times
 function setDefaultTimes() {
     const now = new Date();
     const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-    // Format to 'YYYY-MM-DDTHH:MM'
     const formatDateTimeLocal = (date) => {
         const pad = (num) => num.toString().padStart(2, '0');
         const year = date.getFullYear();
@@ -43,7 +50,6 @@ function setDefaultTimes() {
     endTimeInput.value = formatDateTimeLocal(sevenDaysFromNow);
 }
 
-// Set Random Service Description Placeholder
 function setRandomServiceDescriptionPlaceholder() {
     try {
         const placeholders = JSON.parse(serviceDescriptionTextarea.getAttribute('data-placeholders'));
@@ -59,29 +65,24 @@ function setRandomServiceDescriptionPlaceholder() {
     }
 }
 
-// Show Login Modal
 function showLoginModal() {
     loginModal.style.display = 'block';
 }
 
-// Hide Login Modal
 function hideLoginModal() {
     loginModal.style.display = 'none';
     loginForm.reset();
 }
 
-// Show Sign-Up Modal
 function showSignupModal() {
     signupModal.style.display = 'block';
 }
 
-// Hide Sign-Up Modal
 function hideSignupModal() {
     signupModal.style.display = 'none';
     signupForm.reset();
 }
 
-// Make API Request
 async function makeApiRequest(endpoint, method, data = null) {
     const url = `${API_URL}${endpoint}`;
     const options = {
@@ -121,7 +122,6 @@ async function makeApiRequest(endpoint, method, data = null) {
     }
 }
 
-// Display API Response
 function displayResponse(data) {
     if (data.error) {
         responseDiv.innerHTML = `<pre style="color: red;">Error: ${sanitizeHTML(data.error)}</pre>`;
@@ -130,7 +130,6 @@ function displayResponse(data) {
     }
 }
 
-// Update UI Based on Authentication
 function updateUI() {
     if (authToken) {
         loginBtn.textContent = 'Logout';
@@ -145,7 +144,6 @@ function updateUI() {
     }
 }
 
-// Fetch User's Bids
 async function fetchMyBids() {
     const result = await makeApiRequest('/my_bids', 'GET');
     if (result && result.bids && result.bids.length > 0) {
@@ -162,7 +160,6 @@ async function fetchMyBids() {
     }
 }
 
-// Fetch Recent Nearby Bids
 async function fetchRecentBids() {
     const { lat, lon } = getRandomCoordinates();
     const result = await makeApiRequest('/nearby', 'POST', { lat, lon });
@@ -179,21 +176,18 @@ async function fetchRecentBids() {
     }
 }
 
-// Sanitize HTML to prevent XSS
 function sanitizeHTML(str) {
     const temp = document.createElement('div');
     temp.textContent = str;
     return temp.innerHTML;
 }
 
-// Generate Random Coordinates (Fallback)
 function getRandomCoordinates() {
     const lat = (Math.random() * 180 - 90).toFixed(6);
     const lon = (Math.random() * 360 - 180).toFixed(6);
     return { lat: parseFloat(lat), lon: parseFloat(lon) };
 }
 
-// Handle Location Addition
 function addLocationHandler() {
     if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
@@ -218,7 +212,6 @@ function addLocationHandler() {
     }
 }
 
-// Handle Bid Submission
 function submitBidHandler(event) {
     event.preventDefault();
     const serviceDescription = document.getElementById('service-description').value.trim();
@@ -228,7 +221,6 @@ function submitBidHandler(event) {
     const startTime = document.getElementById('start-time').value;
     const endTime = document.getElementById('end-time').value;
 
-    // Basic Validation
     if (!serviceDescription || isNaN(bidPrice) || isNaN(latitude) || isNaN(longitude) || !startTime || !endTime) {
         alert("Please fill in all fields correctly.");
         return;
@@ -254,8 +246,8 @@ function submitBidHandler(event) {
     makeApiRequest('/make_bid', 'POST', bidData).then(response => {
         if (response && !response.error) {
             bidForm.reset();
-            setDefaultTimes(); // Reset times to defaults after submission
-            setRandomServiceDescriptionPlaceholder(); // Reset placeholder
+            setDefaultTimes();
+            setRandomServiceDescriptionPlaceholder();
             fetchMyBids();
             fetchRecentBids();
             alert("Bid submitted successfully!");
@@ -263,17 +255,12 @@ function submitBidHandler(event) {
     });
 }
 
-// Handle Login/Logout
 function loginHandler() {
     if (authToken) {
-        // Logout
         authToken = null;
         updateUI();
         alert("Logged out successfully.");
     } else {
-        // Show Login Modal
         showLoginModal();
     }
 }
-
-// Handle Si
