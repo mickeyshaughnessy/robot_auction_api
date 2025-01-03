@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Robot Services Exchange (RSX) API Documentation</title>
+    <title>Robot Services Exchange (RSE) API Documentation</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="container">
-    <h1>Robot Services Exchange (RSX) API Documentation</h1>
+    <h1>Robot Services Exchange (RSE) API Documentation</h1>
 
-    <p>A way for people to buy robot services by bidding and a way for robots to get jobs.</p>
+    <p>A way to buy robot services by bidding and a way for robots to get jobs.</p>
 
-    <h3>The RSX API is currently running at http://100.26.236.1:5001</h3>
+    <h3>The RSE API is currently running at http://100.26.236.1:5001</h3>
 
     <div id="response"></div>
 
@@ -35,15 +35,6 @@
                 <td>Password for the new account (min 8 characters)</td>
             </tr>
         </table>
-        <div class="form-group">
-            <label for="register-username">Username:</label>
-            <input type="text" id="register-username" name="username">
-        </div>
-        <div class="form-group">
-            <label for="register-password">Password:</label>
-            <input type="password" id="register-password" name="password">
-        </div>
-        <button onclick="register()">Register</button>
     </div>
 
     <div class="endpoint">
@@ -63,15 +54,6 @@
                 <td>User's password</td>
             </tr>
         </table>
-        <div class="form-group">
-            <label for="login-username">Username:</label>
-            <input type="text" id="login-username" name="username">
-        </div>
-        <div class="form-group">
-            <label for="login-password">Password:</label>
-            <input type="password" id="login-password" name="password">
-        </div>
-        <button onclick="login()">Login</button>
     </div>
 
     <h2>Account Management</h2>
@@ -93,15 +75,6 @@
                 <td>User's password</td>
             </tr>
         </table>
-        <div class="form-group">
-            <label for="account-username">Username:</label>
-            <input type="text" id="account-username" name="username">
-        </div>
-        <div class="form-group">
-            <label for="account-password">Password:</label>
-            <input type="password" id="account-password" name="password">
-        </div>
-        <button onclick="viewAccount()">View Account (Requires Authentication)</button>
     </div>
 
     <h2>Buyer Endpoints</h2>
@@ -136,27 +109,6 @@
                 <td>Unix timestamp for the end of the service period</td>
             </tr>
         </table>
-        <div class="form-group">
-            <label for="bid-service">Service:</label>
-            <input type="text" id="bid-service" name="service">
-        </div>
-        <div class="form-group">
-            <label for="bid-lat">Latitude:</label>
-            <input type="text" id="bid-lat" name="lat">
-        </div>
-        <div class="form-group">
-            <label for="bid-lon">Longitude:</label>
-            <input type="text" id="bid-lon" name="lon">
-        </div>
-        <div class="form-group">
-            <label for="bid-price">Price (USD):</label>
-            <input type="text" id="bid-price" name="price">
-        </div>
-        <div class="form-group">
-            <label for="bid-end-time">End Time (Unix Timestamp):</label>
-            <input type="text" id="bid-end-time" name="end_time">
-        </div>
-        <button onclick="placeBid()">Place Bid (Requires Authentication)</button>
     </div>
 
     <h2>Seller Endpoints</h2>
@@ -187,23 +139,6 @@
                 <td>Maximum distance the robot is willing to travel (in miles)</td>
             </tr>
         </table>
-        <div class="form-group">
-            <label for="grab-services">Services (comma-separated):</label>
-            <input type="text" id="grab-services" name="services">
-        </div>
-        <div class="form-group">
-            <label for="grab-lat">Latitude:</label>
-            <input type="text" id="grab-lat" name="lat">
-        </div>
-        <div class="form-group">
-            <label for="grab-lon">Longitude:</label>
-            <input type="text" id="grab-lon" name="lon">
-        </div>
-        <div class="form-group">
-            <label for="grab-max-distance">Max Distance (miles):</label>
-            <input type="text" id="grab-max-distance" name="max_distance">
-        </div>
-        <button onclick="grabJob()">Grab Job (Requires Authentication)</button>
     </div>
 
     <h2>Shared Endpoints</h2>
@@ -226,15 +161,6 @@
                 <td>Longitude of the center point (-180 to 180)</td>
             </tr>
         </table>
-        <div class="form-group">
-            <label for="nearby-lat">Latitude:</label>
-            <input type="text" id="nearby-lat" name="lat">
-        </div>
-        <div class="form-group">
-            <label for="nearby-lon">Longitude:</label>
-            <input type="text" id="nearby-lon" name="lon">
-        </div>
-        <button onclick="findNearbyActivities()">Find Nearby Activities (Requires Authentication)</button>
     </div>
 
     <div class="endpoint">
@@ -262,32 +188,87 @@
                 <td>Rating for the job (1-5 stars)</td>
             </tr>
         </table>
-        <div class="form-group">
-            <label for="sign-username">Username:</label>
-            <input type="text" id="sign-username" name="username">
-        </div>
-        <div class="form-group">
-            <label for="sign-job-id">Job ID:</label>
-            <input type="text" id="sign-job-id" name="job_id">
-        </div>
-        <div class="form-group">
-            <label for="sign-password">Password:</label>
-            <input type="password" id="sign-password" name="password">
-        </div>
-        <div class="form-group">
-            <label for="sign-star-rating">Star Rating (1-5):</label>
-            <input type="number" id="sign-star-rating" name="star_rating" min="1" max="5">
-        </div>
-        <button onclick="signJob()">Sign Job (Requires Authentication)</button>
     </div>
 
-    <div id="response" class="response-area"></div>
+    <div class="container">
+    
+    <h2>Messaging Endpoints</h2>
+    <p>Note: All messaging endpoints require a valid authentication token.</p>
+
+    <div class="endpoint">
+        <h3><span class="method">POST</span> <span class="path">/chat</span></h3>
+        <p>Send a private message to another user.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>recipient</td>
+                <td>Username of the message recipient</td>
+            </tr>
+            <tr>
+                <td>message</td>
+                <td>Content of the message (max 1000 characters)</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="endpoint">
+        <h3><span class="method">GET</span> <span class="path">/chat</span></h3>
+        <p>Retrieve chat messages for the authenticated user.</p>
+    </div>
+
+    <h2>Bulletin Board Endpoints</h2>
+    <p>Note: Bulletin board endpoints require a valid authentication token.</p>
+
+    <div class="endpoint">
+        <h3><span class="method">POST</span> <span class="path">/bulletin</span></h3>
+        <p>Post a message to the public bulletin board.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>title</td>
+                <td>Title of the bulletin post (max 100 characters)</td>
+            </tr>
+            <tr>
+                <td>content</td>
+                <td>Content of the bulletin post (max 2000 characters)</td>
+            </tr>
+            <tr>
+                <td>category</td>
+                <td>Category of the post (e.g., announcement, job, general)</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="endpoint">
+        <h3><span class="method">GET</span> <span class="path">/bulletin</span></h3>
+        <p>Retrieve recent bulletin board posts.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>category</td>
+                <td>Optional: Filter posts by category</td>
+            </tr>
+            <tr>
+                <td>limit</td>
+                <td>Optional: Maximum number of posts to retrieve (default: 20)</td>
+            </tr>
+        </table>
+    </div>
+
     <h2>System Check</h2>
 
     <div class="endpoint">
         <h3><span class="method">GET</span> <span class="path">/ping</span></h3>
         <p>Check if the API is operational.</p>
-        <button onclick="pingAPI()">Ping API</button>
     </div>
 </div>
 <script src="script.js"></script>
