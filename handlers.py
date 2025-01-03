@@ -19,7 +19,7 @@ def calculate_distance(point1, point2):
 def is_bid_matching(bid, robot_data):
     # Check if a bid matches the requirements of a robot
     bid_description = bid.get('service')
-    robot_description = robot_data.get('service')
+    robot_description = robot_data.get('capabilities')
     if not (bid_description and robot_description):
         return False
     if not matched_service(bid_description, robot_description):
@@ -33,7 +33,7 @@ def is_bid_matching(bid, robot_data):
 def grab_job(data):
     try:
         print(f"grab_job called with data: {json.dumps(data, indent=2)}")
-        required_fields = ['service', 'lat', 'lon', 'max_distance']
+        required_fields = ['capabilities', 'lat', 'lon', 'max_distance']
         if not all(key in data for key in required_fields):
             return {"error": "Missing required fields"}, 400
 
