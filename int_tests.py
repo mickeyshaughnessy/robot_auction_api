@@ -195,6 +195,103 @@ def run_tests():
                 results.append(f"{'🎮 Simulated' if simulated else '🏭 Production'}: Buyer {'✅' if buyer_success else '❌'}, Seller {'✅' if seller_success else '❌'}")
             return True, " | ".join(results)
 
+        def test_send_chat():
+            if not buyer_token or not seller_token:
+                return False, "Buyer or Seller token not available. Cannot test chat."
+            
+            buyer_headers = {"Authorization": f"Bearer {buyer_token}"}
+            
+            # Test sending a message from buyer to seller
+            message_data = {
+                "recipient": test_seller_username,
+                "message": "Hey, quick question about the cleaning service!",
+                "password": "password"
+            }
+            
+            response = requests.post(f"{API_URL}/chat", json=message_data, headers=buyer_headers)
+            if response.status_code != 200:
+                return False, f"Failed to send chat message: status {response.status_code}, Response: {response.text}"
+            
+            message_id = response.json().get('message_id')
+            if not message_id:
+                return False, "No message ID returned in send_chat response"
+                
+            return True, f"💬 Message sent successfully with ID: {message_id}"
+        
+        def test_get_chat():
+            if not seller_token:
+                return False, "Seller token not available. Cannot test chat retrieval."
+                
+            seller_headers = {"Authorization": f"Bearer {seller_token}"}
+            
+            # Get chat messages for seller
+            get_data = {"password": "password"}
+            response = requests.get(f"{API_URL}/chat", json=get_data, headers=seller_headers)
+            
+            if response.status_code != 200:
+                return False, f"Failed to get chat messages: status {response.status_code}, Response: {response.text}"
+                
+            messages = response.json().get('messages', [])
+            message_count = len(messages)
+            
+            # Verify message structure
+            if message_count > 0:
+                first_msg = messages[0]
+                required_fields = ['id', 'sender', 'recipient', 'message', 'timestamp']
+                if not all(field in first_msg for field in required_fields):
+                    return False, f"❌ Message missing required fields. Found: {list(first_msg.keys())}"
+                    
+            return True, f"📨 Retrieved {message_count} messages successfully"
+
+        def test_post_bulletin():
+            if not buyer_token:
+                return False, "Buyer token not available. Cannot test bulletin posting."
+            
+            buyer_headers = {"Authorization": f"Bearer {buyer_token}"}
+            
+            # Test posting a bulletin
+            bulletin_data = {
+                "title": "Test Announcement",
+                "content": "This is a test bulletin post.",
+                "category": "announcement",
+                "password": "password"
+            }
+            
+            response = requests.post(f"{API_URL}/bulletin", json=bulletin_data, headers=buyer_headers)
+            if response.status_code != 200:
+                return False, f"Failed to post bulletin: status {response.status_code}, Response: {response.text}"
+            
+            bulletin_id = response.json().get('bulletin_id')
+            if not bulletin_id:
+                return False, "No bulletin ID returned in response"
+                
+            return True, f"📢 Bulletin posted successfully with ID: {bulletin_id}"
+        
+        def test_get_bulletins():
+            if not seller_token:
+                return False, "Seller token not available. Cannot test bulletin retrieval."
+                
+            seller_headers = {"Authorization": f"Bearer {seller_token}"}
+            
+            # Test different category filters
+            categories = ['announcement', None]
+            results = []
+            
+            for category in categories:
+                params = {'limit': 5}
+                if category:
+                    params['category'] = category
+                    
+                response = requests.get(f"{API_URL}/bulletin", params=params, headers=seller_headers)
+                if response.status_code != 200:
+                    return False, f"Failed to get bulletins: status {response.status_code}, Response: {response.text}"
+                    
+                bulletins = response.json().get('bulletins', [])
+                filter_text = f"category '{category}'" if category else "all categories"
+                results.append(f"{filter_text}: {len(bulletins)} posts")
+            
+            return True, f"📋 Retrieved bulletins - " + " | ".join(results)
+
         tests = [
             ("Ping", test_ping),
             ("Buyer Registration", test_buyer_registration),
@@ -205,6 +302,10 @@ def run_tests():
             ("Nearby Activity", test_nearby_activity),
             ("Grab Job", test_grab_job),
             ("Sign Job", test_sign_job),
+            ("Send Chat", test_send_chat),
+            ("Get Chat", test_get_chat),
+            ("Post Bulletin", test_post_bulletin),
+            ("Get Bulletins", test_get_bulletins),
         ]
 
         total_tests = len(tests)

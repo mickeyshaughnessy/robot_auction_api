@@ -30,6 +30,154 @@ def is_bid_matching(bid, robot_data):
     return (distance <= robot_data.get("max_distance", 1) and
             bid.get('end_time', 0) > time.time())  # Check distance and that bid has not expired
 
+def post_bulletin(data):
+    try:
+        print(f"post_bulletin called with data: {json.dumps(data, indent=2)}")
+        username, password = data.get('username'), data.get('password')
+        title, content = data.get('title'), data.get('content')
+        category = data.get('category', 'general')
+
+        if not all([username, password, title, content]):
+            return {"error": "Missing required parameters"}, 400
+            
+        if len(title) > 100:
+            return {"error": "Title exceeds 100 characters"}, 400
+            
+        if len(content) > 2000:
+            return {"error": "Content exceeds 2000 characters"}, 400
+
+        user_data = redis_client.hget(config.REDHASH_ACCOUNTS, username)
+        if not user_data:
+            return {"error": "User not found"}, 404
+            
+        user_data = json.loads(user_data)
+        if not check_password_hash(user_data.get('password', ''), password):
+            return {"error": "Invalid password"}, 403
+
+        bulletin_id = str(uuid.uuid4())
+        bulletin_data = {
+            'id': bulletin_id,
+            'title': title,
+            'content': content,
+            'category': category,
+            'author': username,
+            'timestamp': int(time.time())
+        }
+
+        redis_client.hset('bulletins', bulletin_id, json.dumps(bulletin_data))
+        
+        return {"bulletin_id": bulletin_id}, 200
+
+    except Exception as e:
+        print(f"Error in post_bulletin: {str(e)}")
+        return {"error": "Internal server error"}, 500
+
+def get_bulletins(data):
+    try:
+        print(f"get_bulletins called with data: {json.dumps(data, indent=2)}")
+        category = data.get('category')
+        limit = min(int(data.get('limit', 20)), 100)  # Cap at 100
+
+        bulletins = []
+        for _, bulletin_json in redis_client.hscan_iter('bulletins'):
+            try:
+                bulletin = json.loads(bulletin_json)
+                if category and bulletin['category'] != category:
+                    continue
+                bulletins.append(bulletin)
+            except json.JSONDecodeError:
+                print(f"Invalid bulletin JSON: {bulletin_json}")
+
+        bulletins.sort(key=lambda x: x.get('timestamp', 0), reverse=True)
+        return {"bulletins": bulletins[:limit]}, 200
+
+    except Exception as e:
+        print(f"Error in get_bulletins: {str(e)}")
+        return {"error": "Internal server error"}, 500
+
+
+def send_chat(data):
+    try:
+        print(f"send_chat called with data: {json.dumps(data, indent=2)}")
+        username = data.get('username')
+        recipient = data.get('recipient')
+        message = data.get('message')
+        password = data.get('password')
+
+        if not all([username, recipient, message, password]):
+            return {"error": "Missing required parameters"}, 400
+            
+        if len(message) > 1000:
+            return {"error": "Message exceeds 1000 characters"}, 400
+
+        # Verify sender exists and password
+        sender_data = redis_client.hget(config.REDHASH_ACCOUNTS, username)
+        if not sender_data:
+            return {"error": "Sender not found"}, 404
+            
+        sender_data = json.loads(sender_data)
+        if not check_password_hash(sender_data.get('password', ''), password):
+            return {"error": "Invalid password"}, 403
+
+        # Verify recipient exists
+        if not redis_client.hexists(config.REDHASH_ACCOUNTS, recipient):
+            return {"error": "Recipient not found"}, 404
+
+        msg_id = str(uuid.uuid4())
+        msg_data = {
+            'id': msg_id,
+            'sender': username,
+            'recipient': recipient,
+            'message': message,
+            'timestamp': int(time.time())
+        }
+
+        # Store message in both sender and recipient chat histories
+        redis_client.hset(f"chat:{recipient}", msg_id, json.dumps(msg_data))
+        redis_client.hset(f"chat:{username}", msg_id, json.dumps(msg_data))
+
+        return {"message_id": msg_id}, 200
+
+    except Exception as e:
+        print(f"Error in send_chat: {str(e)}")
+        return {"error": "Internal server error"}, 500
+
+def get_chat(data):
+    try:
+        print(f"get_chat called with data: {json.dumps(data, indent=2)}")
+        username = data.get('username')
+        password = data.get('password')
+
+        if not all([username, password]):
+            return {"error": "Missing required parameters"}, 400
+
+        # Verify user and password
+        user_data = redis_client.hget(config.REDHASH_ACCOUNTS, username)
+        if not user_data:
+            return {"error": "User not found"}, 404
+            
+        user_data = json.loads(user_data)
+        if not check_password_hash(user_data.get('password', ''), password):
+            return {"error": "Invalid password"}, 403
+
+        # Get all messages for user
+        messages = []
+        for _, msg_json in redis_client.hscan_iter(f"chat:{username}"):
+            try:
+                msg = json.loads(msg_json)
+                messages.append(msg)
+            except json.JSONDecodeError:
+                print(f"Invalid message JSON: {msg_json}")
+
+        # Sort by timestamp descending
+        messages.sort(key=lambda x: x.get('timestamp', 0), reverse=True)
+        
+        return {"messages": messages}, 200
+
+    except Exception as e:
+        print(f"Error in get_chat: {str(e)}")
+        return {"error": "Internal server error"}, 500
+
 def grab_job(data):
     try:
         print(f"grab_job called with data: {json.dumps(data, indent=2)}")

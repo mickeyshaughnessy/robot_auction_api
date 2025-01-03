@@ -144,6 +144,53 @@ def sign_job(current_user):
     except Exception as e:
         return flask.jsonify({"error": str(e)}), 500
 
+@app.route('/chat', methods=['POST'])
+@token_required
+def send_chat(current_user):
+    try:
+        data = flask.request.get_json()
+        if not data:
+            return flask.jsonify({"error": "Invalid JSON data"}), 400
+        data['username'] = current_user
+        response, status = handlers.send_chat(data)
+        return flask.jsonify(response), status
+    except Exception as e:
+        return flask.jsonify({"error": str(e)}), 500
+
+@app.route('/chat', methods=['GET'])
+@token_required
+def get_chat(current_user):
+    try:
+        data = flask.request.get_json() or {}
+        data['username'] = current_user
+        response, status = handlers.get_chat(data)
+        return flask.jsonify(response), status
+    except Exception as e:
+        return flask.jsonify({"error": str(e)}), 500
+
+@app.route('/bulletin', methods=['POST'])
+@token_required
+def post_bulletin(current_user):
+    try:
+        data = flask.request.get_json()
+        if not data:
+            return flask.jsonify({"error": "Invalid JSON data"}), 400
+        data['username'] = current_user
+        response, status = handlers.post_bulletin(data)
+        return flask.jsonify(response), status
+    except Exception as e:
+        return flask.jsonify({"error": str(e)}), 500
+
+@app.route('/bulletin', methods=['GET'])
+@token_required
+def get_bulletins(current_user):
+    try:
+        data = flask.request.args.to_dict()
+        response, status = handlers.get_bulletins(data)
+        return flask.jsonify(response), status
+    except Exception as e:
+        return flask.jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=config.API_PORT, debug=True)
 
