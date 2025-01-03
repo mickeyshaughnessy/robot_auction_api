@@ -120,7 +120,7 @@ def run_tests():
             headers = {"Authorization": f"Bearer {seller_token}"}
             for simulated in [True, False]:
                 robot_data = {
-                    "service": "cleaning, gardening",
+                    "capabilities": "cleaning, gardening",
                     "lat": 40.7128,
                     "lon": -74.0060,
                     "max_distance": 10
@@ -155,7 +155,7 @@ def run_tests():
 
                 # Grab the job
                 robot_data = {
-                    "service": "cleaning",
+                    "capabilities": "cleaning",
                     "lat": 40.7128,
                     "lon": -74.0060,
                     "max_distance": 10
