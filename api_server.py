@@ -10,6 +10,7 @@ import secrets
 from flask_cors import CORS
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
+import os
 
 app = flask.Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -35,6 +36,26 @@ def token_required(f):
             return flask.jsonify({'error': 'Token is invalid or expired'}), 401
         return f(username.decode(), *args, **kwargs)
     return decorated
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_frontend(path):
+    frontend_dir = "/home/ubuntu/RSX"
+    if path.endswith('/'): # Handle trailing slashes
+        path = path[:-1]
+    full_path = os.path.join(frontend_dir, path)
+
+    if os.path.isfile(full_path):
+        return flask.send_from_directory(frontend_dir, path)
+    elif os.path.isdir(full_path):
+        index_file = os.path.join(full_path, "index.html")
+        if os.path.exists(index_file):
+            return flask.send_from_directory(full_path, "index.html")
+        else:
+            return flask.send_from_directory(frontend_dir, 'Pages/Main/Homepage.html') # Serve default if no index.html
+    else:
+        return flask.send_from_directory(frontend_dir, 'Pages/Main/Homepage.html') # Serve default if not found
+
 
 @app.route('/ping', methods=['POST', 'GET'])
 def ping():
