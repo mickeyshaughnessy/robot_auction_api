@@ -145,7 +145,7 @@ def run_tests():
                 "seat": {
                     "id": config.testrsx1.get("id"),
                     "owner": config.testrsx1.get("owner"),
-                    "secret": hashlib.md5(config.testrsx1.get("secret").encode()).hexdigest()
+                    "secret": hashlib.md5(config.testrsx1.get("phrase").encode()).hexdigest()
                 }
             }
             
@@ -160,39 +160,35 @@ def run_tests():
                 return True, "No jobs available (expected)"
             return False, f"Job grab failed: {response.status_code}"
 
+
         def test_sign_job():
             if not state.test_job_id:
-                return True, "No job to sign (skipping)"
+                return False, "No job_id available to sign"
                 
-            # Buyer signs
-            buyer_headers = {"Authorization": f"Bearer {state.buyer_token}"}
-            buyer_data = {
-                "job_id": state.test_job_id,
-                "star_rating": 5
-            }
-            
-            buyer_response = requests.post(f"{API_URL}/sign_job",
-                                        json=buyer_data,
-                                        headers=buyer_headers)
-            
-            if buyer_response.status_code != 200:
-                return False, f"Buyer signing failed: {buyer_response.status_code}"
+            for role, token, rating in [
+                ("buyer", state.buyer_token, 5),
+                ("seller", state.seller_token, 4)
+            ]:
+                response = requests.post(
+                    f"{API_URL}/sign_job",
+                    headers={"Authorization": f"Bearer {token}"},
+                    json={"job_id": state.test_job_id, "star_rating": rating}
+                )
                 
-            # Seller signs
-            seller_headers = {"Authorization": f"Bearer {state.seller_token}"}
-            seller_data = {
-                "job_id": state.test_job_id,
-                "star_rating": 4
-            }
-            
-            seller_response = requests.post(f"{API_URL}/sign_job",
-                                         json=seller_data,
-                                         headers=seller_headers)
-            
-            if seller_response.status_code != 200:
-                return False, f"Seller signing failed: {seller_response.status_code}"
+                if response.status_code != 200:
+                    return False, f"{role.title()} signing failed: {response.status_code} - {response.text}"
+                    
+                # Verify signature recorded
+                verify = requests.get(
+                    f"{API_URL}/job/{state.test_job_id}",
+                    headers={"Authorization": f"Bearer {token}"}
+                )
                 
-            return True, "Job signed by both parties"
+                if verify.status_code != 200 or not verify.json().get(f"{role}_signed"):
+                    return False, f"Failed to verify {role} signature"
+                        
+            return True, "Job successfully signed by both parties"
+
 
         def test_chat():
             if not state.buyer_token:
