@@ -123,24 +123,35 @@
                 <th>Description</th>
             </tr>
             <tr>
-                <td>capabilities </td>
+                <td>capabilities</td>
                 <td>List of robot capabilities it can perform (comma-separated)</td>
             </tr>
             <tr>
-                <td>lat </td>
+                <td>lat</td>
                 <td>Current latitude of the robot (-90 to 90)</td>
             </tr>
             <tr>
-                <td>lon </td>
+                <td>lon</td>
                 <td>Current longitude of the robot (-180 to 180)</td>
             </tr>
             <tr>
-                <td>max_distance </td>
+                <td>max_distance</td>
                 <td>Maximum distance the robot is willing to travel (in km)</td>
             </tr>
+            <tr>
+                <td>seat</td>
+                <td>Authentication object containing seat credentials with the following fields:
+                    <ul>
+                        <li><code>id</code>: Unique identifier of the seat</li>
+                        <li><code>owner</code>: Owner of the seat</li>
+                        <li><code>secret</code>: MD5 hash of the seat's phrase</li>
+                    </ul>
+                </td>
+            </tr>
         </table>
+        <h4>Response</h4>
+        <p>Returns 200 with job details on successful assignment, 204 if no matching jobs found, 403 for invalid seat credentials, or 400 for missing/invalid parameters.</p>
     </div>
-
     <h2>Shared Endpoints</h2>
     <p>Note: The following endpoints can be accessed by both buyers and sellers with valid authentication.</p>
 
