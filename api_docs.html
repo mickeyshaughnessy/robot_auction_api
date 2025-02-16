@@ -12,23 +12,22 @@
 
     <p>A marketplace for robot services - bid on robot services or offer robot capacity.</p>
 
+
     <h3>API Status Check: <button onclick="pingAPI()">Check Status</button></h3>
 
     <div id="response"></div>
 
     <script>
-        async function pingAPI() {
-            const responseDiv = document.getElementById('response');
-            try {
-                const response = await fetch('http://100.26.236.1:5001/ping');
-                const data = await response.json();
-                responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-            } catch (error) {
-                responseDiv.innerHTML = `<pre style="color: red;">Error: ${error.message}</pre>`;
-            }
-        }
-        // Check status immediately when page loads
-        pingAPI();
+	    async function pingAPI() {
+    const responseDiv = document.getElementById('response');
+    try {
+        const response = await fetch('http://100.26.236.1:5001/ping');
+        const data = await response.json();
+        responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+    } catch (error) {
+        responseDiv.innerHTML = `<pre style="color: green;">HTTP only for exchange, allow mixed-content</pre>`;
+    }
+}
     </script>
 
     <h2>Authentication Endpoints</h2>

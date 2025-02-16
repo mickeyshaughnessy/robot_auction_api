@@ -12,7 +12,7 @@ from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
-app = flask.Flask(__name__)
+app = flask.Flask(__name__, static_url_path='', static_folder='/home/ubuntu/RSX')
 CORS(app, resources={r"/*": {"origins": "*"}})
 redis_client = redis.Redis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=config.REDIS_DB)
 
@@ -41,21 +41,26 @@ def token_required(f):
 @app.route('/<path:path>')
 def serve_frontend(path):
     frontend_dir = "/home/ubuntu/RSX"
-    if path.endswith('/'): # Handle trailing slashes
-        path = path[:-1]
+    
+    # Handle root path
+    if not path:
+        path = 'Pages/Main/Homepage.html'
+    
+    # Clean the path to prevent directory traversal
+    path = os.path.normpath(path).lstrip('/')
+    
+    # Try serving the file directly
     full_path = os.path.join(frontend_dir, path)
-
     if os.path.isfile(full_path):
         return flask.send_from_directory(frontend_dir, path)
-    elif os.path.isdir(full_path):
-        index_file = os.path.join(full_path, "index.html")
-        if os.path.exists(index_file):
-            return flask.send_from_directory(full_path, "index.html")
-        else:
-            return flask.send_from_directory(frontend_dir, 'Pages/Main/Homepage.html') # Serve default if no index.html
-    else:
-        return flask.send_from_directory(frontend_dir, 'Pages/Main/Homepage.html') # Serve default if not found
-
+    
+    # Try serving index.html if it exists in the directory
+    index_path = os.path.join(full_path, 'index.html')
+    if os.path.isfile(index_path):
+        return flask.send_from_directory(full_path, 'index.html')
+    
+    # Default to Homepage.html
+    return flask.send_from_directory(frontend_dir, 'Pages/Main/Homepage.html')
 
 @app.route('/ping', methods=['POST', 'GET'])
 def ping():
