@@ -12,9 +12,24 @@
 
     <p>A marketplace for robot services - bid on robot services or offer robot capacity.</p>
 
-    <h3>The RSE API is currently running at http://100.26.236.1:5001</h3>
+    <h3>API Status Check: <button onclick="pingAPI()">Check Status</button></h3>
 
     <div id="response"></div>
+
+    <script>
+        async function pingAPI() {
+            const responseDiv = document.getElementById('response');
+            try {
+                const response = await fetch('http://100.26.236.1:5001/ping');
+                const data = await response.json();
+                responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                responseDiv.innerHTML = `<pre style="color: red;">Error: ${error.message}</pre>`;
+            }
+        }
+        // Check status immediately when page loads
+        pingAPI();
+    </script>
 
     <h2>Authentication Endpoints</h2>
 
