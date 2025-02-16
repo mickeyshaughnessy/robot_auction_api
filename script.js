@@ -16,16 +16,30 @@ const serviceDescriptionTextarea = document.getElementById('service-description'
 const startTimeInput = document.getElementById('start-time');
 const endTimeInput = document.getElementById('end-time');
 
-async function pingAPI() {
-    const responseDiv = document.getElementById('response')
+// Check API status on page load
+document.addEventListener('DOMContentLoaded', checkApiStatus);
+
+async function checkApiStatus() {
+    const statusSpan = document.getElementById('api-status');
     try {
-        const response = await fetch(`${API_URL}/ping`)
-        const data = await response.json()
-        responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`
+        const response = await fetch(`${API_URL}/ping`);
+        const data = await response.json();
+        if (response.ok) {
+            statusSpan.textContent = '🟢 Online';
+            statusSpan.style.color = '#28a745';
+        } else {
+            statusSpan.textContent = '🟡 Degraded';
+            statusSpan.style.color = '#ffc107';
+        }
     } catch (error) {
-        responseDiv.innerHTML = `<pre style="color: red;">Error: ${error.message}</pre>`
+        statusSpan.textContent = '🔴 Offline';
+        statusSpan.style.color = '#dc3545';
+        console.error('API Status Check Error:', error);
     }
 }
+
+// Re-check status every 60 seconds
+setInterval(checkApiStatus, 60000);
 
 function initializeForm() {
     setDefaultTimes();
@@ -82,6 +96,32 @@ function hideSignupModal() {
     signupModal.style.display = 'none';
     signupForm.reset();
 }
+
+
+
+async function checkApiStatus() {
+    const statusSpan = document.getElementById('api-status');
+    try {
+        const response = await fetch(`${API_URL}/ping`);
+        const data = await response.json();
+        if (response.ok) {
+            statusSpan.textContent = '🟢 Online';
+            statusSpan.style.color = '#28a745';
+        } else {
+            statusSpan.textContent = '🟡 Degraded';
+            statusSpan.style.color = '#ffc107';
+        }
+    } catch (error) {
+        statusSpan.textContent = '🔴 Offline';
+        statusSpan.style.color = '#dc3545';
+        console.error('API Status Check Error:', error);
+    }
+}
+
+// Re-check status every 60 seconds
+setInterval(checkApiStatus, 60000);
+
+
 
 async function makeApiRequest(endpoint, method, data = null) {
     const url = `${API_URL}${endpoint}`;
