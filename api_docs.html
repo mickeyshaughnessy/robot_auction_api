@@ -10,7 +10,7 @@
 <div class="container">
     <h1>Robot Services Exchange (RSE) API Documentation</h1>
 
-    <p>A way to buy robot services by bidding and a way for robots to get jobs.</p>
+    <p>A marketplace for robot services - bid on robot services or offer robot capacity.</p>
 
     <h3>The RSE API is currently running at http://100.26.236.1:5001</h3>
 
@@ -27,14 +27,16 @@
                 <th>Description</th>
             </tr>
             <tr>
-                <td>username </td>
+                <td>username</td>
                 <td>Desired username for the new account (3-20 characters)</td>
             </tr>
             <tr>
-                <td>password </td>
+                <td>password</td>
                 <td>Password for the new account (min 8 characters)</td>
             </tr>
         </table>
+        <h4>Response</h4>
+        <p>Returns 200 on successful registration, 400 for invalid parameters.</p>
     </div>
 
     <div class="endpoint">
@@ -46,39 +48,20 @@
                 <th>Description</th>
             </tr>
             <tr>
-                <td>username </td>
+                <td>username</td>
                 <td>User's registered username</td>
             </tr>
             <tr>
-                <td>password </td>
+                <td>password</td>
                 <td>User's password</td>
             </tr>
         </table>
-    </div>
-
-    <h2>Account Management</h2>
-
-    <div class="endpoint">
-        <h3><span class="method">GET</span> <span class="path">/account_data</span></h3>
-        <p>Retrieve the account data for a user.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>username </td>
-                <td>User's registered username</td>
-            </tr>
-            <tr>
-                <td>password </td>
-                <td>User's password</td>
-            </tr>
-        </table>
+        <h4>Response</h4>
+        <p>Returns 200 with access token on success, 403 for invalid credentials.</p>
     </div>
 
     <h2>Buyer Endpoints</h2>
-    <p>Note: All buyer endpoints require a valid authentication token.</p>
+    <p>Note: All buyer endpoints require authentication via username and password.</p>
 
     <div class="endpoint">
         <h3><span class="method">POST</span> <span class="path">/make_bid</span></h3>
@@ -89,34 +72,44 @@
                 <th>Description</th>
             </tr>
             <tr>
-                <td>service </td>
+                <td>username</td>
+                <td>Authenticated username</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>User's password</td>
+            </tr>
+            <tr>
+                <td>service</td>
                 <td>Detailed description of service requested (e.g., cleaning, delivery)</td>
             </tr>
             <tr>
-                <td>lat </td>
+                <td>lat</td>
                 <td>Latitude of the service location (-90 to 90)</td>
             </tr>
             <tr>
-                <td>lon </td>
+                <td>lon</td>
                 <td>Longitude of the service location (-180 to 180)</td>
             </tr>
             <tr>
-                <td>price </td>
+                <td>price</td>
                 <td>Bid price for the service (in USD)</td>
             </tr>
             <tr>
-                <td>end_time </td>
-                <td>Unix timestamp for the end of the service period</td>
+                <td>end_time</td>
+                <td>Unix timestamp for when the bid expires</td>
             </tr>
         </table>
+        <h4>Response</h4>
+        <p>Returns 200 with bid_id on success, 400 for missing parameters.</p>
     </div>
 
     <h2>Seller Endpoints</h2>
-    <p>Note: All seller endpoints require a valid authentication token. A supplier seat is required to access the /grab_job route.</p>
+    <p>Note: All seller endpoints require authentication and a valid supplier seat.</p>
 
     <div class="endpoint">
         <h3><span class="method">POST</span> <span class="path">/grab_job</span></h3>
-        <p>Attempt to accept an available job for a robot.</p>
+        <p>Attempt to accept an available job for a robot. Returns the highest-priced matching bid.</p>
         <table>
             <tr>
                 <th>Parameter</th>
@@ -124,7 +117,7 @@
             </tr>
             <tr>
                 <td>capabilities</td>
-                <td>List of robot capabilities it can perform (comma-separated)</td>
+                <td>List of robot capabilities (comma-separated)</td>
             </tr>
             <tr>
                 <td>lat</td>
@@ -136,75 +129,86 @@
             </tr>
             <tr>
                 <td>max_distance</td>
-                <td>Maximum distance the robot is willing to travel (in km)</td>
+                <td>Maximum distance the robot will travel (in miles)</td>
             </tr>
             <tr>
                 <td>seat</td>
-                <td>Authentication object containing seat credentials with the following fields:
-                    <ul>
-                        <li><code>id</code>: Unique identifier of the seat</li>
-                        <li><code>owner</code>: Owner of the seat</li>
-                        <li><code>secret</code>: MD5 hash of the seat's phrase</li>
-                    </ul>
+                <td>Supplier seat credentials object:
+                    <pre>{
+    "id": "unique_seat_id",
+    "owner": "seat_owner_name",
+    "secret": "md5_hash_of_seat_phrase"
+}</pre>
                 </td>
             </tr>
         </table>
         <h4>Response</h4>
-        <p>Returns 200 with job details on successful assignment, 204 if no matching jobs found, 403 for invalid seat credentials, or 400 for missing/invalid parameters.</p>
+        <p>Returns 200 with job details on success, 204 if no matching jobs found, 403 for invalid seat.</p>
     </div>
+
     <h2>Shared Endpoints</h2>
-    <p>Note: The following endpoints can be accessed by both buyers and sellers with valid authentication.</p>
+    <p>Note: These endpoints require authentication via username and password.</p>
 
     <div class="endpoint">
         <h3><span class="method">POST</span> <span class="path">/nearby</span></h3>
-        <p>Retrieve a sample of recently completed jobs.</p>
+        <p>Retrieve bids within 10 miles of the specified location.</p>
         <table>
             <tr>
                 <th>Parameter</th>
                 <th>Description</th>
             </tr>
             <tr>
-                <td>lat </td>
+                <td>username</td>
+                <td>Authenticated username</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>User's password</td>
+            </tr>
+            <tr>
+                <td>lat</td>
                 <td>Latitude of the center point (-90 to 90)</td>
             </tr>
             <tr>
-                <td>lon </td>
+                <td>lon</td>
                 <td>Longitude of the center point (-180 to 180)</td>
             </tr>
         </table>
+        <h4>Response</h4>
+        <p>Returns 200 with nearby bids, 400 for invalid parameters.</p>
     </div>
 
     <div class="endpoint">
         <h3><span class="method">POST</span> <span class="path">/sign_job</span></h3>
-        <p>Sign off on a completed job and provide a rating.</p>
+        <p>Sign off on a completed job and rate the counterparty. Both buyer and seller must sign to complete the job.</p>
         <table>
             <tr>
                 <th>Parameter</th>
                 <th>Description</th>
             </tr>
             <tr>
-                <td>username </td>
-                <td>User's registered username</td>
+                <td>username</td>
+                <td>Authenticated username</td>
             </tr>
             <tr>
-                <td>job_id </td>
-                <td>ID of the completed job</td>
-            </tr>
-            <tr>
-                <td>password </td>
+                <td>password</td>
                 <td>User's password</td>
             </tr>
             <tr>
-                <td>star_rating </td>
-                <td>Rating for the job (1-5 stars)</td>
+                <td>job_id</td>
+                <td>ID of the completed job</td>
+            </tr>
+            <tr>
+                <td>star_rating</td>
+                <td>Rating for the counterparty (1-5 stars)</td>
             </tr>
         </table>
+        <h4>Response</h4>
+        <p>Returns 200 on success, 400 if already signed, 404 if job not found.</p>
     </div>
 
-    <div class="container">
-    
     <h2>Messaging Endpoints</h2>
-    <p>Note: All messaging endpoints require a valid authentication token.</p>
+    <p>Note: All messaging endpoints require authentication via username and password.</p>
 
     <div class="endpoint">
         <h3><span class="method">POST</span> <span class="path">/chat</span></h3>
@@ -215,23 +219,49 @@
                 <th>Description</th>
             </tr>
             <tr>
-                <td>recipient </td>
+                <td>username</td>
+                <td>Sender's username</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>Sender's password</td>
+            </tr>
+            <tr>
+                <td>recipient</td>
                 <td>Username of the message recipient</td>
             </tr>
             <tr>
-                <td>message </td>
+                <td>message</td>
                 <td>Content of the message (max 1000 characters)</td>
             </tr>
         </table>
+        <h4>Response</h4>
+        <p>Returns 200 with message_id on success, 404 if recipient not found.</p>
     </div>
 
     <div class="endpoint">
         <h3><span class="method">GET</span> <span class="path">/chat</span></h3>
         <p>Retrieve chat messages for the authenticated user.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>username</td>
+                <td>Authenticated username</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>User's password</td>
+            </tr>
+        </table>
+        <h4>Response</h4>
+        <p>Returns 200 with messages array, sorted by timestamp descending.</p>
     </div>
 
     <h2>Bulletin Board Endpoints</h2>
-    <p>Note: Bulletin board endpoints require a valid authentication token.</p>
+    <p>Note: All bulletin board endpoints require authentication via username and password.</p>
 
     <div class="endpoint">
         <h3><span class="method">POST</span> <span class="path">/bulletin</span></h3>
@@ -242,18 +272,28 @@
                 <th>Description</th>
             </tr>
             <tr>
-                <td>title </td>
+                <td>username</td>
+                <td>Authenticated username</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>User's password</td>
+            </tr>
+            <tr>
+                <td>title</td>
                 <td>Title of the bulletin post (max 100 characters)</td>
             </tr>
             <tr>
-                <td>content </td>
+                <td>content</td>
                 <td>Content of the bulletin post (max 2000 characters)</td>
             </tr>
             <tr>
-                <td>category </td>
+                <td>category</td>
                 <td>Category of the post (e.g., announcement, job, general)</td>
             </tr>
         </table>
+        <h4>Response</h4>
+        <p>Returns 200 with bulletin_id on success, 400 for invalid parameters.</p>
     </div>
 
     <div class="endpoint">
@@ -265,21 +305,33 @@
                 <th>Description</th>
             </tr>
             <tr>
-                <td>category </td>
+                <td>username</td>
+                <td>Authenticated username</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>User's password</td>
+            </tr>
+            <tr>
+                <td>category</td>
                 <td>Optional: Filter posts by category</td>
             </tr>
             <tr>
-                <td>limit </td>
-                <td>Optional: Maximum number of posts to retrieve (default: 20)</td>
+                <td>limit</td>
+                <td>Optional: Maximum number of posts to retrieve (default: 20, max: 100)</td>
             </tr>
         </table>
+        <h4>Response</h4>
+        <p>Returns 200 with bulletins array, sorted by timestamp descending.</p>
     </div>
 
     <h2>System Check</h2>
 
     <div class="endpoint">
         <h3><span class="method">GET</span> <span class="path">/ping</span></h3>
-        <p>Check if the API is operational.</p>
+        <p>Check if the API is operational. No authentication required.</p>
+        <h4>Response</h4>
+        <p>Returns 200 if system is operational.</p>
     </div>
 </div>
 <script src="script.js"></script>
