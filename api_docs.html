@@ -13,21 +13,29 @@
     <p>A marketplace for robot services - bid on robot services or offer robot capacity.</p>
 
 
-    <h3>API Status Check: <button onclick="pingAPI()">Check Status</button></h3>
-
+    <h3>API Status Check</h3>
+    <pre><code>curl 100.26.236.1:5001/ping</code></pre>
+    <button onclick="pingAPI()">Check Status</button>
     <div id="response"></div>
-
     <script>
-	    async function pingAPI() {
-    const responseDiv = document.getElementById('response');
-    try {
-        const response = await fetch('http://100.26.236.1:5001/ping');
-        const data = await response.json();
-        responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-    } catch (error) {
-        responseDiv.innerHTML = `<pre style="color: green;">HTTP only for exchange, allow mixed-content</pre>`;
+    async function pingAPI() {
+        const responseDiv = document.getElementById("response");
+        try {
+            const response = await fetch('http://100.26.236.1:5001/ping');
+            const data = await response.json();
+            responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        } catch (error) {
+            if (error.message.includes('') || error.message.includes('NetworkError')) {
+                responseDiv.innerHTML = `<pre style="color: orange;">Mixed Content Error: This request was blocked due to content security policy.
+Try one of these solutions:
+1. Click the shield icon ⛨ in your browser's address bar and allow mixed content
+2. Use curl command: curl 100.26.236.1:5001/ping
+3. Use https instead of http</pre>`;
+            } else {
+                responseDiv.innerHTML = `<pre style="color: orange;">Error: ${error.message}</pre>`;
+            }
+        }
     }
-}
     </script>
 
     <h2>Authentication Endpoints</h2>
