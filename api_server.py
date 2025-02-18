@@ -2,8 +2,7 @@
 Robot Services Exchange API Server
 """
 
-import flask
-import os
+import flask, os, json, time
 from flask_cors import CORS
 from functools import wraps
 import secrets
@@ -21,13 +20,39 @@ import config
 app = flask.Flask(__name__, static_url_path='', static_folder='/home/ubuntu/RSX')
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-def simulation_traffic_middleware(request):
-    if request.headers.get('X-Simulation-Traffic') == 'true':
-        print("Simulated traffic detected")
+def log_request(request, response_code):
+    """Log request details to Redis"""
+    try:
+        log_entry = {
+            'timestamp': int(time.time()),
+            'method': request.method,
+            'path': request.path,
+            'ip': request.remote_addr,
+            'status': response_code,
+            'user_agent': request.headers.get('User-Agent', 'Unknown')
+        }
+        
+        # Add username if authenticated
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            token = auth_header.split(" ")[-1]
+            username = redis_client.get(f"auth_token:{token}")
+            if username:
+                log_entry['username'] = username.decode()
 
-@app.before_request
-def before_request():
-    simulation_traffic_middleware(flask.request)
+        # Store in Redis list with auto-expiry (7 days)
+        key = f"request_log:{time.strftime('%Y-%m-%d')}"
+        redis_client.rpush(key, json.dumps(log_entry))
+        redis_client.expire(key, 7 * 24 * 60 * 60)  # 7 days in seconds
+        
+    except Exception as e:
+        print(f"Logging error: {str(e)}")
+
+@app.after_request
+def after_request(response):
+    """Log after each request"""
+    log_request(flask.request, response.status_code)
+    return response
 
 def token_required(f):
     @wraps(f)
@@ -80,11 +105,6 @@ def login():
     try:
         data = flask.request.get_json()
         response, status = auth_login(data)
-        if status == 200:
-            # Create session token
-            token = secrets.token_hex(32)
-            redis_client.setex(f"auth_token:{token}", 3600, data['username'])
-            return flask.jsonify({"access_token": token}), 200
         return flask.jsonify(response), status
     except Exception as e:
         return flask.jsonify({"error": str(e)}), 500
