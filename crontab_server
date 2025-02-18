@@ -21,9 +21,7 @@
 # For more information see the manual pages of crontab(5) and cron(8)
 # 
 # m h  dom mon dow   command
-0 * * * * /home/ubuntu/MithrilWebsite/scripts/update_website.sh >> /home/ubuntu/website_update.log 2>&1
 1 * * * * /home/ubuntu/RSX/scripts/update_website.sh >> /home/ubuntu/website_update.log 2>&1
 
-0 2 * * * /home/ubuntu/MithrilAPI/scripts/redis-backup.sh >> /home/ubuntu/redis-backup.log 2>&1
-0 8 * * * /path/to/flush_logs.py
+0 8 * * * /home/ubuntu/robot_auction_api/flush_logs.py >> /home/ubuntu/log_flush.log 2>&1
 
