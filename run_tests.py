@@ -3,13 +3,13 @@ Main test runner for Robot Services Exchange API
 """
 
 from conftest import TestState
-from test_auth import run_auth_tests
-from test_buyer import run_buyer_tests
-from test_seller import run_seller_tests
-from test_shared import run_shared_tests
-from test_messaging import run_messaging_tests
-from test_bulletin import run_bulletin_tests
-from test_utils import run_util_tests
+from tests.test_auth import run_auth_tests
+from tests.test_buyer import run_buyer_tests
+from tests.test_seller import run_seller_tests
+from tests.test_shared import run_shared_tests
+from tests.test_messaging import run_messaging_tests
+from tests.test_bulletin import run_bulletin_tests
+from tests.test_utils import run_util_tests
 import config
 
 def run_all_tests():
