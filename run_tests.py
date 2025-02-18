@@ -18,21 +18,24 @@ def run_all_tests():
     api_url = config.API_URL
     
     test_suites = [
-        ("Auth Tests", run_auth_tests),
-        ("Utils Tests", run_util_tests),
-        ("Buyer Tests", run_buyer_tests),
-        ("Seller Tests", run_seller_tests),
-        ("Shared Tests", run_shared_tests),
-        ("Messaging Tests", run_messaging_tests),
-        ("Bulletin Tests", run_bulletin_tests)
+        ("Auth Tests", run_auth_tests, True),
+        ("Utils Tests", run_util_tests, False),
+        ("Buyer Tests", run_buyer_tests, True),
+        ("Seller Tests", run_seller_tests, True),
+        ("Shared Tests", run_shared_tests, True),
+        ("Messaging Tests", run_messaging_tests, True),
+        ("Bulletin Tests", run_bulletin_tests, True)
     ]
 
     results = []
-    for name, test_suite in test_suites:
+    for name, test_suite, needs_args in test_suites:
         print(f"\n{'=' * 50}")
         print(f"Running {name}")
         print(f"{'=' * 50}")
-        result = test_suite(api_url, test_state)
+        if needs_args:
+            result = test_suite(api_url, test_state)
+        else:
+            result = test_suite()
         results.append((name, result))
 
     # Print summary
