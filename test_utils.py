@@ -1,76 +1,54 @@
-import redis, os, json, requests, random
+"""
+Tests for core utilities
+"""
 
-API_URL = os.getenv('API_URL', 'http://localhost:5001')
-REDIS_HOST, REDIS_PORT, REDIS_DB = os.getenv('REDIS_HOST', 'localhost'), int(os.getenv('REDIS_PORT', 6379)), int(os.getenv('REDIS_DB', 0))
-SIMULATION_KEY = "sim_12345"
+from utils import calculate_distance, hash_password, verify_password
+from conftest import run_test
 
-REDHASH_ACCOUNTS = "accounts"
-REDHASH_LIVE_BIDS = "live_bids" 
-REDHASH_SIM_BIDS = "sim_live_bids"
-REDHASH_ACTIVE_JOBS = "active_jobs"
-REDHASH_SIM_JOBS = "sim_active_jobs"
-
-def setup_redis():
-    r = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=True)
-    try:
-        r.ping()
-        return r
-    except redis.ConnectionError as e:
-        print(f"❌ Redis connection failed: {e}")
-        raise
-
-def cleanup_redis(r):
-    # Clean simulation data
-    r.delete(REDHASH_SIM_BIDS, REDHASH_SIM_JOBS)
+def test_distance_calculation():
+    """Test distance calculations"""
+    # NYC to LA coordinates
+    nyc = (40.7128, -74.0060)
+    la = (34.0522, -118.2437)
+    distance = calculate_distance(nyc, la)
     
-    # Clean test accounts
-    for username in r.hkeys(REDHASH_ACCOUNTS):
-        if username.startswith("test_"):
-            r.hdel(REDHASH_ACCOUNTS, username)
+    # Should be ~2450 miles
+    expected = 2450
+    margin = 50  # Allow 50 mile margin of error
     
-    # Clean test tokens
-    for token in r.keys("auth_token:*"):
-        if r.get(token).startswith("test_"):
-            r.delete(token)
+    if not (expected - margin <= distance <= expected + margin):
+        return False, f"Distance {distance} not within expected range"
+        
+    return True, "Distance calculation works"
 
-def run_test(desc, test_fn, *args):
-    print(f"\nTest: {desc}")
-    try:
-        result, msg = test_fn(*args)
-        print("✅ PASS" if result else "❌ FAIL", msg)
-        return result
-    except Exception as e:
-        print(f"❌ ERROR: {str(e)}")
-        return False
-
-def get_auth_token(username="test_user", password="test123"):
-    resp = requests.post(f"{API_URL}/login", json={"username": username, "password": password})
-    if resp.status_code != 200:
-        raise Exception(f"Auth failed: {resp.status_code}")
-    return resp.json()["access_token"]
-
-def create_test_user(username="test_user", password="test123"):
-    resp = requests.post(f"{API_URL}/register", json={"username": username, "password": password})
-    if resp.status_code != 201:
-        raise Exception(f"User creation failed: {resp.status_code}")
-    return get_auth_token(username, password)
-
-def random_location():
-    return (
-        40.7128 + (random.random() - 0.5),  # NYC ± 0.5°
-        -74.0060 + (random.random() - 0.5)
-    )
-
-def assert_valid_response(resp, expected_status=200):
-    assert resp.status_code == expected_status, f"Expected {expected_status}, got {resp.status_code}: {resp.text}"
-    return resp.json() if resp.status_code != 204 else None
-
-class TestConfig:
-    SERVICES = ["cleaning", "delivery", "security", "maintenance", "lawn_care", "pet_sitting", "home_repair", "painting"]
-    PRICES = [25, 50, 75, 100, 150, 200]
+def test_password_hashing():
+    """Test password hashing and verification"""
+    password = "testpassword123"
     
-    @staticmethod
-    def random_service(): return random.choice(TestConfig.SERVICES)
+    # Hash password
+    hashed = hash_password(password)
+    if not hashed or len(hashed) < 20:  # Basic length check
+        return False, "Invalid hash generated"
+        
+    # Verify correct password
+    if not verify_password(hashed, password):
+        return False, "Failed to verify correct password"
+        
+    # Verify wrong password fails
+    if verify_password(hashed, "wrongpassword"):
+        return False, "Verified wrong password"
+        
+    return True, "Password hashing works"
+
+def run_util_tests():
+    """Run all utility tests"""
+    tests = [
+        ("Distance Calculation", test_distance_calculation),
+        ("Password Hashing", test_password_hashing)
+    ]
+
+    results = []
+    for desc, test_func in tests:
+        results.append(run_test(desc, test_func))
     
-    @staticmethod 
-    def random_price(): return random.choice(TestConfig.PRICES)
+    return all(results)
