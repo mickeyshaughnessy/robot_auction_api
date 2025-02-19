@@ -190,4 +190,18 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     createStarfield();
+    
+    // Add pulsing animation to the token logo
+    const tokenLogo = document.getElementById('thersx-logo');
+    if (tokenLogo) {
+        setInterval(() => {
+            tokenLogo.style.transform = 'scale(1.05)';
+            tokenLogo.style.boxShadow = '0 0 20px rgba(74, 135, 255, 0.9)';
+            
+            setTimeout(() => {
+                tokenLogo.style.transform = 'scale(1)';
+                tokenLogo.style.boxShadow = '0 0 15px rgba(74, 135, 255, 0.7)';
+            }, 1000);
+        }, 3000);
+    }
 });
