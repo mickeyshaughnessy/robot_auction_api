@@ -113,14 +113,82 @@ h2::after {
   text-shadow: 0 0 5px rgba(192, 192, 192, 0.5);
 }
 
+.token-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.logo-container {
+  flex-shrink: 0;
+}
+
+.token-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-color), #1a237e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 15px rgba(74, 135, 255, 0.7);
+  position: relative;
+  overflow: hidden;
+}
+
+.token-logo::before {
+  content: '';
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: rotate(45deg) translateX(-200%);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% {
+    transform: rotate(45deg) translateX(-200%);
+  }
+  50% {
+    transform: rotate(45deg) translateX(100%);
+  }
+  100% {
+    transform: rotate(45deg) translateX(100%);
+  }
+}
+
+.logo-text {
+  font-weight: bold;
+  font-size: 1rem;
+  color: white;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+}
+
+.token-details {
+  flex-grow: 1;
+}
+
+.token-details h3 {
+  font-size: 0.9rem;
+  color: var(--accent-color);
+  margin-bottom: 0.5rem;
+}
+
 .coin-address {
   background: rgba(10, 14, 23, 0.5);
   padding: 0.5rem;
   border-radius: 5px;
   font-family: 'Courier New', monospace;
-  overflow: auto;
-  margin: 1rem 0;
+  font-size: 0.9rem;
+  overflow-wrap: break-word;
+  word-break: break-all;
+  letter-spacing: 0.5px;
   border-left: 3px solid var(--accent-color);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .crypto-link, .social-link {
