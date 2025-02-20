@@ -1,0 +1,171 @@
+/*Spacing between section*/
+body .Main{
+	#Hero{margin-top:150px; margin-bottom:200px;}
+	#Explanation{margin-bottom:0px; margin-top:100px;}
+	#Usecases_Heading{margin-bottom:10px; margin-top:300px;}
+	#Usecases_1{margin-bottom:50px;  padding-bottom:100px;}
+	#Usecases_2{margin-bottom:50px; margin-top:50px;}
+	#Quickstart_1{margin-bottom:100px; margin-top:50px;}
+	#Latest_News{padding-bottom:200px; margin-top:100px;}
+}
+
+body .Main{ 
+	#Hero{
+		padding:75px;
+		border-radius:50px;
+		position:relative;
+		left:200px;
+	}
+
+	#Hero img{height:100%;}
+
+	@media only screen and (max-width:1750px){
+		#Hero{
+			position:static;
+		}
+	}
+
+	@media only screen and (max-width:992px){
+		.img-col{
+			display:none;
+		}
+	}
+
+	@media only screen and (max-width:500px){
+		#Hero{padding:50px;}
+	}
+}
+
+body .Main{ 
+	#Explanation{
+		padding:75px;
+		border-radius:50px;
+		position:relative;
+		right:200px;
+	}
+
+	#Explanation img{height:100%;}
+
+	@media only screen and (max-width:1750px){
+		#Explanation{position:static;}
+	}
+
+	@media only screen and (max-width:1199px){
+		#Explanation .img-col{display:none;}
+	}
+
+	@media only screen and (max-width:500px){
+		#Explanation{
+			padding:50px;
+		}
+	}
+
+}
+/*Spacing Banner*/
+body .Main{
+	#Banner{height:800px; position:relative;}
+	
+	#Banner h1{position:absolute; bottom:200px; left:100px; width:850px;}
+
+	#Banner button{position:absolute; bottom:150px; left:100px;}
+
+	@media only screen and (max-width:850px){
+		#Banner h1{width:80%;}
+	}
+	
+	@media only screen and (max-width:650px){
+		#Banner h1{font-size:3rem};
+		#Banner button{display:none;}
+	}
+
+	@media only screen and (max-width:400px){
+		#Banner h1{left:20px;}
+	}
+}
+
+/*Spacing Usecases_1*/
+body .Main{
+	/*TODO: make the width breakpoint dependent*/
+	#Usecases_1{width:80%;}
+	#Usecases_2{width:80%;}
+	
+	#Usecases_1 .Inner{margin:50px; padding:50px; border-radius:50px; height:600px}
+	#Usecases_2 .Inner{margin:50px; padding:50px; border-radius:50px;}
+
+	#Usecases_1 .Inner{display:flex; flex-direction:column; justify-content:center; align-items:center;}
+	#Usecases_1 .Inner img{max-width:80%; margin-bottom:20px;}
+	#Usecases_1 .Inner h4{text-align:center;}
+	#Usecases_1 .Inner p{text-align:center;}
+
+	#Usecases_1 .Inner img{max-width:80%;}
+
+	@media only screen and (min-width:2000px){
+		#Usecases_1 .Inner{max-width:450px}
+	}
+
+	@media only screen and (max-width:1700px){
+		#Usecases_1 .Inner{height:500px; margin:25px;}
+	}
+
+	@media only screen and (max-width:1400px){
+		#Usecases_1 .Inner img{max-width:50%;}
+	}
+
+	@media only screen and (max-width:992px){
+		#Usecases_1 .Inner{
+			margin-top:50px;
+			margin-bottom:50px;
+			
+			height:600px;
+		}
+	}
+
+	@media only screen and (max-width:500px){
+		#Usecases_1{padding:50px;}
+	}
+}
+
+body .Main{
+	#Quickstart_Heading{display:none;}
+	#Quickstart_Heading h2{width:100%; text-align:center;}
+}
+
+body .Main{
+	#Quickstart_1{padding:75px; border-radius:50px;}
+}
+
+body .Main{
+	#Quickstart_2 .Inner{height:450px;}
+
+	#Quickstart_2 .Left{position:relative; right:100px;}
+	#Quickstart_2 .Right{position:relative; left:100px;}
+
+	@media only screen and (max-width:1500px){
+		#Quickstart_2 .Left{position:static;}
+		#Quickstart_2 .Right{position:static;}
+	}
+
+	@media only screen and (max-width:1400px){
+		#Quickstart_2 .Left{margin-bottom:100px;}
+		#Quickstart_2 .Inner{height:auto;}
+	}
+
+	@media only screen and (max-width:500px){
+		#Quickstart_2{padding-bottom: 100px;} 
+	}
+}
+
+body .Main{
+	#Latest_News #Latest_News_Inner{border-radius: 50px;}
+	#Latest_News #Latest_News_Inner #carousel{padding:50px;}
+	#Latest_News #Latest_News_Inner .Inner-Row-1{display:flex; justify-content:center;}
+	#Latest_News #Latest_News_Inner .Inner-Row-2{width:80%;}
+
+	@media only screen and (max-width:1199px){
+		#Latest_News img{display:none;}
+	}
+
+	@media only screen and (max-width:500px){
+		#Latest_News{display:none;}
+	}
+}

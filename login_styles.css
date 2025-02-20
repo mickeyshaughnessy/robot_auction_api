@@ -1,0 +1,12 @@
+.Right-Fixed{
+        position:fixed;
+        top:50px;
+        right:50px;
+
+        width:400px;
+        height:600px;
+
+        z-index:1;
+
+        .Login-Controls h2{margin-top:100px; margin-bottom:50px;}
+}
