@@ -1,0 +1,229 @@
+/*Fonts*/
+@font-face{
+	font-family:"Orbitron";
+	src: url(../../../Fonts/ttf/Orbitron.ttf);
+}
+@font-face{
+	font-family:"Space_Grotesk";
+	src: url(../../../Fonts/ttf/Space_Grotesk.ttf);
+}
+@font-face{
+	font-family:"Chackra_Petch";
+	src: url(../../../Fonts/ttf/ChakraPetch-Regular.ttf);
+}	
+/*Variable definition*/
+:root{
+	/*One brand colour*/	
+	--brand-color:#5C7DBE;
+	
+	/*Supporting colours: Green Orange Red Blue*/
+	--support-green:#6BBE5b;
+	--support-orange:#BF8060;
+	--support-red:#DE5E5E;
+	--support-blue:#5BB9BE;
+
+	/*--accent-colours*/
+
+	/*Brand colour hues*/
+	--brand-color-200:#BCCCEC;
+	--brand-color-300:#94ade0;
+	--brand-color-400:#7f99cc;
+
+	/*Neutrals*/
+	--neutral-100:#DEE4EF;
+	--neutral-200:#BAC1CE;
+	--neutral-300:#949BAA;
+	--neutral-400:#89919F;
+	--neutral-500:#5E6777;
+	--neutral-600:#3C4557;
+	--neutral-700:#232C3F;
+	--neutral-800:#111A2B;
+	--neutral-900:#050B16;
+
+	/*Complementary*/
+	--comp-100:#F2EADA;
+	--comp-200:#ECDCBC;
+	--comp-400:#DBBF86;
+	--comp-500:#BE9D5C;
+
+	/*Second colour attempt*/
+	--base-gradient-1:#2596BE;
+	--base-gradient-2:#3E89C2;
+	--base-gradient-3:#6079BD;
+	--base-gradient-4:#8066AD;
+	--base-gradient-5:#985193;
+	--base-gradient-6:#A53D71;
+	
+	--base-gradient-1-300:#94d4ea;
+	--base-gradient-1-400:#6ac2e2;
+	--base-gradient-1-600:#2598c0;
+	--base-gradient-1-700:#15546b;
+	--base-gradient-1-800:#0c3340;
+	
+	--base-gradient-3-100:#ebeef7;
+	--base-gradient-3-200:#c9d1e9;
+	--base-gradient-3-300:#a5b3da;
+	--base-gradient-3-600:#3a508c;
+	--base-gradient-3-700:#2a3964;
+	--base-gradient-3-750:#25345a;
+	--base-gradient-3-800:#161f36;
+
+	--base-gradient-4-500:#8066AD;
+	--base-gradient-4-400:#9f8bc1;
+	--base-gradient-4-300:#baacd3;
+	--base-gradient-4-200:#d6cde4;
+
+	--base-gradient-5-600:#81457d;
+	--base-gradient-5-700:#5c3159;
+	--base-gradient-5-800:#371e36;
+
+	/*Button styling*/
+	.btn-primary{
+		background-color:var(--base-gradient-1-800);
+		border-color:var(--neutral-900);
+	}
+	.btn-secondary{
+		background-color: var(--base-gradient-5-800);
+		border-color: var(--neutral-900);
+		color:var(--base-gradient-3-100);
+	}
+
+}
+
+body .LightTheme{
+	/*Page Background*/
+	/*
+*	Commented out because it didn't add much. Once things are further along using something lighter, less gray, and more playfull. Works better with        with the robot mascot.
+*	background: var(--comp-100);	
+	background: radial-gradient(circle, var(--neutral-300) 58%, var(--neutral-200) 73%, var(--neutral-100) 93%);
+	*/
+
+
+	/*Standard text styling*/
+	h1{text-transform:uppercase;}
+
+	h1{font-family:"Orbitron"; font-weight:bold; font-size:5rem; color:var(--neutral-900);}
+	h2{font-family:"Space_Grotesk"; font-size:3.5rem; color:var(--neutral-900);}
+	h3{font-family:"Space_Grotesk"; font-size:3rem; color:var(--neutral-900);}
+	h4{font-family:"Space_Grotesk"; font-size:2rem; color:var(--neutral-900);}
+	h5{font-family:"Space_Grotesk"; font-size:1.5rem; color:var(--neutral-900);}
+
+	p{font-family:"Chackra_Petch"; color:var(--neutral-700);}
+
+	/*Coloring*/
+	/*Header coloring*/
+	.Header{
+		border-width:0px 0px 2px 0px;
+		border-style:solid;
+		border-color:black;
+
+		.navbar .navbar-brand {font-weight:800;  color:var(--base-gradient-5-600);}
+		.navbar{background-color:var(--base-gradient-3-800) !important;}
+		.navbar .nav-item{color:var(--base-gradient-3-100);}
+		.navbar .nav-item .nav-link{color:var(--base-gradient-3-200); text-transform:uppercase; font-weight:700;}
+		.navbar .active{text-decoration:underline;}
+	}
+
+	.Right-Fixed{
+		background: rgb(37,52,90);
+		background: radial-gradient(circle, rgba(37,52,90,1) 0%, rgba(22,31,54,1) 100%); 
+
+		border-width:2px;
+		border-style:solid;
+		border-radius: 50px;
+		border-color:black;
+
+		box-shadow: 4px 4px 34px 11px;
+
+		.Login-Controls h2{color:var(--base-gradient-5-700); text-transform:uppercase; font-weight:800;}
+		.Login-Controls label{color:var(--brand-color-200);}
+	}
+	
+	.Main{
+		.Bottom-Section{background: rgb(186,172,211);}
+		.Bottom-Section{background: linear-gradient(0deg, var(--base-gradient-4-500) 6%, var(--base-gradient-4-400) 34%, var(--base-gradient-4-300) 61%, var(--base-gradient-4-200) 79%, #ffffff 100%);}
+	}
+	
+	/*Banner construction*/
+	.Main{
+		#Banner{
+			background-image:url("../../../Images/Banner/Banner_2.webp");
+			background-size:cover;
+
+			button{font-family:"Orbitron"; font-weight:600; font-size:2rem; text-transform:uppercase;}
+		}
+	}
+	
+	/*ID:Hero*/
+	.Main{
+		#Hero{background:var(--base-gradient-4-400); box-shadow: 4px 4px 34px 11px rgba(0,0,0, 0.20);}
+	}
+	
+	/*ID:Explanation*/
+	.Main{
+		#Explanation{background:var(--base-gradient-4-400); box-shadow: 4px 4px 34px 11px rgba(0,0,0, 0.20);}
+	}
+
+	/*ID:Hero*/
+	.Main{
+		#Usecases_Heading{font-size: 4.5rem; text-align:center;}
+	}
+	/*ID:Usecases_1*/
+	.Main{
+		#Usecases_1 .Inner{background-color:var(--brand-color-300); box-shadow: 4px 4px 34px 11px rgba(0,0,0, 0.20);}
+		#Usecases_1 .Inner:hover{background-color:var(--support-blue);}
+
+		#Usecases_1 .Inner p{font-size: 1.5rem;}
+	}
+
+	/*ID:Usecases_2*/
+	.Main{
+		#Usecases_2_container{background-color:var(--comp-200);}
+
+		#Usecases_2 .Inner{background-color:var(--brand-color-300); box-shadow: 4px 4px 34px 11px rgba(0,0,0, 0.20);}
+		#Usecases_2 .Inner:hover{background:var(--support-blue)}
+	}
+
+	/*ID:Quickstart_Heading*/
+	.Main{
+		#Quickstart_Heading{display:none;}
+	}
+
+	/*ID:Quickstart_1*/
+	.Main{
+		#Quickstart_1{background-color:var(--brand-color-400); box-shadow: 4px 4px 34px 11px rgba(0,0,0, 0.20);}
+	}
+	
+	/*ID:Quickstart_2*/
+	.Main{
+		#Quickstart_2 .Inner{background-color: var(--brand-color-400); padding:50px; border-radius: 50px;}
+		
+	}
+
+	/*ID:Quickstart_3*/
+
+
+	/*ID:Latest_News*/
+	.Main{
+		#Latest_News #Latest_News_Inner{background-color:var(--brand-color-400);}
+	}
+
+	.Footer{
+		background-color:var(--base-gradient-3-800);
+		
+		h4{color:var(--base-gradient-5);}
+		a{color:var(--base-gradient-3-200);}
+
+		.Inner{
+			position:relative;
+			left:10px;
+		}
+
+		border-style:solid;
+		border-width: 1px 0px;
+		border-color:#050B16;
+	}
+}
+
+
+
