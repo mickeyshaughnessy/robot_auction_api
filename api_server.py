@@ -127,7 +127,7 @@ def account_data(current_user):
     except Exception as e:
         return flask.jsonify({"error": str(e)}), 500
 
-@app.route('/make_bid', methods=['POST'])
+@app.route('/submit_bid', methods=['POST'])
 @token_required
 def make_bid(current_user):
     try:
