@@ -2,10 +2,91 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>RSE FAQ</title>
+    <title>RSE FAQ - Nearby Services</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Common Styles -->
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .search-form {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 15px;
+        }
+        button:hover {
+            background-color: #3367d6;
+        }
+        #resultsArea {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .bid-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .bid-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .bid-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .bid-price {
+            font-weight: bold;
+            color: #4285f4;
+        }
+        .error-message {
+            color: #d32f2f;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success-message {
+            color: #388e3c;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        #loginSection, #mainSection {
+            transition: opacity 0.3s ease;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -23,8 +104,11 @@
     </header>
     <main>
         <div class="container">
-            <h2>Find Nearby Robots</h2>
-            <div class="search-form">
+            <h2>Find Nearby Robot Services</h2>
+            
+            <!-- Login Section -->
+            <div id="loginSection" class="search-form">
+                <h3>Login to access nearby services</h3>
                 <div class="form-group">
                     <label for="username">Username:</label>
                     <input type="text" id="username" name="username" required>
@@ -33,6 +117,14 @@
                     <label for="password">Password:</label>
                     <input type="password" id="password" name="password" required>
                 </div>
+                <button id="loginBtn" type="button">Login</button>
+                <div id="loginMessage"></div>
+            </div>
+            
+            <!-- Main Section (Hidden until logged in) -->
+            <div id="mainSection" class="search-form" style="display: none;">
+                <div id="userInfo"></div>
+                <h3>Search for nearby robot services</h3>
                 <div class="form-group">
                     <label for="latitude">Latitude:</label>
                     <input type="number" id="latitude" name="latitude" step="0.000001" required>
@@ -41,11 +133,13 @@
                     <label for="longitude">Longitude:</label>
                     <input type="number" id="longitude" name="longitude" step="0.000001" required>
                 </div>
-                <button id="searchNearbyBtn" type="button">Search Nearby</button>
-                <div class="form-group">
-                    <label for="resultsArea">Results:</label>
-                    <textarea id="resultsArea" rows="10" readonly></textarea>
+                <div class="button-group">
+                    <button id="useLocationBtn" type="button">Use My Location</button>
+                    <button id="searchNearbyBtn" type="button">Search Nearby</button>
+                    <button id="logoutBtn" type="button">Logout</button>
                 </div>
+                <div id="nearbyMessage"></div>
+                <div id="resultsContainer"></div>
             </div>
         </div>
     </main>
@@ -56,74 +150,296 @@
     </footer>
 
     <script>
-        document.getElementById('searchNearbyBtn').addEventListener('click', async function() {
+        // Store the authentication token
+        let authToken = '';
+        let currentUsername = '';
+        
+        // DOM elements
+        const loginSection = document.getElementById('loginSection');
+        const mainSection = document.getElementById('mainSection');
+        const loginMessage = document.getElementById('loginMessage');
+        const nearbyMessage = document.getElementById('nearbyMessage');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const userInfo = document.getElementById('userInfo');
+        
+        // Check for saved token in localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedToken = localStorage.getItem('rseAuthToken');
+            const savedUsername = localStorage.getItem('rseUsername');
+            if (savedToken && savedUsername) {
+                authToken = savedToken;
+                currentUsername = savedUsername;
+                showMainSection();
+                updateUserInfo();
+            }
+        });
+        
+        // Login functionality
+        document.getElementById('loginBtn').addEventListener('click', async function() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            const lat = document.getElementById('latitude').value;
-            const lon = document.getElementById('longitude').value;
-            const resultsArea = document.getElementById('resultsArea');
             
-            // Validation
-            if (!username || !password || !lat || !lon) {
-                resultsArea.value = "Please fill in all fields.";
+            if (!username || !password) {
+                loginMessage.innerHTML = '<div class="error-message">Please enter both username and password.</div>';
                 return;
             }
             
-            // Display loading message
-            resultsArea.value = "Searching for nearby robots...";
+            loginMessage.innerHTML = '<div>Logging in...</div>';
             
             try {
-                const response = await fetch('http://100.26.236.1:5001/nearby', {
+                const response = await fetch('http://100.26.236.1:5001/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         username: username,
-                        password: password,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Login failed');
+                }
+                
+                // Save token and username
+                authToken = data.token;
+                currentUsername = username;
+                localStorage.setItem('rseAuthToken', authToken);
+                localStorage.setItem('rseUsername', currentUsername);
+                
+                showMainSection();
+                updateUserInfo();
+                
+            } catch (error) {
+                loginMessage.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
+            }
+        });
+        
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            authToken = '';
+            currentUsername = '';
+            localStorage.removeItem('rseAuthToken');
+            localStorage.removeItem('rseUsername');
+            
+            // Show login section, hide main section
+            loginSection.style.display = 'block';
+            mainSection.style.display = 'none';
+            
+            // Clear fields
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            loginMessage.innerHTML = '';
+        });
+        
+        // Use current location
+        document.getElementById('useLocationBtn').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                nearbyMessage.innerHTML = '<div>Getting your location...</div>';
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        document.getElementById('latitude').value = position.coords.latitude;
+                        document.getElementById('longitude').value = position.coords.longitude;
+                        nearbyMessage.innerHTML = '<div class="success-message">Location obtained successfully!</div>';
+                    },
+                    (error) => {
+                        nearbyMessage.innerHTML = `<div class="error-message">Geolocation error: ${error.message}</div>`;
+                    }
+                );
+            } else {
+                nearbyMessage.innerHTML = '<div class="error-message">Geolocation is not supported by this browser.</div>';
+            }
+        });
+        
+        // Search nearby functionality
+        document.getElementById('searchNearbyBtn').addEventListener('click', async function() {
+            const lat = document.getElementById('latitude').value;
+            const lon = document.getElementById('longitude').value;
+            
+            if (!lat || !lon) {
+                nearbyMessage.innerHTML = '<div class="error-message">Please provide latitude and longitude.</div>';
+                return;
+            }
+            
+            nearbyMessage.innerHTML = '<div>Searching for nearby services...</div>';
+            resultsContainer.innerHTML = '';
+            
+            try {
+                const response = await fetch('http://100.26.236.1:5001/nearby', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
                         lat: parseFloat(lat),
                         lon: parseFloat(lon)
                     })
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Server responded with status: ${response.status}`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to fetch nearby services');
                 }
                 
                 const data = await response.json();
-                resultsArea.value = JSON.stringify(data, null, 2);
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                displayBids(data.bids || {});
+                
             } catch (error) {
-                resultsArea.value = `Error: ${error.message}`;
-                console.error('Error:', error);
+                nearbyMessage.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
             }
         });
         
-        // Optional: Add geolocation to get user's current position
-        document.addEventListener('DOMContentLoaded', function() {
-            if (navigator.geolocation) {
-                const getUserLocation = () => {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            document.getElementById('latitude').value = position.coords.latitude;
-                            document.getElementById('longitude').value = position.coords.longitude;
-                        },
-                        (error) => {
-                            console.error('Geolocation error:', error);
-                        }
-                    );
-                };
-                
-                // Add a button for getting current location
-                const locationBtn = document.createElement('button');
-                locationBtn.textContent = 'Use My Location';
-                locationBtn.type = 'button';
-                locationBtn.addEventListener('click', getUserLocation);
-                
-                // Insert after the longitude input
-                const longitudeInput = document.getElementById('longitude');
-                longitudeInput.parentNode.after(locationBtn);
+        // Function to display bids in a more user-friendly format
+        function displayBids(bids) {
+            resultsContainer.innerHTML = '';
+            
+            const bidCount = Object.keys(bids).length;
+            nearbyMessage.innerHTML = `<div class="success-message">Found ${bidCount} service${bidCount !== 1 ? 's' : ''} nearby!</div>`;
+            
+            if (bidCount === 0) {
+                resultsContainer.innerHTML = '<p>No services found nearby. Try expanding your search area.</p>';
+                return;
             }
-        });
+            
+            for (const [bidId, bid] of Object.entries(bids)) {
+                const bidCard = document.createElement('div');
+                bidCard.className = 'bid-card';
+                
+                const bidTitle = document.createElement('div');
+                bidTitle.className = 'bid-title';
+                bidTitle.textContent = bid.title || 'Untitled Service';
+                
+                const bidDetails = document.createElement('div');
+                bidDetails.className = 'bid-details';
+                
+                // Create fields for the card
+                const detailFields = [
+                    { label: 'Service ID', value: bidId },
+                    { label: 'Posted by', value: bid.username || 'Unknown user' },
+                    { label: 'Price', value: `$${bid.price || 'Not specified'}`, className: 'bid-price' },
+                    { label: 'Posted', value: formatDate(bid.timestamp) },
+                    { label: 'Description', value: bid.description || 'No description provided' }
+                ];
+                
+                detailFields.forEach(field => {
+                    const detailItem = document.createElement('div');
+                    const label = document.createElement('strong');
+                    label.textContent = `${field.label}: `;
+                    
+                    const value = document.createElement('span');
+                    value.textContent = field.value;
+                    if (field.className) {
+                        value.className = field.className;
+                    }
+                    
+                    detailItem.appendChild(label);
+                    detailItem.appendChild(value);
+                    bidDetails.appendChild(detailItem);
+                });
+                
+                // Create action button
+                const actionButton = document.createElement('button');
+                actionButton.textContent = 'Grab This Job';
+                actionButton.addEventListener('click', () => grabJob(bidId));
+                
+                bidCard.appendChild(bidTitle);
+                bidCard.appendChild(bidDetails);
+                bidCard.appendChild(document.createElement('br'));
+                bidCard.appendChild(actionButton);
+                
+                resultsContainer.appendChild(bidCard);
+            }
+        }
+        
+        // Function to grab a job
+        async function grabJob(bidId) {
+            try {
+                const response = await fetch('http://100.26.236.1:5001/grab_job', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        bid_id: bidId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to grab job');
+                }
+                
+                // Show success message
+                nearbyMessage.innerHTML = `<div class="success-message">Success! ${data.message || 'Job grabbed successfully.'}</div>`;
+                
+                // Refresh the nearby list
+                document.getElementById('searchNearbyBtn').click();
+                
+            } catch (error) {
+                nearbyMessage.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Get user account data
+        async function updateUserInfo() {
+            try {
+                const response = await fetch('http://100.26.236.1:5001/account_data', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch account data');
+                }
+                
+                const data = await response.json();
+                
+                // Display user info
+                let rating = 'No ratings yet';
+                if (data.total_ratings > 0) {
+                    const avgRating = (data.stars / data.total_ratings).toFixed(1);
+                    rating = `${avgRating}/5 (${data.total_ratings} ratings)`;
+                }
+                
+                userInfo.innerHTML = `
+                    <div style="margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
+                        <strong>Logged in as:</strong> ${currentUsername} | 
+                        <strong>Rating:</strong> ${rating} | 
+                        <strong>Account created:</strong> ${formatDate(data.created_on)}
+                    </div>
+                `;
+                
+            } catch (error) {
+                userInfo.innerHTML = `<div class="error-message">Error fetching account data: ${error.message}</div>`;
+            }
+        }
+        
+        // Helper function to show main section and hide login
+        function showMainSection() {
+            loginSection.style.display = 'none';
+            mainSection.style.display = 'block';
+        }
+        
+        // Helper function to format dates
+        function formatDate(timestamp) {
+            if (!timestamp) return 'Unknown';
+            
+            const date = new Date(timestamp * 1000);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        }
     </script>
 </body>
 </html>
