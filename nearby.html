@@ -22,6 +22,31 @@
         </div>
     </header>
     <main>
+        <div class="container">
+            <h2>Find Nearby Robots</h2>
+            <div class="search-form">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="latitude">Latitude:</label>
+                    <input type="number" id="latitude" name="latitude" step="0.000001" required>
+                </div>
+                <div class="form-group">
+                    <label for="longitude">Longitude:</label>
+                    <input type="number" id="longitude" name="longitude" step="0.000001" required>
+                </div>
+                <button id="searchNearbyBtn" type="button">Search Nearby</button>
+                <div class="form-group">
+                    <label for="resultsArea">Results:</label>
+                    <textarea id="resultsArea" rows="10" readonly></textarea>
+                </div>
+            </div>
         </div>
     </main>
     <footer>
@@ -29,5 +54,76 @@
             <p>&copy; 2025 Robot Services Exchange. All rights reserved.</p>
         </div>
     </footer>
+
+    <script>
+        document.getElementById('searchNearbyBtn').addEventListener('click', async function() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const lat = document.getElementById('latitude').value;
+            const lon = document.getElementById('longitude').value;
+            const resultsArea = document.getElementById('resultsArea');
+            
+            // Validation
+            if (!username || !password || !lat || !lon) {
+                resultsArea.value = "Please fill in all fields.";
+                return;
+            }
+            
+            // Display loading message
+            resultsArea.value = "Searching for nearby robots...";
+            
+            try {
+                const response = await fetch('http://100.26.236.1:5001/nearby', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        lat: parseFloat(lat),
+                        lon: parseFloat(lon)
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                resultsArea.value = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultsArea.value = `Error: ${error.message}`;
+                console.error('Error:', error);
+            }
+        });
+        
+        // Optional: Add geolocation to get user's current position
+        document.addEventListener('DOMContentLoaded', function() {
+            if (navigator.geolocation) {
+                const getUserLocation = () => {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            document.getElementById('latitude').value = position.coords.latitude;
+                            document.getElementById('longitude').value = position.coords.longitude;
+                        },
+                        (error) => {
+                            console.error('Geolocation error:', error);
+                        }
+                    );
+                };
+                
+                // Add a button for getting current location
+                const locationBtn = document.createElement('button');
+                locationBtn.textContent = 'Use My Location';
+                locationBtn.type = 'button';
+                locationBtn.addEventListener('click', getUserLocation);
+                
+                // Insert after the longitude input
+                const longitudeInput = document.getElementById('longitude');
+                longitudeInput.parentNode.after(locationBtn);
+            }
+        });
+    </script>
 </body>
 </html>
