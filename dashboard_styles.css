@@ -1,0 +1,125 @@
+/* Dashboard Styles */
+
+.user-dashboard-section {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-top: 15px;
+  max-width: 100%;
+  padding: 15px;
+  width: 100%;
+}
+
+.section-title {
+  border-bottom: 1px solid #dee2e6;
+  color: #343a40;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+}
+
+/* Recent Bids Styles */
+.recent-bids-section {
+  margin-bottom: 20px;
+}
+
+.recent-bid-item {
+  align-items: center;
+  background-color: white;
+  border-left: 3px solid #6c757d;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 10px;
+  transition: all 0.2s ease;
+}
+
+.recent-bid-item:hover {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.bid-service {
+  color: #343a40;
+  flex: 1;
+  font-weight: 600;
+}
+
+.bid-price {
+  color: #28a745;
+  font-weight: 600;
+  margin: 0 10px;
+}
+
+.bid-status {
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  min-width: 70px;
+  padding: 3px 8px;
+  text-align: center;
+}
+
+.status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-in-progress {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-pending {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+/* Community and Quick Actions Styles */
+.community-section, 
+.quick-actions-section {
+  margin-bottom: 20px;
+}
+
+.user-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.user-actions .btn {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  font-size: 0.9rem;
+  justify-content: center;
+  min-width: 110px;
+  padding: 8px 12px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .bid-status {
+    font-size: 0.7rem;
+    min-width: 60px;
+    padding: 2px 6px;
+  }
+  
+  .bid-service {
+    font-size: 0.9rem;
+  }
+  
+  .bid-price {
+    font-size: 0.85rem;
+    margin: 0 5px;
+  }
+  
+  .user-actions .btn {
+    font-size: 0.8rem;
+    min-width: 100px;
+  }
+}

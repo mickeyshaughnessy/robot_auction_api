@@ -12,6 +12,7 @@
 		<link rel="stylesheet" href="footer_styles.css">
 
 		<link rel="stylesheet" href="login_styles.css">
+		<link rel="stylesheet" href="dashboard_styles.css">
 		
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
@@ -44,6 +45,58 @@
 			}
 			.register-form {
 				display: none;
+			}
+			.user-dashboard-section {
+				display: none;
+				margin-top: 20px;
+				padding: 15px;
+				background-color: #f8f9fa;
+				border-radius: 4px;
+			}
+			.section-title {
+				font-size: 18px;
+				font-weight: bold;
+				margin-bottom: 10px;
+				padding-bottom: 5px;
+				border-bottom: 1px solid #dee2e6;
+			}
+			.recent-bids-section {
+				margin-bottom: 20px;
+			}
+			.recent-bid-item {
+				display: flex;
+				justify-content: space-between;
+				padding: 8px 0;
+				border-bottom: 1px solid #e9ecef;
+			}
+			.bid-service {
+				font-weight: bold;
+			}
+			.bid-price {
+				color: #28a745;
+			}
+			.bid-status {
+				padding: 2px 6px;
+				border-radius: 3px;
+				font-size: 0.85em;
+			}
+			.status-completed {
+				background-color: #d4edda;
+				color: #155724;
+			}
+			.status-in-progress {
+				background-color: #fff3cd;
+				color: #856404;
+			}
+			.status-pending {
+				background-color: #e2e3e5;
+				color: #383d41;
+			}
+			.user-actions {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px;
+				margin-top: 15px;
 			}
 		</style>
 	</head>
@@ -82,7 +135,7 @@
 						</div>
 						<div class="User-Icon-Large">
 							<input type="image"  aria-expanded="false" aria-controls="#Right-Fixed-Container" src="images/Icons/user.png" data-bs-toggle="collapse" data-bs-target="#Right-Fixed-Container">
-							<span id="auth-status-indicator" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+							<span id="auth-status-indicator" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" style="display: none;">
 								✓
 							</span>
 						</div>
@@ -148,6 +201,42 @@
 								<a href="Dashboard.html" class="btn btn-primary mb-2 w-100">My Dashboard</a>
 								<a href="nearby.html" class="btn btn-success mb-2 w-100">Find Nearby Services</a>
 								<button id="logout-button" class="btn btn-danger w-100">Logout</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- User Dashboard Section -->
+					<div id="user-dashboard-section" class="user-dashboard-section">
+						<!-- Recent Bids Section -->
+						<div class="recent-bids-section">
+							<h4 class="section-title">Recent Bids</h4>
+							<div id="recent-bids-list">
+								<p>Loading recent bids...</p>
+							</div>
+							<div class="text-center mt-2">
+								<a href="Dashboard.html" class="btn btn-sm btn-outline-primary">View All Bids</a>
+							</div>
+						</div>
+						
+						<!-- Community Features -->
+						<div class="community-section">
+							<h4 class="section-title">Community</h4>
+							<div class="user-actions">
+								<button id="open-chat-btn" class="btn btn-sm btn-outline-success">
+									<i class="bi bi-chat-dots"></i> Open Chat
+								</button>
+								<button id="open-bulletin-btn" class="btn btn-sm btn-outline-info">
+									<i class="bi bi-bulletin-board"></i> Bulletin Board
+								</button>
+							</div>
+						</div>
+						
+						<!-- Quick Actions -->
+						<div class="quick-actions-section">
+							<h4 class="section-title">Quick Actions</h4>
+							<div class="user-actions">
+								<a href="make_bid.html" class="btn btn-sm btn-primary">Create New Bid</a>
+								<a href="grab_job.html" class="btn btn-sm btn-success">Grab a Job</a>
 							</div>
 						</div>
 					</div>
@@ -433,282 +522,8 @@ Prepare your robot's 				data, including:</p>
 			<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 			<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 		
-            <script>
-                // Constants and API endpoints
-                const API_BASE_URL = 'http://100.26.236.1:5001';
-                const LOGIN_ENDPOINT = `${API_BASE_URL}/login`;
-                const REGISTER_ENDPOINT = `${API_BASE_URL}/register`;
-                const ACCOUNT_DATA_ENDPOINT = `${API_BASE_URL}/account_data`;
-                
-                // DOM Elements
-                const loginForm = document.getElementById('login-form');
-                const registerForm = document.getElementById('register-form');
-                const userProfile = document.getElementById('user-profile');
-                const loginMessage = document.getElementById('login-message');
-                const registerMessage = document.getElementById('register-message');
-                const authStatusIndicator = document.getElementById('auth-status-indicator');
-                
-                // Form switching functions
-                document.getElementById('show-register-form').addEventListener('click', function(e) {
-                    e.preventDefault();
-                    loginForm.style.display = 'none';
-                    registerForm.style.display = 'block';
-                });
-                
-                document.getElementById('show-login-form').addEventListener('click', function(e) {
-                    e.preventDefault();
-                    registerForm.style.display = 'none';
-                    loginForm.style.display = 'block';
-                });
-                
-                document.getElementById('register-now-btn').addEventListener('click', function() {
-                    // Open the login/register panel and show register form
-                    registerForm.style.display = 'block';
-                    loginForm.style.display = 'none';
-                    
-                    // Trigger the collapse to open
-                    const rightFixedContainer = document.getElementById('Right-Fixed-Container');
-                    if (!rightFixedContainer.classList.contains('show')) {
-                        document.querySelector('.User-Icon-Large input').click();
-                    }
-                });
-                
-                // Check if user is already logged in
-                document.addEventListener('DOMContentLoaded', function() {
-                    checkAuthStatus();
-                });
-                
-                function checkAuthStatus() {
-                    const token = localStorage.getItem('rseAuthToken');
-                    const username = localStorage.getItem('rseUsername');
-                    
-                    if (token && username) {
-                        // Update UI for authenticated user
-                        showAuthenticatedUI(username, token);
-                        // Fetch and display user data
-                        fetchAccountData(token);
-                    }
-                }
-                
-                // Login form submission
-                document.getElementById('login-form-element').addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    
-                    const username = document.getElementById('login-username').value.trim();
-                    const password = document.getElementById('login-password').value;
-                    const rememberMe = document.getElementById('rememberMe').checked;
-                    
-                    if (!username || !password) {
-                        showMessage(loginMessage, 'Please enter both username and password', 'error');
-                        return;
-                    }
-                    
-                    try {
-                        showMessage(loginMessage, 'Logging in...', 'info');
-                        
-                        const response = await fetch(LOGIN_ENDPOINT, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                username: username,
-                                password: password
-                            })
-                        });
-                        
-                        const data = await response.json();
-                        
-                        if (!response.ok) {
-                            throw new Error(data.error || 'Login failed');
-                        }
-                        
-                        // Store auth token
-                        const token = data.access_token;
-                        if (rememberMe) {
-                            localStorage.setItem('rseAuthToken', token);
-                            localStorage.setItem('rseUsername', username);
-                        } else {
-                            sessionStorage.setItem('rseAuthToken', token);
-                            sessionStorage.setItem('rseUsername', username);
-                        }
-                        
-                        showMessage(loginMessage, 'Login successful!', 'success');
-                        
-                        // Update UI for authenticated user
-                        showAuthenticatedUI(username, token);
-                        
-                        // Fetch and display user data
-                        fetchAccountData(token);
-                        
-                    } catch (error) {
-                        showMessage(loginMessage, `Error: ${error.message}`, 'error');
-                    }
-                });
-                
-                // Register form submission
-                document.getElementById('register-form-element').addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    
-                    const username = document.getElementById('register-username').value.trim();
-                    const password = document.getElementById('register-password').value;
-                    const confirmPassword = document.getElementById('register-confirm-password').value;
-                    
-                    if (!username || !password || !confirmPassword) {
-                        showMessage(registerMessage, 'Please fill in all fields', 'error');
-                        return;
-                    }
-                    
-                    if (password !== confirmPassword) {
-                        showMessage(registerMessage, 'Passwords do not match', 'error');
-                        return;
-                    }
-                    
-                    if (username.length < 3 || username.length > 20) {
-                        showMessage(registerMessage, 'Username must be between 3 and 20 characters', 'error');
-                        return;
-                    }
-                    
-                    if (password.length < 8) {
-                        showMessage(registerMessage, 'Password must be at least 8 characters', 'error');
-                        return;
-                    }
-                    
-                    try {
-                        showMessage(registerMessage, 'Creating account...', 'info');
-                        
-                        const response = await fetch(REGISTER_ENDPOINT, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                username: username,
-                                password: password
-                            })
-                        });
-                        
-                        const data = await response.json();
-                        
-                        if (!response.ok) {
-                            throw new Error(data.error || 'Registration failed');
-                        }
-                        
-                        showMessage(registerMessage, 'Registration successful! You can now log in.', 'success');
-                        
-                        // Clear registration form
-                        document.getElementById('register-username').value = '';
-                        document.getElementById('register-password').value = '';
-                        document.getElementById('register-confirm-password').value = '';
-                        
-                        // Auto-fill login form and switch to it after a delay
-                        document.getElementById('login-username').value = username;
-                        setTimeout(() => {
-                            registerForm.style.display = 'none';
-                            loginForm.style.display = 'block';
-                        }, 2000);
-                        
-                    } catch (error) {
-                        showMessage(registerMessage, `Error: ${error.message}`, 'error');
-                    }
-                });
-                
-                // Logout functionality
-                document.getElementById('logout-button').addEventListener('click', function() {
-                    // Clear stored credentials
-                    localStorage.removeItem('rseAuthToken');
-                    localStorage.removeItem('rseUsername');
-                    sessionStorage.removeItem('rseAuthToken');
-                    sessionStorage.removeItem('rseUsername');
-                    
-                    // Update UI for logged out state
-                    showLoggedOutUI();
-                    
-                    // Show success message
-                    alert('You have been successfully logged out.');
-                });
-                
-                // Helper functions
-                function showMessage(element, message, type) {
-                    element.textContent = message;
-                    element.style.display = 'block';
-                    
-                    // Reset classes
-                    element.classList.remove('error-message', 'success-message');
-                    
-                    // Add appropriate class
-                    if (type === 'error') {
-                        element.classList.add('error-message');
-                    } else if (type === 'success') {
-                        element.classList.add('success-message');
-                    }
-                    
-                    // Auto hide after 5 seconds for success messages
-                    if (type === 'success') {
-                        setTimeout(() => {
-                            element.style.display = 'none';
-                        }, 5000);
-                    }
-                }
-                
-                function showAuthenticatedUI(username, token) {
-                    // Hide login and register forms, show user profile
-                    loginForm.style.display = 'none';
-                    registerForm.style.display = 'none';
-                    userProfile.style.display = 'block';
-                    
-                    // Update profile username
-                    document.getElementById('profile-username').textContent = username;
-                    
-                    // Show authentication indicator
-                    authStatusIndicator.style.display = 'block';
-                }
-                
-                function showLoggedOutUI() {
-                    // Show login form, hide register form and user profile
-                    loginForm.style.display = 'block';
-                    registerForm.style.display = 'none';
-                    userProfile.style.display = 'none';
-                    
-                    // Clear form fields
-                    document.getElementById('login-username').value = '';
-                    document.getElementById('login-password').value = '';
-                    document.getElementById('rememberMe').checked = false;
-                    
-                    // Hide authentication indicator
-                    authStatusIndicator.style.display = 'none';
-                }
-                
-                async function fetchAccountData(token) {
-                    try {
-                        const response = await fetch(ACCOUNT_DATA_ENDPOINT, {
-                            method: 'GET',
-                            headers: {
-                                'Authorization': `Bearer ${token}`
-                            }
-                        });
-                        
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch account data');
-                        }
-                        
-                        const data = await response.json();
-                        
-                        // Update user profile with account data
-                        const ratingElement = document.getElementById('user-rating');
-                        const totalRatingsElement = document.getElementById('user-total-ratings');
-                        
-                        if (data.total_ratings > 0) {
-                            const avgRating = (data.stars / data.total_ratings).toFixed(1);
-                            ratingElement.textContent = `${avgRating}/5`;
-                        } else {
-                            ratingElement.textContent = 'No ratings yet';
-                        }
-                        
-                        totalRatingsElement.textContent = data.total_ratings;
-                        
-                    } catch (error) {
-                        console.error('Error fetching account data:', error);
-                    }
-                }
-            </script>
+            <!-- Move the JavaScript to external file -->
+			<script src="script.js"></script>
+		</div>
+	</body>
+</html>
