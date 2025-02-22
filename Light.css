@@ -147,7 +147,7 @@ body .LightTheme{
 	/*Banner construction*/
 	.Main{
 		#Banner{
-			background-image:url("../../../Images/Banner/Banner_2.webp");
+			background-image:url("images/Banner/Banner_2.webp");
 			background-size:cover;
 
 			button{font-family:"Orbitron"; font-weight:600; font-size:2rem; text-transform:uppercase;}
