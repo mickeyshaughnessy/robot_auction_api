@@ -1,6 +1,6 @@
 // Constants 
 const API_BASE_URL = window.location.protocol === 'https:' ? 
-  'https://100.26.236.1:5001' : 'http://100.26.236.1:5001';
+  'https://rse-api.com:5002' : 'http://100.26.236.1:5001';
 const API_TIMEOUT = 5000; // 5 second timeout
 const LOGIN_ENDPOINT = `${API_BASE_URL}/login`;
 const REGISTER_ENDPOINT = `${API_BASE_URL}/register`;
