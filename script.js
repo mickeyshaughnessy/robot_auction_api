@@ -51,7 +51,6 @@ const elements = {
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
   checkApiStatus();
-  initializeForm();
   checkAuthStatus();
   initializeBidForm();
   
