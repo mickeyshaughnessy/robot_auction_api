@@ -1,15 +1,15 @@
 /*Fonts*/
 @font-face{
 	font-family:"Orbitron";
-	src: url(../../../Fonts/ttf/Orbitron.ttf);
+	src: url(fonts/Orbitron.ttf);
 }
 @font-face{
 	font-family:"Space_Grotesk";
-	src: url(../../../Fonts/ttf/Space_Grotesk.ttf);
+	src: url(fonts/Space_Grotesk.ttf);
 }
 @font-face{
 	font-family:"Chackra_Petch";
-	src: url(../../../Fonts/ttf/ChakraPetch-Regular.ttf);
+	src: url(fonts/ChakraPetch-Regular.ttf);
 }	
 /*Variable definition*/
 :root{
