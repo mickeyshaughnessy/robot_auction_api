@@ -4,8 +4,8 @@ const API_BASE_URL = window.location.protocol === 'https:' ?
 const API_TIMEOUT = 5000; // 5 second timeout
 const LOGIN_ENDPOINT = `${API_BASE_URL}/login`;
 const REGISTER_ENDPOINT = `${API_BASE_URL}/register`;
-const ACCOUNT_DATA_ENDPOINT = `${API_BASE_URL}/account_data`;
-const RECENT_BIDS_ENDPOINT = `${API_BASE_URL}/my_bids`;
+const ACCOUNT_ENDPOINT = `${API_BASE_URL}/account`;
+const CANCEL_BID_ENDPOINT = `${API_BASE_URL}/cancel_bid`;
 const BULLETIN_ENDPOINT = `${API_BASE_URL}/bulletin`;
 const SUBMIT_BID_ENDPOINT = `${API_BASE_URL}/submit_bid`;
 
@@ -263,7 +263,86 @@ document.addEventListener('DOMContentLoaded', () => {
   if (elements.submitBidBtn) {
     elements.submitBidBtn.addEventListener('click', handleBidSubmit);
   }
+  
+  // Set up API status check buttons
+  setupApiStatusButtons();
 });
+
+// Add event listeners for API status check buttons
+function setupApiStatusButtons() {
+  // Select all buttons with the data-action attribute set to "check-api-status"
+  const checkStatusButtons = document.querySelectorAll('[data-action="check-api-status"]');
+  
+  if (checkStatusButtons.length > 0) {
+    checkStatusButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        // Get the target response div from data-target attribute, or default to 'response'
+        const targetId = button.getAttribute('data-target') || 'response';
+        const responseDiv = document.getElementById(targetId);
+        
+        if (responseDiv) {
+          responseDiv.innerHTML = '<pre style="color: blue;">Checking API status...</pre>';
+          pingAPI(responseDiv);
+        } else {
+          console.error(`Target response div with id "${targetId}" not found`);
+        }
+      });
+    });
+  }
+}
+
+// API Status Check function
+async function pingAPI(targetDiv = null) {
+  // Use provided target div or try to find a response div
+  const responseDiv = targetDiv || elements.responseDiv || document.getElementById('response');
+  
+  if (!responseDiv) {
+    console.error('No response div found for API status check');
+    return;
+  }
+  
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
+    
+    const response = await fetch(`${API_BASE_URL}/ping`, {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    
+    const data = await response.json();
+    
+    // Update status indicator if it exists
+    updateStatusIndicator(response.ok ? 'online' : 'degraded');
+    
+    // Display the response in the target div
+    responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+    
+    return data;
+  } catch (error) {
+    let errorMessage = '';
+    
+    if (error.name === 'AbortError') {
+      errorMessage = `<pre style="color: orange;">Request timed out after ${API_TIMEOUT/1000} seconds</pre>`;
+      updateStatusIndicator('timeout');
+    } else if (error.message.includes('Mixed Content') || error.message.includes('NetworkError')) {
+      errorMessage = `<pre style="color: orange;">Mixed Content Error: This request was blocked due to content security policy.
+Try one of these solutions:
+1. Click the shield icon ⛨ in your browser's address bar and allow mixed content
+2. Use curl command: curl ${API_BASE_URL.replace('https://', '').replace('http://', '')}/ping
+3. Use https instead of http</pre>`;
+      updateStatusIndicator('offline');
+    } else {
+      errorMessage = `<pre style="color: orange;">Error: ${error.message}</pre>`;
+      updateStatusIndicator('offline');
+    }
+    
+    responseDiv.innerHTML = errorMessage;
+    
+    console.error('API Status Check Error:', error);
+    return { error: error.message };
+  }
+}
 
 // Check API status
 async function checkApiStatus() {
@@ -278,6 +357,7 @@ async function checkApiStatus() {
 
     const data = await response.json();
     updateStatusIndicator(response.ok ? 'online' : 'degraded');
+    return data;
   } catch (error) {
     if (error.name === 'AbortError') {
       updateStatusIndicator('timeout');
@@ -285,6 +365,7 @@ async function checkApiStatus() {
       updateStatusIndicator('offline');
       console.error('API Status Check Error:', error);
     }
+    return { error: error.message };
   }
 }
 
@@ -317,9 +398,6 @@ function checkAuthStatus() {
     
     // Fetch and display user data
     fetchAccountData(token);
-    
-    // Fetch recent bids
-    fetchRecentBids(token);
   }
 }
 
@@ -365,9 +443,6 @@ async function handleLoginSubmit(e) {
     
     // Fetch and display user data
     fetchAccountData(authToken);
-    
-    // Fetch recent bids
-    fetchRecentBids(authToken);
     
     // Update the main UI
     updateUI();
@@ -491,6 +566,17 @@ async function makeApiRequest(endpoint, method, data = null) {
   }
 }
 
+// Helper function to display response data
+function displayResponse(data) {
+  if (!elements.responseDiv) return;
+  
+  if (data.error) {
+    elements.responseDiv.innerHTML = `<pre style="color: red;">${data.error}</pre>`;
+  } else {
+    elements.responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+  }
+}
+
 // UI helper functions
 function showMessage(element, message, type) {
   if (!element) return;
@@ -571,7 +657,7 @@ function showLoggedOutUI() {
 // Data fetching functions
 async function fetchAccountData(token) {
   try {
-    const data = await makeApiRequest('/account_data', 'GET');
+    const data = await makeApiRequest('/account', 'GET');
     
     if (data && !data.error) {
       // Update user profile with account data
@@ -588,76 +674,135 @@ async function fetchAccountData(token) {
         
         totalRatingsElement.textContent = data.total_ratings;
       }
+      
+      // Update bids display if bids data is available
+      if (data.bids && data.bids.length > 0) {
+        updateBidsDisplay(data.bids);
+      }
     }
   } catch (error) {
     console.error('Error fetching account data:', error);
   }
 }
 
-async function fetchRecentBids(token) {
-  try {
-    const data = await makeApiRequest('/my_bids', 'GET');
+// Function to update bids display
+function updateBidsDisplay(bids) {
+  // Update recent bids section
+  const recentBidsList = document.getElementById('recent-bids-list');
+  
+  if (recentBidsList) {
+    // Clear existing items
+    recentBidsList.innerHTML = '';
     
-    // Update recent bids section
-    const recentBidsList = document.getElementById('recent-bids-list');
-    
-    if (recentBidsList) {
-      // Clear existing items
-      recentBidsList.innerHTML = '';
-      
-      if (data && data.bids && data.bids.length > 0) {
-        // Add each bid to the list
-        data.bids.slice(0, 5).forEach(bid => {
-          const bidItem = document.createElement('div');
-          bidItem.classList.add('recent-bid-item');
-          
-          const serviceType = document.createElement('span');
-          serviceType.classList.add('bid-service');
-          serviceType.textContent = bid.service;
-          
-          const price = document.createElement('span');
-          price.classList.add('bid-price');
-          price.textContent = `$${bid.price.toFixed(2)}`;
-          
-          const status = document.createElement('span');
-          status.classList.add('bid-status');
-          status.textContent = bid.status || 'Pending';
-          
-          // Add appropriate status class
-          if (bid.status === 'Completed') {
-            status.classList.add('status-completed');
-          } else if (bid.status === 'In Progress') {
-            status.classList.add('status-in-progress');
-          } else {
-            status.classList.add('status-pending');
-          }
-          
-          bidItem.appendChild(serviceType);
-          bidItem.appendChild(price);
-          bidItem.appendChild(status);
-          
-          recentBidsList.appendChild(bidItem);
-        });
-      } else {
-        // No bids found
-        const noBidsMsg = document.createElement('p');
-        noBidsMsg.textContent = 'No recent bids found.';
-        recentBidsList.appendChild(noBidsMsg);
-      }
-    }
-    
-    // Also update bids in other containers if they exist
-    if (document.getElementById('my-bids')) {
-      updateBidsContainer('my-bids', data);
-    }
-    
-  } catch (error) {
-    console.error('Error fetching recent bids:', error);
-    
-    // Show error message in the recent bids section
-    const recentBidsList = document.getElementById('recent-bids-list');
-    if (recentBidsList) {
-      recentBidsList.innerHTML = '<p class="text-danger">Failed to load recent bids.</p>';
+    if (bids && bids.length > 0) {
+      // Add each bid to the list
+      bids.slice(0, 5).forEach(bid => {
+        const bidItem = document.createElement('div');
+        bidItem.classList.add('recent-bid-item');
+        
+        const serviceType = document.createElement('span');
+        serviceType.classList.add('bid-service');
+        serviceType.textContent = bid.service;
+        
+        const price = document.createElement('span');
+        price.classList.add('bid-price');
+        price.textContent = `$${parseFloat(bid.price).toFixed(2)}`;
+        
+        const status = document.createElement('span');
+        status.classList.add('bid-status');
+        status.textContent = bid.status || 'Pending';
+        
+        // Add appropriate status class
+        if (bid.status === 'completed') {
+          status.classList.add('status-completed');
+        } else if (bid.status === 'matched') {
+          status.classList.add('status-in-progress');
+        } else if (bid.status === 'cancelled') {
+          status.classList.add('status-cancelled');
+        } else {
+          status.classList.add('status-pending');
+        }
+        
+        bidItem.appendChild(serviceType);
+        bidItem.appendChild(price);
+        bidItem.appendChild(status);
+        
+        // Add cancel button for pending bids
+        if (bid.status === 'pending') {
+          const cancelBtn = document.createElement('button');
+          cancelBtn.classList.add('cancel-bid-btn');
+          cancelBtn.textContent = 'Cancel';
+          cancelBtn.dataset.bidId = bid.id;
+          cancelBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            cancelBid(bid.id);
+          });
+          bidItem.appendChild(cancelBtn);
+        }
+        
+        recentBidsList.appendChild(bidItem);
+      });
+    } else {
+      // No bids found
+      const noBidsMsg = document.createElement('p');
+      noBidsMsg.textContent = 'No recent bids found.';
+      recentBidsList.appendChild(noBidsMsg);
     }
   }
+  
+  // Also update bids in other containers if they exist
+  if (document.getElementById('my-bids')) {
+    updateBidsContainer('my-bids', { bids });
+  }
+}
+
+// Function to cancel a bid
+async function cancelBid(bidId) {
+  try {
+    const result = await makeApiRequest('/cancel_bid', 'POST', {
+      bid_id: bidId
+    });
+    
+    if (result && !result.error) {
+      alert('Bid cancelled successfully');
+      // Refresh account data to update bid list
+      fetchAccountData();
+    } else {
+      alert(`Error: ${result.error || 'Failed to cancel bid'}`);
+    }
+  } catch (error) {
+    console.error('Error cancelling bid:', error);
+    alert(`Error: ${error.message}`);
+  }
+}
+
+// Function to get random coordinates (for bid form)
+function getRandomCoordinates() {
+  const lat = (Math.random() * 180 - 90).toFixed(6);
+  const lon = (Math.random() * 360 - 180).toFixed(6);
+  return { lat, lon };
+}
+
+// Update function expected by other parts of the code
+function updateUI() {
+  // This would be implemented based on requirements
+  console.log('UI updated');
+}
+
+// Function to update bids container
+function updateBidsContainer(containerId, data) {
+  // This would be implemented based on requirements
+  console.log(`Updated bids in ${containerId}`);
+}
+
+// Function to create a bid modal if it doesn't exist
+function ensureBidModalExists() {
+  // This would be implemented based on requirements
+  console.log('Ensuring bid modal exists');
+}
+
+// Function to handle bid submission
+function handleBidSubmit(e) {
+  // This would be implemented based on requirements
+  console.log('Handling bid submission');
 }

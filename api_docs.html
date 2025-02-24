@@ -39,28 +39,8 @@
 
     <h3>API Status Check</h3>
     <pre><code>curl https://rse-api.com:5002/ping</code></pre>
-    <button onclick="pingAPI()">Check Status</button>
+    <button data-action="check-api-status" data-target="response">Check Status</button>
     <div id="response"></div>
-    <script>
-    async function pingAPI() {
-        const responseDiv = document.getElementById("response");
-        try {
-            const response = await fetch('https://rse-api.com:5002/ping')
-            const data = await response.json();
-            responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-        } catch (error) {
-            if (error.message.includes('') || error.message.includes('NetworkError')) {
-                responseDiv.innerHTML = `<pre style="color: orange;">Mixed Content Error: This request was blocked due to content security policy.
-Try one of these solutions:
-1. Click the shield icon ⛨ in your browser's address bar and allow mixed content
-2. Use curl command: curl 100.26.236.1:5001/ping
-3. Use https instead of http</pre>`;
-            } else {
-                responseDiv.innerHTML = `<pre style="color: orange;">Error: ${error.message}</pre>`;
-            }
-        }
-    }
-    </script>
 
     <h2>Authentication Endpoints</h2>
 
@@ -110,7 +90,7 @@ Try one of these solutions:
     <p>Note: All buyer endpoints require authentication via username and password.</p>
 
     <div class="endpoint">
-        <h3><span class="method">POST</span> <span class="path">/make_bid</span></h3>
+        <h3><span class="method">POST</span> <span class="path">/submit_bid</span></h3>
         <p>Submit a new bid for a robot service.</p>
         <table>
             <tr>
@@ -190,6 +170,67 @@ Try one of these solutions:
         </table>
         <h4>Response</h4>
         <p>Returns 200 with job details on success, 204 if no matching jobs found, 403 for invalid seat.</p>
+    </div>
+
+    <h2>User Account Endpoints</h2>
+    <p>Note: All account endpoints require authentication.</p>
+
+    <div class="endpoint">
+        <h3><span class="method">GET</span> <span class="path">/account</span></h3>
+        <p>Retrieve detailed information about the authenticated user's account, including profile data and bids.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>username</td>
+                <td>Authenticated username</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>User's password</td>
+            </tr>
+            <tr>
+                <td>include_bids</td>
+                <td>Optional: Set to "true" to include user's bids in the response (default: true)</td>
+            </tr>
+            <tr>
+                <td>bid_status</td>
+                <td>Optional: Filter bids by status (pending, matched, completed, cancelled)</td>
+            </tr>
+            <tr>
+                <td>limit</td>
+                <td>Optional: Maximum number of bids to retrieve (default: 20)</td>
+            </tr>
+        </table>
+        <h4>Response</h4>
+        <p>Returns 200 with user profile data including ratings, transaction history, account status, and recent bids.</p>
+    </div>
+
+    <div class="endpoint">
+        <h3><span class="method">POST</span> <span class="path">/cancel_bid</span></h3>
+        <p>Cancel a pending bid created by the authenticated user.</p>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>username</td>
+                <td>Authenticated username</td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>User's password</td>
+            </tr>
+            <tr>
+                <td>bid_id</td>
+                <td>ID of the bid to cancel</td>
+            </tr>
+        </table>
+        <h4>Response</h4>
+        <p>Returns 200 on successful cancellation, 400 if bid cannot be cancelled (already matched or completed), 404 if bid not found.</p>
     </div>
 
     <h2>Shared Endpoints</h2>
@@ -376,6 +417,8 @@ Try one of these solutions:
     <div class="endpoint">
         <h3><span class="method">GET</span> <span class="path">/ping</span></h3>
         <p>Check if the API is operational. No authentication required.</p>
+        <button data-action="check-api-status" data-target="ping-response">Check API Status</button>
+        <div id="ping-response"></div>
         <h4>Response</h4>
         <p>Returns 200 if system is operational.</p>
     </div>
