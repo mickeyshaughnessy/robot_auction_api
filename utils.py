@@ -1,17 +1,28 @@
 """
 Core utilities for the Robot Services Exchange API
 """
-
 import math, redis, json, hashlib
 from werkzeug.security import generate_password_hash, check_password_hash
 import config
 
-# Redis client setup
+def setup_redis(host, port, db):
+    """Initialize Redis connection"""
+    return redis.Redis(host=host, port=port, db=db)
+
+def cleanup_redis(redis_client):
+    """Clean up test data in Redis"""
+    # Only for test environments - cleans up test keys
+    if config.ENVIRONMENT == "test":
+        for key in redis_client.keys("test_*"):
+            redis_client.delete(key)
+
+# Redis client setup for general use
 redis_client = redis.Redis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=config.REDIS_DB)
 
 def calculate_distance(point1, point2):
     """Calculate great-circle distance between two points"""
-    lat1, lon1, lat2, lon2 = *point1, *point2
+    lat1, lon1 = point1
+    lat2, lon2 = point2
     lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
     dlat, dlon = lat2 - lat1, lon2 - lon1
     a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
