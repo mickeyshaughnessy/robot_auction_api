@@ -356,7 +356,10 @@ async function checkApiStatus() {
     clearTimeout(timeoutId);
 
     const data = await response.json();
+    
+    // Update status indicator without displaying response in the response div
     updateStatusIndicator(response.ok ? 'online' : 'degraded');
+    
     return data;
   } catch (error) {
     if (error.name === 'AbortError') {
