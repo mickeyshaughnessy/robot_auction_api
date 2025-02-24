@@ -9,8 +9,9 @@ import secrets
 
 # Import handlers
 from auth import register as auth_register, login as auth_login
-from buyer import submit_bid
+from buyer import submit_bid, cancel_bid
 from seller import grab_job
+from account import get_account
 from shared import nearby_activity, sign_job
 from messaging import send_chat, get_chat
 from bulletin import post_bulletin, get_bulletins
@@ -109,21 +110,15 @@ def login():
     except Exception as e:
         return flask.jsonify({"error": str(e)}), 500
 
-@app.route('/account_data', methods=['GET'])
+@app.route('/account', methods=['GET'])
 @token_required
 def account_data(current_user):
     try:
-        account_json = redis_client.hget(config.REDHASH_ACCOUNTS, current_user)
-        if not account_json:
-            return flask.jsonify({"error": "Account not found"}), 404
-        if isinstance(account_json, bytes):
-            account_json = account_json.decode('utf-8')
-        account = json.loads(account_json)
-        return flask.jsonify({
-            "created_on": account.get("created_on", 0),
-            "stars": account.get("stars", 0),
-            "total_ratings": account.get("total_ratings", 0)
-        }), 200
+        # Get query parameters
+        data = flask.request.args.to_dict()
+        data['username'] = current_user
+        response, status = get_account(data)
+        return flask.jsonify(response), status
     except Exception as e:
         return flask.jsonify({"error": str(e)}), 500
 
@@ -136,6 +131,19 @@ def make_bid(current_user):
             return flask.jsonify({"error": "Invalid JSON data"}), 400
         data['username'] = current_user
         response, status = submit_bid(data)
+        return flask.jsonify(response), status
+    except Exception as e:
+        return flask.jsonify({"error": str(e)}), 500
+        
+@app.route('/cancel_bid', methods=['POST'])
+@token_required
+def handle_cancel_bid(current_user):
+    try:
+        data = flask.request.get_json()
+        if not data:
+            return flask.jsonify({"error": "Invalid JSON data"}), 400
+        data['username'] = current_user
+        response, status = cancel_bid(data)
         return flask.jsonify(response), status
     except Exception as e:
         return flask.jsonify({"error": str(e)}), 500
