@@ -48,11 +48,100 @@ const elements = {
   useRandomLocationBtn: document.getElementById('use-random-location')
 };
 
+// Original script.js functions for form initialization
+function initializeForm() {
+  if (elements.startTimeInput && elements.endTimeInput) {
+    setDefaultTimes();
+  }
+  
+  if (elements.serviceDescriptionTextarea) {
+    setRandomServiceDescriptionPlaceholder();
+  }
+}
+
+function setDefaultTimes() {
+  const now = new Date();
+  const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+  const formatDateTimeLocal = (date) => {
+    return date.toISOString().slice(0, 16);
+  };
+
+  if (elements.startTimeInput) {
+    elements.startTimeInput.value = formatDateTimeLocal(now);
+  }
+  
+  if (elements.endTimeInput) {
+    elements.endTimeInput.value = formatDateTimeLocal(sevenDaysFromNow);
+  }
+}
+
+function setRandomServiceDescriptionPlaceholder() {
+  try {
+    if (elements.serviceDescriptionTextarea) {
+      const placeholders = JSON.parse(elements.serviceDescriptionTextarea.getAttribute('data-placeholders'));
+      if (Array.isArray(placeholders) && placeholders.length > 0) {
+        const randomIndex = Math.floor(Math.random() * placeholders.length);
+        elements.serviceDescriptionTextarea.setAttribute('placeholder', placeholders[randomIndex]);
+      }
+    }
+  } catch (error) {
+    console.error("Error parsing service descriptions:", error);
+    if (elements.serviceDescriptionTextarea) {
+      elements.serviceDescriptionTextarea.setAttribute('placeholder', 'Describe the service you want...');
+    }
+  }
+}
+
+// Initialize bid form with default values
+function initializeBidForm() {
+  // Get the start time and end time inputs in the bid modal
+  const startTimeInput = document.getElementById('start-time');
+  const endTimeInput = document.getElementById('end-time');
+  
+  if (!startTimeInput || !endTimeInput) {
+    return;
+  }
+  
+  // Set default times
+  const now = new Date();
+  const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  
+  const formatDateTimeLocal = (date) => {
+    return date.toISOString().slice(0, 16);
+  };
+  
+  startTimeInput.value = formatDateTimeLocal(now);
+  endTimeInput.value = formatDateTimeLocal(sevenDaysFromNow);
+  
+  // Set random coordinates initially
+  const coords = getRandomCoordinates();
+  const latInput = document.getElementById('latitude');
+  const lonInput = document.getElementById('longitude');
+  
+  if (latInput && lonInput) {
+    latInput.value = coords.lat;
+    lonInput.value = coords.lon;
+  }
+  
+  // Set default price
+  const priceInput = document.getElementById('bid-price');
+  if (priceInput) {
+    priceInput.value = '25.00';
+  }
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
   checkApiStatus();
+  initializeForm();
   checkAuthStatus();
-  initializeBidForm();
+  
+  // Add bid modal to the page if it doesn't exist
+  ensureBidModalExists();
+  
+  // Call this later after the modal might be added to the DOM
+  setTimeout(initializeBidForm, 500);
   
   // Form switching event handlers
   if (document.getElementById('show-register-form')) {
