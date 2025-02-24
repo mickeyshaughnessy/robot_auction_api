@@ -38,14 +38,14 @@
 
 
     <h3>API Status Check</h3>
-    <pre><code>curl 100.26.236.1:5001/ping</code></pre>
+    <pre><code>curl https://rse-api.com:5002/ping</code></pre>
     <button onclick="pingAPI()">Check Status</button>
     <div id="response"></div>
     <script>
     async function pingAPI() {
         const responseDiv = document.getElementById("response");
         try {
-            const response = await fetch('http://100.26.236.1:5001/ping');
+            const response = await fetch('https://rse-api.com:5002/ping')
             const data = await response.json();
             responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
         } catch (error) {
