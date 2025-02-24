@@ -1,3 +1,7 @@
+#profile-username {
+    color: white; /* or #fff, or any light color you prefer */
+}
+
 .Right-Fixed{
         position:fixed;
         top:50px;
