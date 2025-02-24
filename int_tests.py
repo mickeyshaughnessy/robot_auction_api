@@ -134,7 +134,6 @@ def run_tests():
                 "end_time": int(time.time()) + 3600
             }
             
-            # According to test results, this should be submit_bid not make_bid
             response = requests.post(f"{API_URL}/submit_bid", 
                                   json=bid_data, 
                                   headers=headers)
