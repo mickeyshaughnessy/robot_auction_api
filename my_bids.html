@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RSE My Bids</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Stylesheets -->
+    <link rel="stylesheet" href="my_bids.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>RSE My Bids</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="dashboard2.html">Dashboard</a></li>
+                    <li><a href="my_bids.html" class="active">My Bids</a></li>
+                    <li><a href="api_docs.html">API Docs</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <!-- Authentication Section -->
+            <div id="auth-section">
+                <div id="login-section" class="auth-panel">
+                    <h2>Login to View Your Bids</h2>
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button id="login-btn" type="button">Login</button>
+                    <div id="login-message"></div>
+                </div>
+                
+                <div id="user-info" class="auth-panel" style="display: none;">
+                    <div class="user-profile">
+                        <span id="profile-username"></span>
+                        <button id="logout-btn">Logout</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Bids Section -->
+            <div id="bids-section" style="display: none;">
+                <div class="section-header">
+                    <h2>My Bids</h2>
+                    <button id="refresh-bids-btn">Refresh</button>
+                </div>
+                
+                <div class="bid-controls">
+                    <div class="filter-controls">
+                        <select id="status-filter">
+                            <option value="all">All Statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="matched">Matched</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                        <button id="apply-filter-btn">Apply Filter</button>
+                    </div>
+                    <div class="new-bid">
+                        <button id="new-bid-btn">Create New Bid</button>
+                    </div>
+                </div>
+                
+                <div id="bids-container">
+                    <div id="bids-loading" class="loading-indicator">Loading your bids...</div>
+                    <div id="bids-list"></div>
+                    <div id="no-bids-message" style="display: none;">You don't have any bids yet.</div>
+                </div>
+            </div>
+            
+            <!-- Bid Creation Form -->
+            <div id="bid-form-container" class="form-panel" style="display: none;">
+                <div class="section-header">
+                    <h2>Create New Bid</h2>
+                    <button id="close-form-btn" class="close-btn">&times;</button>
+                </div>
+                
+                <form id="bid-form">
+                    <div class="form-group">
+                        <label for="service-description">Service Description:</label>
+                        <textarea id="service-description" rows="3" placeholder="Describe the service you need..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group location-group">
+                        <label>Location:</label>
+                        <div class="location-inputs">
+                            <div>
+                                <label for="bid-latitude">Latitude:</label>
+                                <input type="number" id="bid-latitude" step="0.000001" required>
+                            </div>
+                            <div>
+                                <label for="bid-longitude">Longitude:</label>
+                                <input type="number" id="bid-longitude" step="0.000001" required>
+                            </div>
+                            <button type="button" id="update-location-btn">Use My Location</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bid-price">Bid Price ($):</label>
+                        <input type="number" id="bid-price" min="0.01" step="0.01" required placeholder="Enter your bid amount">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bid-expiry">Bid Expires:</label>
+                        <div class="date-time-container">
+                            <input type="text" id="bid-end-date" placeholder="YYYY-MM-DD" required>
+                            <input type="text" id="bid-end-time" placeholder="HH:MM" required>
+                        </div>
+                        <small class="field-hint">Enter the date and time when your bid expires</small>
+                    </div>
+                    
+                    <button type="submit" id="submit-bid-btn">Submit Bid</button>
+                </form>
+                <div id="bid-submit-message"></div>
+            </div>
+            
+            <!-- Bid Details Modal -->
+            <div id="bid-details-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Bid Details</h2>
+                        <button id="close-details-btn" class="close-btn">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="bid-details-content"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="cancel-bid-btn" class="danger-btn">Cancel Bid</button>
+                        <button id="close-modal-btn">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Robot Services Exchange. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="my_bids.js"></script>
+</body>
+</html>

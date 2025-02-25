@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RSE Dashboard2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Stylesheets -->
+    <link rel="stylesheet" href="dashboard2.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>RSE Activity Dashboard2</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="dashboard2.html" class="active">Dashboard2</a></li>
+                    <li><a href="seats.html">Seats Info</a></li>
+                    <li><a href="api_docs.html">API Docs</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
+                </ul>
+            </nav>
+            <div class="style-picker">
+                <label for="theme-select">Style:</label>
+                <select id="theme-select">
+                    <option value="default">Default</option>
+                    <option value="aztec-wrestler">Aztec Wrestler</option>
+                    <option value="tmnt">TMNT</option>
+                    <option value="icewind-dale">Icewind Dale</option>
+                    <option value="classic-snes">Classic SNES</option>
+                    <option value="cyberninja">CyberNinja</option>
+                </select>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="container dashboard-container">
+            <div class="dashboard-grid">
+                <div class="map-container">
+                    <div id="map"></div>
+                    <div class="map-controls">
+                        <label><input type="checkbox" id="show-bids" checked> Show Bids</label>
+                        <!-- Won jobs filter removed -->
+                        <label><input type="checkbox" id="show-completed-jobs" checked> Show Completed Jobs</label>
+                    </div>
+                </div>
+                <div class="console-container">
+                    <!-- Login Section (Will be dynamically added by JS) -->
+                    
+                    <div class="activity-feed">
+                        <h2>Activity Log</h2>
+                        <div id="activity-log"></div>
+                    </div>
+                    <div class="button-container">
+                        <!-- Grab job button removed -->
+                        <button id="submit-bid">Submit Bid</button>
+                    </div>
+                    <div id="submission-data">
+                        <!-- Submission data will appear here -->
+                    </div>
+                    
+                    <!-- Bid Submission Form -->
+                    <div id="bid-form-container" class="bid-form-container">
+                        <h3>Submit New Bid</h3>
+                        <form id="bid-form">
+                            <div class="form-group">
+                                <label for="service-description">Service Description:</label>
+                                <textarea id="service-description" rows="3" placeholder="Describe the service you need..." required></textarea>
+                            </div>
+                            
+                            <div class="form-group location-group">
+                                <label>Location:</label>
+                                <div class="location-inputs">
+                                    <div>
+                                        <label for="bid-latitude">Latitude:</label>
+                                        <input type="number" id="bid-latitude" step="0.000001" required>
+                                    </div>
+                                    <div>
+                                        <label for="bid-longitude">Longitude:</label>
+                                        <input type="number" id="bid-longitude" step="0.000001" required>
+                                    </div>
+                                    <button type="button" id="update-location-btn">Update Location</button>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="bid-price">Bid Price ($):</label>
+                                <input type="number" id="bid-price" min="0.01" step="0.01" required placeholder="Enter your bid amount">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="bid-end-time">Bid Expires:</label>
+                                <div class="date-time-container">
+                                    <input type="text" id="bid-end-date" placeholder="YYYY-MM-DD" required>
+                                    <input type="text" id="bid-end-time-input" placeholder="HH:MM" required>
+                                </div>
+                                <small class="field-hint">Enter the date and time when your bid expires</small>
+                            </div>
+                            
+                            <button type="submit" id="submit-bid-btn">Submit Bid</button>
+                        </form>
+                        <div id="bid-submit-message"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Leaflet JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    
+    <!-- Dashboard JS with integrated nearby functionality -->
+    <script src="dashboard2.js"></script>
+</body>
+</html>
