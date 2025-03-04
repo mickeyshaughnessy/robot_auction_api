@@ -42,6 +42,8 @@ def grab_job(data):
         if (seat['owner'] != stored_seat['owner'] or 
             seat['secret'] != hashlib.md5(stored_seat['phrase'].encode()).hexdigest()):
             return {"error": "Invalid seat credentials"}, 403
+        
+        data['username'] = seat['owner']
 
         # Find matching bids
         matched_bids = []

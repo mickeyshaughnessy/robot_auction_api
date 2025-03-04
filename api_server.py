@@ -162,13 +162,11 @@ def nearby(current_user):
         return flask.jsonify({"error": str(e)}), 500
 
 @app.route('/grab_job', methods=['POST'])
-@token_required
-def handle_grab_job(current_user):
+def handle_grab_job():
     try:
         data = flask.request.get_json()
         if not data:
             return flask.jsonify({"error": "Invalid JSON data"}), 400
-        data['username'] = current_user
         response, status = grab_job(data)
         return flask.jsonify(response), status
     except Exception as e:
