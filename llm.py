@@ -77,7 +77,7 @@ def groq_completion(prompt, model, max_tokens):
         print(f"Error communicating with Groq API: {e}")
         return None
 
-def matched_service(buyer_description, seller_description, api="ollama"):
+def matched_service(buyer_description, seller_description, api="groq"):
     prompt = f"""
 Buyer's service request: {buyer_description}
 Robot owner's service offering: {seller_description}
@@ -85,8 +85,9 @@ Based on the descriptions above, determine if the robot's capabilities match the
 Answer with only 'True' if there's a match, or 'False' if there isn't a match.
 """
     response = generate_completion(prompt, api=api)
+    print(response)
     if response:
-        return response.strip().lower() == 'true'
+        return 'true' in response.strip().lower()
     else:
         return False
 
@@ -94,6 +95,11 @@ if __name__ == "__main__":
     buyer_request = "I need a robot to mow my lawn and trim the hedges in my garden."
     robot_capabilities = "Our robot can perform various gardening tasks including lawn mowing, hedge trimming, and weeding."
 
-    print("Using Ollama API:")
+    is_match_ollama = matched_service(buyer_request, robot_capabilities)
+    print(f"Is there a match? {'Yes' if is_match_ollama else 'No'}")
+    
+    buyer_request = "I need a robot to cook food for this week."
+    robot_capabilities = "Our robot can perform various gardening tasks including lawn mowing, hedge trimming, and weeding."
+
     is_match_ollama = matched_service(buyer_request, robot_capabilities)
     print(f"Is there a match? {'Yes' if is_match_ollama else 'No'}")
