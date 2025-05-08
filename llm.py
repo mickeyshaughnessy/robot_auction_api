@@ -8,7 +8,8 @@ OLLAMA_API_URL = "http://localhost:11434/api/generate"
 
 def generate_completion(prompt, api="ollama", model=None, max_tokens=100):
     if api == "ollama":
-        return ollama_completion(prompt, model or "llama2", max_tokens)
+        #return ollama_completion(prompt, model or "deepseek-r1:1.5b", max_tokens)
+        return ollama_completion(prompt, model or "phi3:3.8b", max_tokens)
     elif api == "anthropic":
         return anthropic_completion(prompt, model or "claude-2", max_tokens)
     elif api == "groq":
@@ -28,6 +29,7 @@ def ollama_completion(prompt, model, max_tokens):
         response = requests.post(OLLAMA_API_URL, json=payload)
         response.raise_for_status()
         result = response.json()
+        print(result)
         return result.get('response', '')
     except requests.exceptions.RequestException as e:
         print(f"Error communicating with Ollama API: {e}")
@@ -77,15 +79,15 @@ def groq_completion(prompt, model, max_tokens):
         print(f"Error communicating with Groq API: {e}")
         return None
 
-def matched_service(buyer_description, seller_description, api="groq"):
+def matched_service(buyer_description, seller_description, api="ollama"):
     prompt = f"""
 Buyer's service request: {buyer_description}
 Robot owner's service offering: {seller_description}
 Based on the descriptions above, determine if the robot's capabilities match the buyer's requirements.
+Make your answer very short and concise.
 Answer with only 'True' if there's a match, or 'False' if there isn't a match.
 """
     response = generate_completion(prompt, api=api)
-    print(response)
     if response:
         return 'true' in response.strip().lower()
     else:
