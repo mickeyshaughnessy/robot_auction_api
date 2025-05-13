@@ -92,6 +92,10 @@ def serve_frontend(path):
 def ping():
     return flask.jsonify({"message": "ok"}), 200
 
+@app.route('/resume', methods=['POST'])
+def ping():
+    return flask.jsonify({"message": "resume ok"}), 200
+
 @app.route('/register', methods=['POST'])
 def register():
     try:
