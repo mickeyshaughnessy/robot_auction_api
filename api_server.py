@@ -1,3 +1,13 @@
+############
+#<thinking>
+#🤔🤔🤔🤠
+#User's Flask app is running without SSL context
+#Need to add SSL configuration to use Let's Encrypt certificates
+#Add ssl_context parameter to app.run() with cert and key paths
+#Keep debug=False for production SSL usage
+#</thinking>
+###########
+
 """
 Robot Services Exchange API Server
 """
@@ -93,7 +103,7 @@ def ping():
     return flask.jsonify({"message": "ok"}), 200
 
 @app.route('/resume', methods=['POST'])
-def ping():
+def resume():
     return flask.jsonify({"message": "resume ok"}), 200
 
 @app.route('/register', methods=['POST'])
@@ -237,6 +247,17 @@ def handle_get_bulletins(current_user):
         return flask.jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=config.API_PORT, debug=True)
+    # SSL Configuration using Let's Encrypt certificates
+    ssl_context = (
+        '/etc/letsencrypt/live/rse-api.com/fullchain.pem',  # Certificate
+        '/etc/letsencrypt/live/rse-api.com/privkey.pem'     # Private Key
+    )
+    
+    app.run(
+        host='0.0.0.0', 
+        port=config.API_PORT, 
+        ssl_context=ssl_context,
+        debug=False  # Set to False for production SSL
+    )
 
 application = app
