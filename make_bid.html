@@ -74,26 +74,54 @@
     <script>
         const API_URL = 'http://100.26.236.1:5001';
         
+        // Debug: Log all localStorage contents
+        console.log('=== DEBUGGING AUTHENTICATION ===');
+        console.log('localStorage contents:');
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const value = localStorage.getItem(key);
+            console.log(`  ${key}: ${value}`);
+        }
+        
+        console.log('sessionStorage contents:');
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            const value = sessionStorage.getItem(key);
+            console.log(`  ${key}: ${value}`);
+        }
+        
         // Try multiple possible token storage keys
         let authToken = localStorage.getItem('authToken') || 
                        localStorage.getItem('access_token') || 
                        localStorage.getItem('token') ||
+                       localStorage.getItem('jwt') ||
+                       localStorage.getItem('bearer_token') ||
                        sessionStorage.getItem('authToken') ||
-                       sessionStorage.getItem('access_token');
+                       sessionStorage.getItem('access_token') ||
+                       sessionStorage.getItem('token');
+                       
+        console.log('Found auth token:', !!authToken);
+        if (authToken) {
+            console.log('Token preview:', authToken.substring(0, 50) + '...');
+        }
+        console.log('=== END DEBUGGING ===');
 
         function checkAuth() {
             console.log('Checking authentication...');
             console.log('Available localStorage keys:', Object.keys(localStorage));
+            console.log('Available sessionStorage keys:', Object.keys(sessionStorage));
+            
+            // Log all storage contents for debugging
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                console.log(`localStorage[${key}]:`, localStorage.getItem(key));
+            }
+            
             console.log('AuthToken found:', !!authToken);
             
             if (!authToken) {
-                document.getElementById('current-bids').innerHTML = `
-                    <div style="text-align: center; padding: 20px;">
-                        <p>Please log in first to submit bids and view your account.</p>
-                        <a href="index.html" class="btn btn-primary">Go to Login</a>
-                    </div>
-                `;
-                // Don't redirect immediately, let user see the page
+                // Don't show login message immediately, just log the issue
+                console.log('No auth token found, will show login prompt only if API calls fail');
                 return false;
             }
             return true;
@@ -189,6 +217,16 @@ Would you like to try again?`;
         document.getElementById('bid-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            // Try to reload token if not available
+            if (!authToken) {
+                console.log('No token on submit, trying to reload...');
+                authToken = localStorage.getItem('authToken') || 
+                           localStorage.getItem('access_token') || 
+                           localStorage.getItem('token') ||
+                           sessionStorage.getItem('authToken') ||
+                           sessionStorage.getItem('access_token');
+            }
+            
             if (!authToken) {
                 alert('Please log in first');
                 window.location.href = 'index.html';
@@ -208,6 +246,7 @@ Would you like to try again?`;
             }
 
             console.log('Submitting bid with token:', authToken.substring(0, 20) + '...');
+            console.log('Bid data:', { service, lat, lon, price, end_time: endTime });
 
             try {
                 const response = await fetch(`${API_URL}/make_bid`, {
@@ -242,12 +281,30 @@ Would you like to try again?`;
         });
 
         async function refreshBids() {
+            console.log('Refreshing bids...');
+            
             if (!authToken) {
-                checkAuth();
-                return;
+                console.log('No token available, trying to reload token from storage...');
+                // Try to reload token
+                authToken = localStorage.getItem('authToken') || 
+                           localStorage.getItem('access_token') || 
+                           localStorage.getItem('token') ||
+                           sessionStorage.getItem('authToken') ||
+                           sessionStorage.getItem('access_token');
+                
+                if (!authToken) {
+                    document.getElementById('current-bids').innerHTML = `
+                        <div style="text-align: center; padding: 20px;">
+                            <p>Please log in first to view your bids.</p>
+                            <a href="index.html" class="btn btn-primary">Go to Login</a>
+                        </div>
+                    `;
+                    return;
+                }
             }
             
             try {
+                console.log('Making API call with token:', authToken.substring(0, 20) + '...');
                 const response = await fetch(`${API_URL}/account_data`, {
                     method: 'GET',
                     headers: {
@@ -255,17 +312,28 @@ Would you like to try again?`;
                     }
                 });
 
+                console.log('API Response status:', response.status);
+                
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('Account data:', data);
                     displayBids(data.bids || []);
                 } else if (response.status === 401) {
-                    document.getElementById('current-bids').innerHTML = '<p>Session expired. Please log in again.</p>';
+                    document.getElementById('current-bids').innerHTML = `
+                        <div style="text-align: center; padding: 20px;">
+                            <p>Session expired. Please log in again.</p>
+                            <a href="index.html" class="btn btn-primary">Go to Login</a>
+                        </div>
+                    `;
                     localStorage.removeItem('authToken');
                     authToken = null;
                 } else {
-                    document.getElementById('current-bids').innerHTML = '<p>Could not load bids.</p>';
+                    const errorData = await response.json();
+                    console.log('Error response:', errorData);
+                    document.getElementById('current-bids').innerHTML = '<p>Could not load bids: ' + (errorData.error || 'Unknown error') + '</p>';
                 }
             } catch (error) {
+                console.error('Network error:', error);
                 document.getElementById('current-bids').innerHTML = '<p>Error loading bids: ' + error.message + '</p>';
             }
         }
@@ -351,9 +419,9 @@ Would you like to try again?`;
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
-            if (checkAuth()) {
-                refreshBids();
-            }
+            console.log('Page loaded, checking authentication and loading bids...');
+            checkAuth(); // Just for debugging
+            refreshBids(); // Always try to refresh bids
         });
     </script>
 
