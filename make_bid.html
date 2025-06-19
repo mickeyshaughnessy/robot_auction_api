@@ -8,6 +8,18 @@
 </head>
 <body>
     <div class="container">
+        <div class="endpoint" style="margin-bottom: 20px;">
+            <div id="user-info" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h3>Welcome, <span id="current-username">Loading...</span>!</h3>
+                    <p>Submit a new bid or manage your existing bids below.</p>
+                </div>
+                <div>
+                    <a href="index.html" class="btn btn-sm btn-secondary">← Back to Home</a>
+                </div>
+            </div>
+        </div>
+        
         <h1>Submit New Bid</h1>
         
         <div class="endpoint">
@@ -36,7 +48,7 @@
 
                 <div class="form-group">
                     <label for="price">Bid Price (USD):</label>
-                    <input type="number" id="price" min="1" step="0.01" placeholder="50.00">
+                    <input type="number" id="price" min="0.01" step="0.01" placeholder="50.00">
                 </div>
 
                 <div class="form-group">
@@ -74,37 +86,79 @@
     <script>
         const API_URL = 'http://100.26.236.1:5001';
         
-        // Debug: Log all localStorage contents
+        // Debug: Log all storage contents
         console.log('=== DEBUGGING AUTHENTICATION ===');
-        console.log('localStorage contents:');
+        console.log('All localStorage contents:');
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
             const value = localStorage.getItem(key);
-            console.log(`  ${key}: ${value}`);
+            console.log(`  ${key}:`, value);
         }
         
-        console.log('sessionStorage contents:');
+        console.log('All sessionStorage contents:');
         for (let i = 0; i < sessionStorage.length; i++) {
             const key = sessionStorage.key(i);
             const value = sessionStorage.getItem(key);
-            console.log(`  ${key}: ${value}`);
+            console.log(`  ${key}:`, value);
         }
         
-        // Try multiple possible token storage keys
+        // Check for user data that might indicate login status
+        const possibleUserKeys = ['currentUser', 'user', 'userData', 'username', 'loggedInUser'];
+        possibleUserKeys.forEach(key => {
+            const value = localStorage.getItem(key) || sessionStorage.getItem(key);
+            if (value) {
+                console.log(`Found user data - ${key}:`, value);
+            }
+        });
+        
+        // Try all possible token storage keys
         let authToken = localStorage.getItem('authToken') || 
                        localStorage.getItem('access_token') || 
                        localStorage.getItem('token') ||
                        localStorage.getItem('jwt') ||
                        localStorage.getItem('bearer_token') ||
+                       localStorage.getItem('userToken') ||
                        sessionStorage.getItem('authToken') ||
                        sessionStorage.getItem('access_token') ||
-                       sessionStorage.getItem('token');
+                       sessionStorage.getItem('token') ||
+                       sessionStorage.getItem('userToken');
+        
+        // Also check if authentication might be stored in a different format
+        const possibleAuthKeys = ['auth', 'authentication', 'session', 'login'];
+        possibleAuthKeys.forEach(key => {
+            const value = localStorage.getItem(key) || sessionStorage.getItem(key);
+            if (value) {
+                console.log(`Found auth-related data - ${key}:`, value);
+                try {
+                    const parsed = JSON.parse(value);
+                    if (parsed.token || parsed.access_token || parsed.authToken) {
+                        console.log('Found token in parsed object:', parsed);
+                        authToken = authToken || parsed.token || parsed.access_token || parsed.authToken;
+                    }
+                } catch (e) {
+                    // Not JSON, might be a direct token
+                    if (value.length > 20) { // Assume tokens are longer than 20 chars
+                        console.log('Might be a direct token:', value.substring(0, 20) + '...');
+                        authToken = authToken || value;
+                    }
+                }
+            }
+        });
                        
-        console.log('Found auth token:', !!authToken);
+        console.log('Final auth token found:', !!authToken);
         if (authToken) {
             console.log('Token preview:', authToken.substring(0, 50) + '...');
         }
         console.log('=== END DEBUGGING ===');
+        
+        // Function to get current username from storage
+        function getCurrentUsername() {
+            return localStorage.getItem('currentUser') || 
+                   localStorage.getItem('username') || 
+                   sessionStorage.getItem('currentUser') ||
+                   sessionStorage.getItem('username') || 
+                   'Anonymous';
+        }
 
         function checkAuth() {
             console.log('Checking authentication...');
@@ -420,6 +474,20 @@ Would you like to try again?`;
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Page loaded, checking authentication and loading bids...');
+            
+            // Show current username
+            const username = getCurrentUsername();
+            document.getElementById('current-username').textContent = username;
+            
+            if (username === 'Anonymous') {
+                document.getElementById('user-info').innerHTML = `
+                    <div style="text-align: center; padding: 20px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px;">
+                        <p>⚠️ You don't appear to be logged in. Please log in first for full functionality.</p>
+                        <a href="index.html" class="btn btn-primary">Go to Login</a>
+                    </div>
+                `;
+            }
+            
             checkAuth(); // Just for debugging
             refreshBids(); // Always try to refresh bids
         });
