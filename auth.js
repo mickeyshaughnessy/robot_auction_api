@@ -1,134 +1,336 @@
-// Shared Authentication Module for RSE
-// Include this file in all pages that need authentication
-
-const RSE_AUTH = {
-    API_URL: window.location.protocol === 'https:' ? 
-      'https://rse-api.com:5002' : 'http://100.26.236.1:5001',
-    
-    // Get authentication token from storage
-    getToken() {
-        const possibleKeys = [
-            'authToken', 'access_token', 'token', 'jwt', 'bearer_token', 'userToken'
-        ];
+// RSE Unified Authentication Manager
+class RSEAuthManager {
+    constructor() {
+        this.currentUser = null;
+        this.loginForm = null;
+        this.registerForm = null;
+        this.userProfile = null;
+        this.authStatus = null;
         
-        for (const key of possibleKeys) {
-            let token = localStorage.getItem(key) || sessionStorage.getItem(key);
-            if (token) return token;
-        }
-        
-        // Check for tokens in JSON objects
-        const possibleAuthObjects = ['auth', 'authentication', 'session', 'login', 'user'];
-        for (const key of possibleAuthObjects) {
-            const value = localStorage.getItem(key) || sessionStorage.getItem(key);
-            if (value) {
-                try {
-                    const parsed = JSON.parse(value);
-                    if (parsed.token || parsed.access_token || parsed.authToken) {
-                        return parsed.token || parsed.access_token || parsed.authToken;
-                    }
-                } catch (e) {
-                    // Not JSON, might be direct token
-                    if (value.length > 20) return value;
-                }
-            }
-        }
-        
-        return null;
-    },
-    
-    // Get current username from storage
-    getUsername() {
-        const possibleKeys = ['currentUser', 'username', 'user', 'loggedInUser'];
-        
-        for (const key of possibleKeys) {
-            let username = localStorage.getItem(key) || sessionStorage.getItem(key);
-            if (username) {
-                try {
-                    const parsed = JSON.parse(username);
-                    return parsed.username || parsed.name || parsed;
-                } catch (e) {
-                    return username;
-                }
-            }
-        }
-        
-        return null;
-    },
-    
-    // Store authentication data
-    setAuth(token, username) {
-        localStorage.setItem('authToken', token);
-        localStorage.setItem('currentUser', username);
-    },
-    
-    // Clear authentication data
-    clearAuth() {
-        const keysToRemove = [
-            'authToken', 'access_token', 'token', 'jwt', 'bearer_token', 'userToken',
-            'currentUser', 'username', 'user', 'loggedInUser', 'auth', 'authentication', 'session'
-        ];
-        
-        keysToRemove.forEach(key => {
-            localStorage.removeItem(key);
-            sessionStorage.removeItem(key);
-        });
-    },
-    
-    // Check if user is authenticated
-    isAuthenticated() {
-        return !!this.getToken();
-    },
-    
-    // Make authenticated API call
-    async apiCall(endpoint, options = {}) {
-        const token = this.getToken();
-        
-        const defaultOptions = {
-            headers: {
-                'Content-Type': 'application/json',
-                ...(token && { 'Authorization': `Bearer ${token}` })
-            }
-        };
-        
-        const mergedOptions = {
-            ...defaultOptions,
-            ...options,
-            headers: { ...defaultOptions.headers, ...options.headers }
-        };
-        
-        const response = await fetch(`${this.API_URL}${endpoint}`, mergedOptions);
-        
-        if (response.status === 401) {
-            this.clearAuth();
-            throw new Error('Authentication expired. Please log in again.');
-        }
-        
-        return response;
-    },
-    
-    // Debug function to log all auth-related storage
-    debugAuth() {
-        console.log('=== RSE AUTH DEBUG ===');
-        console.log('Token:', this.getToken() ? this.getToken().substring(0, 30) + '...' : 'None');
-        console.log('Username:', this.getUsername() || 'None');
-        console.log('Is Authenticated:', this.isAuthenticated());
-        
-        console.log('All localStorage:');
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            console.log(`  ${key}:`, localStorage.getItem(key));
-        }
-        
-        console.log('All sessionStorage:');
-        for (let i = 0; i < sessionStorage.length; i++) {
-            const key = sessionStorage.key(i);
-            console.log(`  ${key}:`, sessionStorage.getItem(key));
-        }
-        console.log('=== END AUTH DEBUG ===');
+        this.initializeElements();
+        this.bindEvents();
+        this.checkAuthStatus();
     }
-};
 
-// Auto-initialize debugging if in development
-if (window.location.hostname === 'localhost' || window.location.hostname.includes('robotservicesauction.com')) {
-    RSE_AUTH.debugAuth();
+    initializeElements() {
+        // Auth sections
+        this.loginSection = document.getElementById('login-section');
+        this.registerSection = document.getElementById('register-section');
+        this.profileSection = document.getElementById('profile-section');
+        
+        // Forms
+        this.loginForm = document.getElementById('login-form');
+        this.registerForm = document.getElementById('register-form');
+        
+        // Form links
+        this.showRegisterLink = document.getElementById('show-register');
+        this.showLoginLink = document.getElementById('show-login');
+        this.registerCTA = document.getElementById('register-cta');
+        
+        // User profile elements
+        this.profileUsername = document.getElementById('profile-username');
+        this.userRating = document.getElementById('user-rating');
+        this.userTotalRatings = document.getElementById('user-total-ratings');
+        this.logoutBtn = document.getElementById('logout-btn');
+        
+        // Auth status indicator
+        this.authStatus = document.getElementById('auth-status');
+        
+        // Message containers
+        this.loginMessage = document.getElementById('login-message');
+        this.registerMessage = document.getElementById('register-message');
+    }
+
+    bindEvents() {
+        // Form submissions
+        if (this.loginForm) {
+            this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+        }
+        
+        if (this.registerForm) {
+            this.registerForm.addEventListener('submit', (e) => this.handleRegister(e));
+        }
+        
+        // Form toggles
+        if (this.showRegisterLink) {
+            this.showRegisterLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showRegisterForm();
+            });
+        }
+        
+        if (this.showLoginLink) {
+            this.showLoginLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showLoginForm();
+            });
+        }
+        
+        if (this.registerCTA) {
+            this.registerCTA.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showAuthPanel();
+                this.showRegisterForm();
+            });
+        }
+        
+        // Logout
+        if (this.logoutBtn) {
+            this.logoutBtn.addEventListener('click', () => this.handleLogout());
+        }
+    }
+
+    async handleLogin(event) {
+        event.preventDefault();
+        
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value;
+        
+        if (!username || !password) {
+            this.showMessage(this.loginMessage, 'Please enter both username and password', 'error');
+            return;
+        }
+        
+        try {
+            this.showMessage(this.loginMessage, 'Logging in...', 'info');
+            
+            const response = await window.rseApi.login(username, password);
+            
+            if (response.access_token) {
+                this.showMessage(this.loginMessage, 'Login successful!', 'success');
+                await this.loadUserProfile(username);
+                this.showUserProfile();
+                this.updateAuthStatus(true);
+                
+                // Clear form
+                this.loginForm.reset();
+                
+                // Hide auth panel after delay
+                setTimeout(() => {
+                    this.hideAuthPanel();
+                }, 1500);
+            }
+        } catch (error) {
+            this.showMessage(this.loginMessage, error.message, 'error');
+        }
+    }
+
+    async handleRegister(event) {
+        event.preventDefault();
+        
+        const username = document.getElementById('register-username').value.trim();
+        const password = document.getElementById('register-password').value;
+        const confirmPassword = document.getElementById('register-confirm').value;
+        
+        // Validation
+        if (!username || !password || !confirmPassword) {
+            this.showMessage(this.registerMessage, 'Please fill in all fields', 'error');
+            return;
+        }
+        
+        if (username.length < 3 || username.length > 20) {
+            this.showMessage(this.registerMessage, 'Username must be 3-20 characters', 'error');
+            return;
+        }
+        
+        if (password.length < 8) {
+            this.showMessage(this.registerMessage, 'Password must be at least 8 characters', 'error');
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            this.showMessage(this.registerMessage, 'Passwords do not match', 'error');
+            return;
+        }
+        
+        try {
+            this.showMessage(this.registerMessage, 'Creating account...', 'info');
+            
+            await window.rseApi.register(username, password);
+            
+            this.showMessage(this.registerMessage, 'Account created successfully! Please log in.', 'success');
+            
+            // Clear form and switch to login
+            this.registerForm.reset();
+            
+            setTimeout(() => {
+                this.showLoginForm();
+                // Pre-fill username
+                document.getElementById('login-username').value = username;
+            }, 2000);
+            
+        } catch (error) {
+            this.showMessage(this.registerMessage, error.message, 'error');
+        }
+    }
+
+    async handleLogout() {
+        try {
+            await window.rseApi.logout();
+            this.currentUser = null;
+            this.showLoginForm();
+            this.updateAuthStatus(false);
+            this.hideAuthPanel();
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    }
+
+    async loadUserProfile(username) {
+        try {
+            const accountData = await window.rseApi.getAccountData();
+            
+            this.currentUser = {
+                username: username,
+                rating: accountData.stars || 0,
+                totalRatings: accountData.total_ratings || 0,
+                ...accountData
+            };
+            
+            this.updateProfileDisplay();
+        } catch (error) {
+            console.error('Failed to load user profile:', error);
+            this.currentUser = { username: username, rating: 0, totalRatings: 0 };
+            this.updateProfileDisplay();
+        }
+    }
+
+    updateProfileDisplay() {
+        if (!this.currentUser) return;
+        
+        if (this.profileUsername) {
+            this.profileUsername.textContent = this.currentUser.username;
+        }
+        
+        if (this.userRating) {
+            this.userRating.textContent = `${this.currentUser.rating}/5`;
+        }
+        
+        if (this.userTotalRatings) {
+            this.userTotalRatings.textContent = this.currentUser.totalRatings;
+        }
+    }
+
+    showLoginForm() {
+        this.hideAllSections();
+        if (this.loginSection) {
+            this.loginSection.style.display = 'block';
+        }
+        this.clearMessages();
+    }
+
+    showRegisterForm() {
+        this.hideAllSections();
+        if (this.registerSection) {
+            this.registerSection.style.display = 'block';
+        }
+        this.clearMessages();
+    }
+
+    showUserProfile() {
+        this.hideAllSections();
+        if (this.profileSection) {
+            this.profileSection.style.display = 'block';
+        }
+        this.clearMessages();
+    }
+
+    hideAllSections() {
+        [this.loginSection, this.registerSection, this.profileSection].forEach(section => {
+            if (section) section.style.display = 'none';
+        });
+    }
+
+    showAuthPanel() {
+        const authPanel = document.getElementById('auth-panel');
+        if (authPanel && !authPanel.classList.contains('show')) {
+            const collapse = new bootstrap.Collapse(authPanel);
+            collapse.show();
+        }
+    }
+
+    hideAuthPanel() {
+        const authPanel = document.getElementById('auth-panel');
+        if (authPanel && authPanel.classList.contains('show')) {
+            const collapse = new bootstrap.Collapse(authPanel);
+            collapse.hide();
+        }
+    }
+
+    updateAuthStatus(isAuthenticated) {
+        if (this.authStatus) {
+            this.authStatus.style.display = isAuthenticated ? 'block' : 'none';
+        }
+    }
+
+    showMessage(container, message, type = 'info') {
+        if (!container) return;
+        
+        container.textContent = message;
+        container.className = `auth-message ${type}`;
+        container.style.display = 'block';
+        
+        // Auto-hide success messages
+        if (type === 'success') {
+            setTimeout(() => {
+                container.style.display = 'none';
+            }, 3000);
+        }
+    }
+
+    clearMessages() {
+        [this.loginMessage, this.registerMessage].forEach(msg => {
+            if (msg) {
+                msg.style.display = 'none';
+                msg.textContent = '';
+            }
+        });
+    }
+
+    async checkAuthStatus() {
+        if (window.rseApi.isAuthenticated()) {
+            try {
+                // Try to load user profile to verify token is still valid
+                const accountData = await window.rseApi.getAccountData();
+                
+                // Extract username from token or use a default
+                const username = localStorage.getItem('rse_username') || 'User';
+                
+                await this.loadUserProfile(username);
+                this.showUserProfile();
+                this.updateAuthStatus(true);
+            } catch (error) {
+                // Token is invalid, clear it
+                window.rseApi.clearToken();
+                this.showLoginForm();
+                this.updateAuthStatus(false);
+            }
+        } else {
+            this.showLoginForm();
+            this.updateAuthStatus(false);
+        }
+    }
+
+    // Public methods for other modules
+    getCurrentUser() {
+        return this.currentUser;
+    }
+
+    isLoggedIn() {
+        return !!this.currentUser && window.rseApi.isAuthenticated();
+    }
+
+    requireAuth() {
+        if (!this.isLoggedIn()) {
+            this.showAuthPanel();
+            this.showLoginForm();
+            return false;
+        }
+        return true;
+    }
 }
+
+// Initialize authentication manager when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.rseAuth = new RSEAuthManager();
+});
