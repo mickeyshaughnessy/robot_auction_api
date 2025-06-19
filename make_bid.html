@@ -72,8 +72,32 @@
     </div>
 
     <script>
-        const API_URL = 'https://100.26.236.1:5001';
-        let authToken = localStorage.getItem('authToken');
+        const API_URL = 'http://100.26.236.1:5001';
+        
+        // Try multiple possible token storage keys
+        let authToken = localStorage.getItem('authToken') || 
+                       localStorage.getItem('access_token') || 
+                       localStorage.getItem('token') ||
+                       sessionStorage.getItem('authToken') ||
+                       sessionStorage.getItem('access_token');
+
+        function checkAuth() {
+            console.log('Checking authentication...');
+            console.log('Available localStorage keys:', Object.keys(localStorage));
+            console.log('AuthToken found:', !!authToken);
+            
+            if (!authToken) {
+                document.getElementById('current-bids').innerHTML = `
+                    <div style="text-align: center; padding: 20px;">
+                        <p>Please log in first to submit bids and view your account.</p>
+                        <a href="index.html" class="btn btn-primary">Go to Login</a>
+                    </div>
+                `;
+                // Don't redirect immediately, let user see the page
+                return false;
+            }
+            return true;
+        }
 
         function fillService(text) {
             document.getElementById('service').value = text;
@@ -98,6 +122,12 @@
         document.getElementById('bid-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            if (!authToken) {
+                alert('Please log in first');
+                window.location.href = 'index.html';
+                return;
+            }
+            
             const service = document.getElementById('service').value;
             const lat = parseFloat(document.getElementById('lat').value);
             const lon = parseFloat(document.getElementById('lon').value);
@@ -110,6 +140,8 @@
                 return;
             }
 
+            console.log('Submitting bid with token:', authToken.substring(0, 20) + '...');
+
             try {
                 const response = await fetch(`${API_URL}/make_bid`, {
                     method: 'POST',
@@ -118,15 +150,18 @@
                         'Authorization': `Bearer ${authToken}`
                     },
                     body: JSON.stringify({
-                        service: service,
-                        lat: lat,
-                        lon: lon,
-                        price: price,
-                        end_time: endTime
+                        bid: {
+                            service: service,
+                            lat: lat,
+                            lon: lon,
+                            price: price,
+                            end_time: endTime
+                        }
                     })
                 });
 
                 const result = await response.json();
+                console.log('API Response:', response.status, result);
                 
                 if (response.ok) {
                     alert('Bid submitted successfully!');
@@ -136,11 +171,17 @@
                     alert('Error: ' + (result.error || 'Failed to submit bid'));
                 }
             } catch (error) {
+                console.error('Network error:', error);
                 alert('Network error: ' + error.message);
             }
         });
 
         async function refreshBids() {
+            if (!authToken) {
+                checkAuth();
+                return;
+            }
+            
             try {
                 const response = await fetch(`${API_URL}/account_data`, {
                     method: 'GET',
@@ -152,8 +193,12 @@
                 if (response.ok) {
                     const data = await response.json();
                     displayBids(data.bids || []);
+                } else if (response.status === 401) {
+                    document.getElementById('current-bids').innerHTML = '<p>Session expired. Please log in again.</p>';
+                    localStorage.removeItem('authToken');
+                    authToken = null;
                 } else {
-                    document.getElementById('current-bids').innerHTML = '<p>Could not load bids. Please log in.</p>';
+                    document.getElementById('current-bids').innerHTML = '<p>Could not load bids.</p>';
                 }
             } catch (error) {
                 document.getElementById('current-bids').innerHTML = '<p>Error loading bids: ' + error.message + '</p>';
@@ -164,7 +209,7 @@
             const container = document.getElementById('current-bids');
             
             if (bids.length === 0) {
-                container.innerHTML = '<p>No current bids.</p>';
+                container.innerHTML = '<p>No current bids. Submit your first bid above!</p>';
                 return;
             }
 
@@ -176,7 +221,7 @@
                     <div class="bid-item" onclick="viewBidDetails('${bid.bid_id}')">
                         <div class="bid-summary">
                             <strong>${bid.service.substring(0, 50)}${bid.service.length > 50 ? '...' : ''}</strong>
-                            <span class="bid-price">$${bid.price}</span>
+                            <span class="bid-price">${bid.price}</span>
                             <span class="bid-status ${status}">${status.toUpperCase()}</span>
                         </div>
                         <div class="bid-location">Location: ${bid.lat.toFixed(4)}, ${bid.lon.toFixed(4)}</div>
@@ -197,7 +242,7 @@
                 document.getElementById('bid-details-content').innerHTML = `
                     <p><strong>Service:</strong> ${bid.service}</p>
                     <p><strong>Location:</strong> ${bid.lat}, ${bid.lon}</p>
-                    <p><strong>Price:</strong> $${bid.price}</p>
+                    <p><strong>Price:</strong> ${bid.price}</p>
                     <p><strong>Status:</strong> ${bid.status || 'pending'}</p>
                     <p><strong>Created:</strong> ${new Date(bid.created_time * 1000).toLocaleString()}</p>
                     <p><strong>Expires:</strong> ${new Date(bid.end_time * 1000).toLocaleString()}</p>
@@ -239,13 +284,12 @@
             }
         }
 
-        // Check authentication on page load
-        if (!authToken) {
-            alert('Please log in first');
-            window.location.href = 'index.html';
-        } else {
-            refreshBids();
-        }
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            if (checkAuth()) {
+                refreshBids();
+            }
+        });
     </script>
 
     <style>
