@@ -3,426 +3,537 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Robot Services Exchange (RSE) API Documentation</title>
+    <title>Robot Services Exchange - API Documentation</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-
-
-    <header>
-        <div class="container header-container">
-            <h1>Robot Services Exchange (RSE)</h1>
-            <nav>
-                <ul>
-                    <li><a href="index.html" class="active">Home</a></li>
-                    <li><a href="dashboard.html">Dashboard</a></li>
-                    <li><a href="api_docs.html">API Docs</a></li>
-                    <li><a href="faq.html">FAQ</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="terms.html">Terms of Service</a></li>
-                </ul>
+    <div id="theme-container" class="light-theme">
+        <!-- Unified Header Component -->
+        <header class="site-header">
+            <nav class="navbar navbar-expand-lg" data-bs-theme="dark">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="index.html">
+                        <strong>RSE</strong>
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="main-nav">
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="index.html">Home</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    Technical
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="api_docs.html">API Documentation</a></li>
+                                    <li><a class="dropdown-item" href="dashboard.html">Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="nearby.html">Nearby Services</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    About
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="about.html">About RSE</a></li>
+                                    <li><a class="dropdown-item" href="faq.html">FAQ</a></li>
+                                    <li><a class="dropdown-item" href="seats.html">Supplier Seats</a></li>
+                                    <li><a class="dropdown-item" href="terms.html">Terms of Service</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <div class="auth-controls">
+                            <button id="user-menu-btn" class="user-icon-btn" data-bs-toggle="collapse" data-bs-target="#auth-panel">
+                                <img src="images/Icons/user.png" alt="User">
+                                <span id="auth-status" class="auth-indicator" style="display: none;">✓</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </nav>
-            <div class="auth-buttons">
-                <!--
-                <button id="login-btn" class="login-btn">Login</button>
-                <button id="signup-btn" class="signup-btn">New Account</button>
-                -->
+        </header>
+
+        <!-- Unified Auth Panel Component -->
+        <div class="collapse" id="auth-panel">
+            <div class="auth-container">
+                <!-- Login Form -->
+                <div id="login-section" class="auth-section">
+                    <h3>Login</h3>
+                    <form id="login-form">
+                        <div class="form-field">
+                            <input type="text" id="login-username" placeholder="Username" required>
+                        </div>
+                        <div class="form-field">
+                            <input type="password" id="login-password" placeholder="Password" required>
+                        </div>
+                        <div class="form-field checkbox-field">
+                            <input type="checkbox" id="remember-me">
+                            <label for="remember-me">Remember me</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign In</button>
+                        <div class="auth-links">
+                            <a href="#" id="show-register">Register</a>
+                            <a href="#">Forgot password?</a>
+                        </div>
+                        <div id="login-message" class="auth-message"></div>
+                    </form>
+                </div>
+
+                <!-- Register Form -->
+                <div id="register-section" class="auth-section" style="display: none;">
+                    <h3>Register</h3>
+                    <form id="register-form">
+                        <div class="form-field">
+                            <input type="text" id="register-username" placeholder="Username (3-20 chars)" required>
+                        </div>
+                        <div class="form-field">
+                            <input type="password" id="register-password" placeholder="Password (min 8 chars)" required>
+                        </div>
+                        <div class="form-field">
+                            <input type="password" id="register-confirm" placeholder="Confirm password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Register</button>
+                        <div class="auth-links">
+                            <a href="#" id="show-login">Back to login</a>
+                        </div>
+                        <div id="register-message" class="auth-message"></div>
+                    </form>
+                </div>
+
+                <!-- User Profile -->
+                <div id="profile-section" class="auth-section" style="display: none;">
+                    <div class="user-profile">
+                        <h3 id="profile-username">Username</h3>
+                        <div class="user-stats">
+                            <p><strong>Rating:</strong> <span id="user-rating">0/5</span></p>
+                            <p><strong>Total Ratings:</strong> <span id="user-total-ratings">0</span></p>
+                        </div>
+                        <div class="profile-actions">
+                            <a href="dashboard.html" class="btn btn-primary">My Dashboard</a>
+                            <a href="nearby.html" class="btn btn-success">Find Services</a>
+                            <button id="logout-btn" class="btn btn-danger">Logout</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </header>
 
-<div class="container">
-    <h1>Robot Services Exchange (RSE) API Documentation</h1>
+        <!-- Main Content -->
+        <main class="main-content">
+            <section class="content-section">
+                <div class="container">
+                    <div class="api-docs-header">
+                        <h1>Robot Services Exchange API Documentation</h1>
+                        <p class="lead">A marketplace for robot services - bid on robot services or offer robot capacity.</p>
+                        
+                        <!-- API Status Check -->
+                        <div class="api-status-section">
+                            <h3>API Status Check</h3>
+                            <div class="code-block">
+                                <code>curl http://100.26.236.1:5001/ping</code>
+                            </div>
+                            <button class="btn btn-primary" data-action="check-api-status" data-target="api-status-response">
+                                Check API Status
+                            </button>
+                            <div id="api-status-response" class="api-response"></div>
+                        </div>
+                    </div>
 
-    <p>A marketplace for robot services - bid on robot services or offer robot capacity.</p>
+                    <!-- Authentication Endpoints -->
+                    <section class="endpoint-section">
+                        <h2>Authentication Endpoints</h2>
+                        
+                        <div class="endpoint">
+                            <div class="endpoint-header">
+                                <h3><span class="method post">POST</span> <span class="path">/register</span></h3>
+                            </div>
+                            <p>Register a new user account.</p>
+                            
+                            <div class="endpoint-content">
+                                <h4>Parameters</h4>
+                                <table class="param-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>username</code></td>
+                                            <td>string</td>
+                                            <td>Desired username for the new account (3-20 characters)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>password</code></td>
+                                            <td>string</td>
+                                            <td>Password for the new account (min 8 characters)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <h4>Response</h4>
+                                <p>Returns 201 on successful registration, 400 for invalid parameters.</p>
+                                
+                                <div class="try-it-section">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="toggleTryIt('register-try')">
+                                        Try It →
+                                    </button>
+                                    <div id="register-try" class="try-it-form" style="display: none;">
+                                        <div class="form-field">
+                                            <input type="text" placeholder="Username" id="try-register-username">
+                                        </div>
+                                        <div class="form-field">
+                                            <input type="password" placeholder="Password" id="try-register-password">
+                                        </div>
+                                        <button class="btn btn-primary btn-sm" onclick="tryRegister()">Send Request</button>
+                                        <div class="try-it-response"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
+                        <div class="endpoint">
+                            <div class="endpoint-header">
+                                <h3><span class="method post">POST</span> <span class="path">/login</span></h3>
+                            </div>
+                            <p>Authenticate a user and receive an access token.</p>
+                            
+                            <div class="endpoint-content">
+                                <h4>Parameters</h4>
+                                <table class="param-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>username</code></td>
+                                            <td>string</td>
+                                            <td>User's registered username</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>password</code></td>
+                                            <td>string</td>
+                                            <td>User's password</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <h4>Response</h4>
+                                <p>Returns 200 with access token on success, 401 for invalid credentials.</p>
+                            </div>
+                        </div>
+                    </section>
 
-    <h3>API Status Check</h3>
-    <pre><code>curl https://rse-api.com:5002/ping</code></pre>
-    <button data-action="check-api-status" data-target="response">Check Status</button>
-    <div id="response"></div>
+                    <!-- Buyer Endpoints -->
+                    <section class="endpoint-section">
+                        <h2>Buyer Endpoints</h2>
+                        <p class="section-note">Note: All buyer endpoints require authentication via Bearer token.</p>
+                        
+                        <div class="endpoint">
+                            <div class="endpoint-header">
+                                <h3><span class="method post">POST</span> <span class="path">/make_bid</span></h3>
+                            </div>
+                            <p>Submit a new bid for a robot service.</p>
+                            
+                            <div class="endpoint-content">
+                                <h4>Parameters</h4>
+                                <table class="param-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>service</code></td>
+                                            <td>string</td>
+                                            <td>Detailed description of service requested (e.g., cleaning, delivery)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>lat</code></td>
+                                            <td>number</td>
+                                            <td>Latitude of the service location (-90 to 90)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>lon</code></td>
+                                            <td>number</td>
+                                            <td>Longitude of the service location (-180 to 180)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>price</code></td>
+                                            <td>number</td>
+                                            <td>Bid price for the service (in USD)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>end_time</code></td>
+                                            <td>integer</td>
+                                            <td>Unix timestamp for when the bid expires</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <h4>Response</h4>
+                                <p>Returns 200 with bid_id on success, 400 for missing parameters.</p>
+                            </div>
+                        </div>
+                    </section>
 
-    <h2>Authentication Endpoints</h2>
+                    <!-- Seller Endpoints -->
+                    <section class="endpoint-section">
+                        <h2>Seller Endpoints</h2>
+                        <p class="section-note">Note: Seller endpoints require authentication and a valid supplier seat.</p>
+                        
+                        <div class="endpoint">
+                            <div class="endpoint-header">
+                                <h3><span class="method post">POST</span> <span class="path">/grab_job</span></h3>
+                            </div>
+                            <p>Attempt to accept an available job for a robot. Returns the highest-priced matching bid.</p>
+                            
+                            <div class="endpoint-content">
+                                <h4>Parameters</h4>
+                                <table class="param-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>services</code></td>
+                                            <td>array</td>
+                                            <td>List of services the robot can perform</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>lat</code></td>
+                                            <td>number</td>
+                                            <td>Current latitude of the robot (-90 to 90)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>lon</code></td>
+                                            <td>number</td>
+                                            <td>Current longitude of the robot (-180 to 180)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>max_distance</code></td>
+                                            <td>number</td>
+                                            <td>Maximum distance the robot will travel (in miles)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <h4>Response</h4>
+                                <p>Returns 200 with job details on success, 204 if no matching jobs found.</p>
+                            </div>
+                        </div>
+                    </section>
 
-    <div class="endpoint">
-        <h3><span class="method">POST</span> <span class="path">/register</span></h3>
-        <p>Register a new user account.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>username</td>
-                <td>Desired username for the new account (3-20 characters)</td>
-            </tr>
-            <tr>
-                <td>password</td>
-                <td>Password for the new account (min 8 characters)</td>
-            </tr>
-        </table>
-        <h4>Response</h4>
-        <p>Returns 200 on successful registration, 400 for invalid parameters.</p>
+                    <!-- Shared Endpoints -->
+                    <section class="endpoint-section">
+                        <h2>Shared Endpoints</h2>
+                        <p class="section-note">Note: These endpoints require authentication via Bearer token.</p>
+                        
+                        <div class="endpoint">
+                            <div class="endpoint-header">
+                                <h3><span class="method post">POST</span> <span class="path">/nearby</span></h3>
+                            </div>
+                            <p>Retrieve bids within 10 miles of the specified location.</p>
+                            
+                            <div class="endpoint-content">
+                                <h4>Parameters</h4>
+                                <table class="param-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>lat</code></td>
+                                            <td>number</td>
+                                            <td>Latitude of the center point (-90 to 90)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>lon</code></td>
+                                            <td>number</td>
+                                            <td>Longitude of the center point (-180 to 180)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <h4>Response</h4>
+                                <p>Returns 200 with nearby bids array, 400 for invalid parameters.</p>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header">
+                                <h3><span class="method post">POST</span> <span class="path">/sign_job</span></h3>
+                            </div>
+                            <p>Sign off on a completed job and rate the counterparty.</p>
+                            
+                            <div class="endpoint-content">
+                                <h4>Parameters</h4>
+                                <table class="param-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>job_id</code></td>
+                                            <td>string</td>
+                                            <td>ID of the completed job</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>star_rating</code></td>
+                                            <td>integer</td>
+                                            <td>Rating for the counterparty (1-5 stars)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <h4>Response</h4>
+                                <p>Returns 200 on success, 400 if already signed, 404 if job not found.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Communication Endpoints -->
+                    <section class="endpoint-section">
+                        <h2>Communication Endpoints</h2>
+                        
+                        <div class="endpoint">
+                            <div class="endpoint-header">
+                                <h3><span class="method post">POST</span> <span class="path">/chat</span></h3>
+                            </div>
+                            <p>Send a private message to another user.</p>
+                            
+                            <div class="endpoint-content">
+                                <h4>Parameters</h4>
+                                <table class="param-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>recipient</code></td>
+                                            <td>string</td>
+                                            <td>Username of the message recipient</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>message</code></td>
+                                            <td>string</td>
+                                            <td>Content of the message (max 1000 characters)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header">
+                                <h3><span class="method get">GET</span> <span class="path">/chat</span></h3>
+                            </div>
+                            <p>Retrieve chat messages for the authenticated user.</p>
+                            
+                            <div class="endpoint-content">
+                                <h4>Response</h4>
+                                <p>Returns 200 with messages array, sorted by timestamp descending.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- System Check -->
+                    <section class="endpoint-section">
+                        <h2>System Check</h2>
+                        
+                        <div class="endpoint">
+                            <div class="endpoint-header">
+                                <h3><span class="method get">GET</span> <span class="path">/ping</span></h3>
+                            </div>
+                            <p>Check if the API is operational. No authentication required.</p>
+                            
+                            <div class="endpoint-content">
+                                <button class="btn btn-primary" data-action="check-api-status" data-target="ping-response">
+                                    Test Ping Endpoint
+                                </button>
+                                <div id="ping-response" class="api-response"></div>
+                                
+                                <h4>Response</h4>
+                                <p>Returns 200 if system is operational.</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </section>
+        </main>
+
+        <!-- Unified Footer Component -->
+        <footer class="site-footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Attribution</h4>
+                        <div class="footer-links">
+                            <a href="https://www.flaticon.com/free-icons/freight" title="freight icons">Freight icons created by monkik - Flaticon</a><br>
+                            <a href="https://www.flaticon.com/free-icons/call-center" title="call center icons">Call center icons created by monkik - Flaticon</a><br>
+                            <a href="https://www.flaticon.com/free-icons/excavator" title="excavator icons">Excavator icons created by monkik - Flaticon</a><br>
+                            <a href="https://www.flaticon.com/free-icons/mop" title="mop icons">Mop icons created by monkik - Flaticon</a><br>
+                            <a href="https://www.flaticon.com/free-icons/shield" title="shield icons">Shield icons created by monkik - Flaticon</a><br>
+                            <a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Freepik - Flaticon</a>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <h4>Links</h4>
+                        <div class="footer-links">
+                            <a href="about.html">About</a><br>
+                            <a href="terms.html">Terms of Service</a><br>
+                            <a href="api_docs.html">API</a><br>
+                            <a href="faq.html">FAQ</a>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <h4>Social Media</h4>
+                        <div class="footer-links">
+                            <a href="https://x.com/RobotServicesX">@RobotServicesX</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2025 Robot Services Exchange. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
     </div>
 
-    <div class="endpoint">
-        <h3><span class="method">POST</span> <span class="path">/login</span></h3>
-        <p>Authenticate a user and receive an access token.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>username</td>
-                <td>User's registered username</td>
-            </tr>
-            <tr>
-                <td>password</td>
-                <td>User's password</td>
-            </tr>
-        </table>
-        <h4>Response</h4>
-        <p>Returns 200 with access token on success, 403 for invalid credentials.</p>
-    </div>
-
-    <h2>Buyer Endpoints</h2>
-    <p>Note: All buyer endpoints require authentication via username and password.</p>
-
-    <div class="endpoint">
-        <h3><span class="method">POST</span> <span class="path">/submit_bid</span></h3>
-        <p>Submit a new bid for a robot service.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>username</td>
-                <td>Authenticated username</td>
-            </tr>
-            <tr>
-                <td>password</td>
-                <td>User's password</td>
-            </tr>
-            <tr>
-                <td>service</td>
-                <td>Detailed description of service requested (e.g., cleaning, delivery)</td>
-            </tr>
-            <tr>
-                <td>lat</td>
-                <td>Latitude of the service location (-90 to 90)</td>
-            </tr>
-            <tr>
-                <td>lon</td>
-                <td>Longitude of the service location (-180 to 180)</td>
-            </tr>
-            <tr>
-                <td>price</td>
-                <td>Bid price for the service (in USD)</td>
-            </tr>
-            <tr>
-                <td>end_time</td>
-                <td>Unix timestamp for when the bid expires</td>
-            </tr>
-        </table>
-        <h4>Response</h4>
-        <p>Returns 200 with bid_id on success, 400 for missing parameters.</p>
-    </div>
-
-    <h2>Seller Endpoints</h2>
-    <p>Note: Seller endpoints require a valid supplier seat.</p>
-
-    <div class="endpoint">
-        <h3><span class="method">POST</span> <span class="path">/grab_job</span></h3>
-        <p>Attempt to accept an available job for a robot. Returns the highest-priced matching bid.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>capabilities</td>
-                <td>List of robot capabilities (comma-separated)</td>
-            </tr>
-            <tr>
-                <td>lat</td>
-                <td>Current latitude of the robot (-90 to 90)</td>
-            </tr>
-            <tr>
-                <td>lon</td>
-                <td>Current longitude of the robot (-180 to 180)</td>
-            </tr>
-            <tr>
-                <td>max_distance</td>
-                <td>Maximum distance the robot will travel (in miles)</td>
-            </tr>
-            <tr>
-                <td>seat</td>
-                <td>Supplier seat credentials object:
-                    <pre>{
-    "id": "unique_seat_id",
-    "owner": "seat_owner_name",
-    "secret": "md5_hash_of_seat_phrase"
-}</pre>
-                </td>
-            </tr>
-        </table>
-        <h4>Response</h4>
-        <p>Returns 200 with job details on success, 204 if no matching jobs found, 403 for invalid seat.</p>
-    </div>
-
-    <h2>User Account Endpoints</h2>
-    <p>Note: All account endpoints require authentication.</p>
-
-    <div class="endpoint">
-        <h3><span class="method">GET</span> <span class="path">/account</span></h3>
-        <p>Retrieve detailed information about the authenticated user's account, including profile data and bids.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>username</td>
-                <td>Authenticated username</td>
-            </tr>
-            <tr>
-                <td>password</td>
-                <td>User's password</td>
-            </tr>
-            <tr>
-                <td>include_bids</td>
-                <td>Optional: Set to "true" to include user's bids in the response (default: true)</td>
-            </tr>
-            <tr>
-                <td>bid_status</td>
-                <td>Optional: Filter bids by status (pending, matched, completed, cancelled)</td>
-            </tr>
-            <tr>
-                <td>limit</td>
-                <td>Optional: Maximum number of bids to retrieve (default: 20)</td>
-            </tr>
-        </table>
-        <h4>Response</h4>
-        <p>Returns 200 with user profile data including ratings, transaction history, account status, and recent bids.</p>
-    </div>
-
-    <div class="endpoint">
-        <h3><span class="method">POST</span> <span class="path">/cancel_bid</span></h3>
-        <p>Cancel a pending bid created by the authenticated user.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>username</td>
-                <td>Authenticated username</td>
-            </tr>
-            <tr>
-                <td>password</td>
-                <td>User's password</td>
-            </tr>
-            <tr>
-                <td>bid_id</td>
-                <td>ID of the bid to cancel</td>
-            </tr>
-        </table>
-        <h4>Response</h4>
-        <p>Returns 200 on successful cancellation, 400 if bid cannot be cancelled (already matched or completed), 404 if bid not found.</p>
-    </div>
-
-    <h2>Shared Endpoints</h2>
-    <p>Note: These endpoints require authentication via username and password.</p>
-
-    <div class="endpoint">
-        <h3><span class="method">POST</span> <span class="path">/nearby</span></h3>
-        <p>Retrieve bids within 10 miles of the specified location.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>username</td>
-                <td>Authenticated username</td>
-            </tr>
-            <tr>
-                <td>password</td>
-                <td>User's password</td>
-            </tr>
-            <tr>
-                <td>lat</td>
-                <td>Latitude of the center point (-90 to 90)</td>
-            </tr>
-            <tr>
-                <td>lon</td>
-                <td>Longitude of the center point (-180 to 180)</td>
-            </tr>
-        </table>
-        <h4>Response</h4>
-        <p>Returns 200 with nearby bids, 400 for invalid parameters.</p>
-    </div>
-
-    <div class="endpoint">
-        <h3><span class="method">POST</span> <span class="path">/sign_job</span></h3>
-        <p>Sign off on a completed job and rate the counterparty. Both buyer and seller must sign to complete the job.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>username</td>
-                <td>Authenticated username</td>
-            </tr>
-            <tr>
-                <td>password</td>
-                <td>User's password</td>
-            </tr>
-            <tr>
-                <td>job_id</td>
-                <td>ID of the completed job</td>
-            </tr>
-            <tr>
-                <td>star_rating</td>
-                <td>Rating for the counterparty (1-5 stars)</td>
-            </tr>
-        </table>
-        <h4>Response</h4>
-        <p>Returns 200 on success, 400 if already signed, 404 if job not found.</p>
-    </div>
-
-    <h2>Messaging Endpoints</h2>
-    <p>Note: All messaging endpoints require authentication via username and password.</p>
-
-    <div class="endpoint">
-        <h3><span class="method">POST</span> <span class="path">/chat</span></h3>
-        <p>Send a private message to another user.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>username</td>
-                <td>Sender's username</td>
-            </tr>
-            <tr>
-                <td>password</td>
-                <td>Sender's password</td>
-            </tr>
-            <tr>
-                <td>recipient</td>
-                <td>Username of the message recipient</td>
-            </tr>
-            <tr>
-                <td>message</td>
-                <td>Content of the message (max 1000 characters)</td>
-            </tr>
-        </table>
-        <h4>Response</h4>
-        <p>Returns 200 with message_id on success, 404 if recipient not found.</p>
-    </div>
-
-    <div class="endpoint">
-        <h3><span class="method">GET</span> <span class="path">/chat</span></h3>
-        <p>Retrieve chat messages for the authenticated user.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>username</td>
-                <td>Authenticated username</td>
-            </tr>
-            <tr>
-                <td>password</td>
-                <td>User's password</td>
-            </tr>
-        </table>
-        <h4>Response</h4>
-        <p>Returns 200 with messages array, sorted by timestamp descending.</p>
-    </div>
-
-    <h2>Bulletin Board Endpoints</h2>
-    <p>Note: All bulletin board endpoints require authentication via username and password.</p>
-
-    <div class="endpoint">
-        <h3><span class="method">POST</span> <span class="path">/bulletin</span></h3>
-        <p>Post a message to the public bulletin board.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>username</td>
-                <td>Authenticated username</td>
-            </tr>
-            <tr>
-                <td>password</td>
-                <td>User's password</td>
-            </tr>
-            <tr>
-                <td>title</td>
-                <td>Title of the bulletin post (max 100 characters)</td>
-            </tr>
-            <tr>
-                <td>content</td>
-                <td>Content of the bulletin post (max 2000 characters)</td>
-            </tr>
-            <tr>
-                <td>category</td>
-                <td>Category of the post (e.g., announcement, job, general)</td>
-            </tr>
-        </table>
-        <h4>Response</h4>
-        <p>Returns 200 with bulletin_id on success, 400 for invalid parameters.</p>
-    </div>
-
-    <div class="endpoint">
-        <h3><span class="method">GET</span> <span class="path">/bulletin</span></h3>
-        <p>Retrieve recent bulletin board posts.</p>
-        <table>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>username</td>
-                <td>Authenticated username</td>
-            </tr>
-            <tr>
-                <td>password</td>
-                <td>User's password</td>
-            </tr>
-            <tr>
-                <td>category</td>
-                <td>Optional: Filter posts by category</td>
-            </tr>
-            <tr>
-                <td>limit</td>
-                <td>Optional: Maximum number of posts to retrieve (default: 20, max: 100)</td>
-            </tr>
-        </table>
-        <h4>Response</h4>
-        <p>Returns 200 with bulletins array, sorted by timestamp descending.</p>
-    </div>
-
-    <h2>System Check</h2>
-
-    <div class="endpoint">
-        <h3><span class="method">GET</span> <span class="path">/ping</span></h3>
-        <p>Check if the API is operational. No authentication required.</p>
-        <button data-action="check-api-status" data-target="ping-response">Check API Status</button>
-        <div id="ping-response"></div>
-        <h4>Response</h4>
-        <p>Returns 200 if system is operational.</p>
-    </div>
-</div>
-<script src="script.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="api.js"></script>
+    <script src="auth.js"></script>
+    <script src="main.js"></script>
+    <script src="api-docs.js"></script>
 </body>
 </html>
