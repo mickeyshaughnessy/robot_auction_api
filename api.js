@@ -1,7 +1,8 @@
 // RSE Unified API Service
 class RSEApiService {
     constructor() {
-        this.baseURL = 'http://100.26.236.1:5001';
+        // Use HTTPS to avoid security warnings
+        this.baseURL = 'https://100.26.236.1:5001';
         this.token = this.getStoredToken();
     }
 

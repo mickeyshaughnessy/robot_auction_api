@@ -134,7 +134,7 @@
                         <div class="api-status-section">
                             <h3>API Status Check</h3>
                             <div class="code-block">
-                                <code>curl http://100.26.236.1:5001/ping</code>
+                                <code>curl https://100.26.236.1:5001/ping</code>
                             </div>
                             <button class="btn btn-primary" data-action="check-api-status" data-target="api-status-response">
                                 Check API Status
@@ -420,6 +420,7 @@
                     <!-- Communication Endpoints -->
                     <section class="endpoint-section">
                         <h2>Communication Endpoints</h2>
+                        <p class="section-note">Note: All messaging endpoints require authentication via Bearer token.</p>
                         
                         <div class="endpoint">
                             <div class="endpoint-header">
@@ -450,6 +451,9 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                                
+                                <h4>Response</h4>
+                                <p>Returns 200 with message_id on success, 404 if recipient not found.</p>
                             </div>
                         </div>
 
@@ -462,6 +466,143 @@
                             <div class="endpoint-content">
                                 <h4>Response</h4>
                                 <p>Returns 200 with messages array, sorted by timestamp descending.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Bulletin Board Endpoints -->
+                    <section class="endpoint-section">
+                        <h2>Bulletin Board Endpoints</h2>
+                        <p class="section-note">Note: All bulletin board endpoints require authentication via Bearer token.</p>
+                        
+                        <div class="endpoint">
+                            <div class="endpoint-header">
+                                <h3><span class="method post">POST</span> <span class="path">/bulletin</span></h3>
+                            </div>
+                            <p>Post a message to the public bulletin board.</p>
+                            
+                            <div class="endpoint-content">
+                                <h4>Parameters</h4>
+                                <table class="param-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>title</code></td>
+                                            <td>string</td>
+                                            <td>Title of the bulletin post (max 100 characters)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>content</code></td>
+                                            <td>string</td>
+                                            <td>Content of the bulletin post (max 2000 characters)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>category</code></td>
+                                            <td>string</td>
+                                            <td>Category of the post (e.g., announcement, job, general)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <h4>Response</h4>
+                                <p>Returns 200 with bulletin_id on success, 400 for invalid parameters.</p>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header">
+                                <h3><span class="method get">GET</span> <span class="path">/bulletin</span></h3>
+                            </div>
+                            <p>Retrieve recent bulletin board posts.</p>
+                            
+                            <div class="endpoint-content">
+                                <h4>Parameters</h4>
+                                <table class="param-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>category</code></td>
+                                            <td>string</td>
+                                            <td>Optional: Filter posts by category</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>limit</code></td>
+                                            <td>integer</td>
+                                            <td>Optional: Maximum number of posts to retrieve (default: 20, max: 100)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <h4>Response</h4>
+                                <p>Returns 200 with bulletins array, sorted by timestamp descending.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Account Management Endpoints -->
+                    <section class="endpoint-section">
+                        <h2>Account Management Endpoints</h2>
+                        <p class="section-note">Note: All account endpoints require authentication via Bearer token.</p>
+                        
+                        <div class="endpoint">
+                            <div class="endpoint-header">
+                                <h3><span class="method get">GET</span> <span class="path">/account_data</span></h3>
+                            </div>
+                            <p>Retrieve detailed information about the authenticated user's account, including profile data and ratings.</p>
+                            
+                            <div class="endpoint-content">
+                                <h4>Response</h4>
+                                <p>Returns 200 with user profile data including ratings, account creation date, and statistics.</p>
+                                
+                                <div class="code-block">
+                                    <code>{
+  "created_on": 1640995200,
+  "stars": 4.5,
+  "total_ratings": 42
+}</code>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header">
+                                <h3><span class="method post">POST</span> <span class="path">/cancel_bid</span></h3>
+                            </div>
+                            <p>Cancel a pending bid created by the authenticated user.</p>
+                            
+                            <div class="endpoint-content">
+                                <h4>Parameters</h4>
+                                <table class="param-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>bid_id</code></td>
+                                            <td>string</td>
+                                            <td>ID of the bid to cancel</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <h4>Response</h4>
+                                <p>Returns 200 on successful cancellation, 400 if bid cannot be cancelled (already matched or completed), 404 if bid not found.</p>
                             </div>
                         </div>
                     </section>
