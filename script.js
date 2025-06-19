@@ -9,9 +9,6 @@ const CANCEL_BID_ENDPOINT = `${API_BASE_URL}/cancel_bid`;
 const BULLETIN_ENDPOINT = `${API_BASE_URL}/bulletin`;
 const SUBMIT_BID_ENDPOINT = `${API_BASE_URL}/submit_bid`;
 
-// Authentication token
-let authToken = null;
-
 // Cache DOM elements for auth UI
 const elements = {
   // Login and user profile elements
@@ -62,11 +59,9 @@ function initializeForm() {
 function setDefaultTimes() {
   const now = new Date();
   const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-
   const formatDateTimeLocal = (date) => {
     return date.toISOString().slice(0, 16);
   };
-
   if (elements.startTimeInput) {
     elements.startTimeInput.value = formatDateTimeLocal(now);
   }
@@ -187,14 +182,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Logout functionality
   if (document.getElementById('logout-button')) {
     document.getElementById('logout-button').addEventListener('click', function() {
-      // Clear stored credentials
-      localStorage.removeItem('rseAuthToken');
-      localStorage.removeItem('rseUsername');
-      sessionStorage.removeItem('rseAuthToken');
-      sessionStorage.removeItem('rseUsername');
-      
-      // Clear auth token
-      authToken = null;
+      // Use RSE_AUTH to clear authentication
+      RSE_AUTH.clearAuth();
       
       // Update UI for logged out state
       showLoggedOutUI();
@@ -208,32 +197,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // Community feature buttons
   if (document.getElementById('open-chat-btn')) {
     document.getElementById('open-chat-btn').addEventListener('click', function() {
-      const token = localStorage.getItem('rseAuthToken') || sessionStorage.getItem('rseAuthToken');
-      if (token) {
-        openChatInterface(token);
+      if (RSE_AUTH.isAuthenticated()) {
+        openChatInterface(RSE_AUTH.getToken());
       }
     });
   }
   
   if (document.getElementById('open-bulletin-btn')) {
     document.getElementById('open-bulletin-btn').addEventListener('click', function() {
-      const token = localStorage.getItem('rseAuthToken') || sessionStorage.getItem('rseAuthToken');
-      if (token) {
-        openBulletinInterface(token);
+      if (RSE_AUTH.isAuthenticated()) {
+        openBulletinInterface(RSE_AUTH.getToken());
       }
     });
   }
   
   // Handle the Create New Bid button click
-  const createBidBtns = document.querySelectorAll('a[href="make_bid.html"]');
+  const createBidBtns = document.querySelectorAll('a[href="make_bid.html"], button[onclick*="make_bid.html"]');
   if (createBidBtns.length > 0) {
     createBidBtns.forEach(btn => {
       btn.addEventListener('click', function(e) {
         e.preventDefault();
         
-        // Check if user is logged in
-        const token = localStorage.getItem('rseAuthToken') || sessionStorage.getItem('rseAuthToken');
-        if (!token) {
+        // Check if user is logged in using RSE_AUTH
+        if (!RSE_AUTH.isAuthenticated()) {
           alert('Please log in to create a bid.');
           // Open the login panel
           const rightFixedContainer = document.getElementById('Right-Fixed-Container');
@@ -243,9 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
         
-        // Show the bid modal
-        const bidModal = new bootstrap.Modal(document.getElementById('bid-modal'));
-        bidModal.show();
+        // Redirect to make_bid.html since user is authenticated
+        window.location.href = 'make_bid.html';
       });
     });
   }
@@ -349,12 +334,10 @@ async function checkApiStatus() {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
-
     const response = await fetch(`${API_BASE_URL}/ping`, {
       signal: controller.signal
     });
     clearTimeout(timeoutId);
-
     const data = await response.json();
     
     // Update status indicator without displaying response in the response div
@@ -381,7 +364,6 @@ function updateStatusIndicator(status) {
     offline: { text: '🔴 Offline', color: '#dc3545' },
     timeout: { text: '🔴 Timeout', color: '#dc3545' }
   };
-
   const { text, color } = statusMap[status];
   elements.statusSpan.textContent = text;
   elements.statusSpan.style.color = color;
@@ -389,13 +371,10 @@ function updateStatusIndicator(status) {
 
 // Authentication functions
 function checkAuthStatus() {
-  const token = localStorage.getItem('rseAuthToken') || sessionStorage.getItem('rseAuthToken');
-  const username = localStorage.getItem('rseUsername') || sessionStorage.getItem('rseUsername');
+  const token = RSE_AUTH.getToken();
+  const username = RSE_AUTH.getUsername();
   
   if (token && username) {
-    // Set the auth token
-    authToken = token;
-    
     // Update UI for authenticated user
     showAuthenticatedUI(username, token);
     
@@ -419,33 +398,42 @@ async function handleLoginSubmit(e) {
   try {
     showMessage(elements.loginMessage, 'Logging in...', 'info');
     
-    const result = await makeApiRequest('/login', 'POST', {
-      username: username,
-      password: password
+    const response = await fetch(`${API_BASE_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password
+      })
     });
     
-    if (!result || result.error) {
+    const result = await response.json();
+    
+    if (!response.ok || result.error) {
       throw new Error(result?.error || 'Login failed');
     }
     
-    // Store auth token
-    authToken = result.access_token;
+    // Store auth using RSE_AUTH module
+    RSE_AUTH.setAuth(result.access_token, username);
     
+    // Store in session/local based on remember me preference
     if (rememberMe) {
-      localStorage.setItem('rseAuthToken', authToken);
-      localStorage.setItem('rseUsername', username);
+      localStorage.setItem('authToken', result.access_token);
+      localStorage.setItem('currentUser', username);
     } else {
-      sessionStorage.setItem('rseAuthToken', authToken);
-      sessionStorage.setItem('rseUsername', username);
+      sessionStorage.setItem('authToken', result.access_token);
+      sessionStorage.setItem('currentUser', username);
     }
     
     showMessage(elements.loginMessage, 'Login successful!', 'success');
     
     // Update UI for authenticated user
-    showAuthenticatedUI(username, authToken);
+    showAuthenticatedUI(username, result.access_token);
     
     // Fetch and display user data
-    fetchAccountData(authToken);
+    fetchAccountData(result.access_token);
     
     // Update the main UI
     updateUI();
@@ -485,12 +473,20 @@ async function handleRegisterSubmit(e) {
   try {
     showMessage(elements.registerMessage, 'Creating account...', 'info');
     
-    const result = await makeApiRequest('/register', 'POST', {
-      username: username,
-      password: password
+    const response = await fetch(`${API_BASE_URL}/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password
+      })
     });
     
-    if (!result || result.error) {
+    const result = await response.json();
+    
+    if (!response.ok || result.error) {
       throw new Error(result?.error || 'Registration failed');
     }
     
@@ -510,62 +506,6 @@ async function handleRegisterSubmit(e) {
     
   } catch (error) {
     showMessage(elements.registerMessage, `Error: ${error.message}`, 'error');
-  }
-}
-
-// API Request function
-async function makeApiRequest(endpoint, method, data = null) {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
-
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method,
-      signal: controller.signal,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(authToken && { 'Authorization': `Bearer ${authToken}` })
-      },
-      ...(data && { body: JSON.stringify(data) })
-    });
-
-    clearTimeout(timeoutId);
-    
-    // Handle no content responses
-    if (response.status === 204) {
-      return { success: true };
-    }
-    
-    const result = await response.json();
-
-    if (response.status === 401) {
-      authToken = null;
-      localStorage.removeItem('rseAuthToken');
-      sessionStorage.removeItem('rseAuthToken');
-      updateUI();
-      showLoggedOutUI();
-      throw new Error('Session expired. Please login again.');
-    }
-
-    if (!response.ok) {
-      throw new Error(result.message || result.error || 'An error occurred');
-    }
-
-    if (elements.responseDiv) {
-      displayResponse(result);
-    }
-
-    return result;
-  } catch (error) {
-    const errorMessage = error.name === 'AbortError' ? 
-      'Request timed out' : error.message;
-    
-    if (elements.responseDiv) {
-      displayResponse({ error: errorMessage });
-    }
-    
-    console.error("API Request Error:", error);
-    return { error: errorMessage };
   }
 }
 
@@ -660,9 +600,11 @@ function showLoggedOutUI() {
 // Data fetching functions
 async function fetchAccountData(token) {
   try {
-    const data = await makeApiRequest('/account', 'GET');
+    const response = await RSE_AUTH.apiCall('/account_data');
     
-    if (data && !data.error) {
+    if (response.ok) {
+      const data = await response.json();
+      
       // Update user profile with account data
       const ratingElement = document.getElementById('user-rating');
       const totalRatingsElement = document.getElementById('user-total-ratings');
@@ -762,15 +704,17 @@ function updateBidsDisplay(bids) {
 // Function to cancel a bid
 async function cancelBid(bidId) {
   try {
-    const result = await makeApiRequest('/cancel_bid', 'POST', {
-      bid_id: bidId
+    const response = await RSE_AUTH.apiCall('/cancel_bid', {
+      method: 'POST',
+      body: JSON.stringify({ bid_id: bidId })
     });
     
-    if (result && !result.error) {
+    if (response.ok) {
       alert('Bid cancelled successfully');
       // Refresh account data to update bid list
       fetchAccountData();
     } else {
+      const result = await response.json();
       alert(`Error: ${result.error || 'Failed to cancel bid'}`);
     }
   } catch (error) {
@@ -808,4 +752,15 @@ function ensureBidModalExists() {
 function handleBidSubmit(e) {
   // This would be implemented based on requirements
   console.log('Handling bid submission');
+}
+
+// Community functions placeholders
+function openChatInterface(token) {
+  console.log('Opening chat interface with token:', token.substring(0, 20) + '...');
+  // Implementation would go here
+}
+
+function openBulletinInterface(token) {
+  console.log('Opening bulletin interface with token:', token.substring(0, 20) + '...');
+  // Implementation would go here
 }

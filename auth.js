@@ -2,7 +2,8 @@
 // Include this file in all pages that need authentication
 
 const RSE_AUTH = {
-    API_URL: 'http://100.26.236.1:5001',
+    API_URL: window.location.protocol === 'https:' ? 
+      'https://rse-api.com:5002' : 'http://100.26.236.1:5001',
     
     // Get authentication token from storage
     getToken() {
