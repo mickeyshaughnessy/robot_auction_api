@@ -1,3 +1,366 @@
-calls the /submit_bid route on the API.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make Bid - Robot Services Exchange</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Submit New Bid</h1>
+        
+        <div class="endpoint">
+            <h3>New Bid Request</h3>
+            <form id="bid-form">
+                <div class="form-group">
+                    <label for="service">Service Description:</label>
+                    <textarea id="service" rows="3" placeholder="Describe what you need done..."></textarea>
+                    <div class="service-examples">
+                        <button type="button" onclick="fillService('Taco Bell Tacos Supreme delivery to my friend')">Taco Bell Delivery</button>
+                        <button type="button" onclick="fillService('Emergency medical service to my location')">Emergency Medical</button>
+                        <button type="button" onclick="fillService('Clean my apartment kitchen and bathroom')">Apartment Cleaning</button>
+                        <button type="button" onclick="fillService('Walk my dog for 30 minutes')">Dog Walking</button>
+                        <button type="button" onclick="fillService('Grocery shopping and delivery from Whole Foods')">Grocery Shopping</button>
+                    </div>
+                </div>
 
+                <div class="form-group">
+                    <label for="location">Location:</label>
+                    <div class="location-inputs">
+                        <input type="number" id="lat" placeholder="Latitude" step="0.000001" min="-90" max="90">
+                        <input type="number" id="lon" placeholder="Longitude" step="0.000001" min="-180" max="180">
+                        <button type="button" onclick="getCurrentLocation()">Use My Location</button>
+                    </div>
+                </div>
 
+                <div class="form-group">
+                    <label for="price">Bid Price (USD):</label>
+                    <input type="number" id="price" min="1" step="0.01" placeholder="50.00">
+                </div>
+
+                <div class="form-group">
+                    <label for="end-time">Bid Expires:</label>
+                    <select id="end-time">
+                        <option value="3600">1 hour</option>
+                        <option value="10800">3 hours</option>
+                        <option value="21600">6 hours</option>
+                        <option value="43200">12 hours</option>
+                        <option value="86400" selected>24 hours</option>
+                        <option value="172800">48 hours</option>
+                        <option value="604800">1 week</option>
+                    </select>
+                </div>
+
+                <button type="submit">Submit Bid</button>
+            </form>
+        </div>
+
+        <div class="endpoint">
+            <h3>Your Current Bids</h3>
+            <div id="current-bids">
+                <p>Loading your bids...</p>
+            </div>
+            <button onclick="refreshBids()">Refresh Bids</button>
+        </div>
+
+        <div id="bid-details" class="endpoint" style="display: none;">
+            <h3>Bid Details</h3>
+            <div id="bid-details-content"></div>
+            <button onclick="hideBidDetails()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://100.26.236.1:5001';
+        let authToken = localStorage.getItem('authToken');
+
+        function fillService(text) {
+            document.getElementById('service').value = text;
+        }
+
+        function getCurrentLocation() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        document.getElementById('lat').value = position.coords.latitude;
+                        document.getElementById('lon').value = position.coords.longitude;
+                    },
+                    error => {
+                        alert('Could not get your location: ' + error.message);
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        }
+
+        document.getElementById('bid-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const service = document.getElementById('service').value;
+            const lat = parseFloat(document.getElementById('lat').value);
+            const lon = parseFloat(document.getElementById('lon').value);
+            const price = parseFloat(document.getElementById('price').value);
+            const endTimeOffset = parseInt(document.getElementById('end-time').value);
+            const endTime = Math.floor(Date.now() / 1000) + endTimeOffset;
+
+            if (!service || !lat || !lon || !price) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/make_bid`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        service: service,
+                        lat: lat,
+                        lon: lon,
+                        price: price,
+                        end_time: endTime
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('Bid submitted successfully!');
+                    document.getElementById('bid-form').reset();
+                    refreshBids();
+                } else {
+                    alert('Error: ' + (result.error || 'Failed to submit bid'));
+                }
+            } catch (error) {
+                alert('Network error: ' + error.message);
+            }
+        });
+
+        async function refreshBids() {
+            try {
+                const response = await fetch(`${API_URL}/account_data`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayBids(data.bids || []);
+                } else {
+                    document.getElementById('current-bids').innerHTML = '<p>Could not load bids. Please log in.</p>';
+                }
+            } catch (error) {
+                document.getElementById('current-bids').innerHTML = '<p>Error loading bids: ' + error.message + '</p>';
+            }
+        }
+
+        function displayBids(bids) {
+            const container = document.getElementById('current-bids');
+            
+            if (bids.length === 0) {
+                container.innerHTML = '<p>No current bids.</p>';
+                return;
+            }
+
+            const bidList = bids.map(bid => {
+                const endDate = new Date(bid.end_time * 1000);
+                const status = bid.status || 'pending';
+                
+                return `
+                    <div class="bid-item" onclick="viewBidDetails('${bid.bid_id}')">
+                        <div class="bid-summary">
+                            <strong>${bid.service.substring(0, 50)}${bid.service.length > 50 ? '...' : ''}</strong>
+                            <span class="bid-price">$${bid.price}</span>
+                            <span class="bid-status ${status}">${status.toUpperCase()}</span>
+                        </div>
+                        <div class="bid-location">Location: ${bid.lat.toFixed(4)}, ${bid.lon.toFixed(4)}</div>
+                        <div class="bid-expires">Expires: ${endDate.toLocaleString()}</div>
+                        ${status === 'pending' ? `<button onclick="cancelBid('${bid.bid_id}', event)" class="cancel-btn">Cancel</button>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = bidList;
+        }
+
+        function viewBidDetails(bidId) {
+            const bids = JSON.parse(localStorage.getItem('userBids') || '[]');
+            const bid = bids.find(b => b.bid_id === bidId);
+            
+            if (bid) {
+                document.getElementById('bid-details-content').innerHTML = `
+                    <p><strong>Service:</strong> ${bid.service}</p>
+                    <p><strong>Location:</strong> ${bid.lat}, ${bid.lon}</p>
+                    <p><strong>Price:</strong> $${bid.price}</p>
+                    <p><strong>Status:</strong> ${bid.status || 'pending'}</p>
+                    <p><strong>Created:</strong> ${new Date(bid.created_time * 1000).toLocaleString()}</p>
+                    <p><strong>Expires:</strong> ${new Date(bid.end_time * 1000).toLocaleString()}</p>
+                `;
+                document.getElementById('bid-details').style.display = 'block';
+            }
+        }
+
+        function hideBidDetails() {
+            document.getElementById('bid-details').style.display = 'none';
+        }
+
+        async function cancelBid(bidId, event) {
+            event.stopPropagation();
+            
+            if (!confirm('Are you sure you want to cancel this bid?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/cancel_bid`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ bid_id: bidId })
+                });
+
+                if (response.ok) {
+                    alert('Bid cancelled successfully');
+                    refreshBids();
+                } else {
+                    const result = await response.json();
+                    alert('Error: ' + (result.error || 'Failed to cancel bid'));
+                }
+            } catch (error) {
+                alert('Network error: ' + error.message);
+            }
+        }
+
+        // Check authentication on page load
+        if (!authToken) {
+            alert('Please log in first');
+            window.location.href = 'index.html';
+        } else {
+            refreshBids();
+        }
+    </script>
+
+    <style>
+        .service-examples {
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .service-examples button {
+            background-color: var(--color-accent);
+            color: var(--color-text);
+            border: 2px solid var(--color-secondary);
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .service-examples button:hover {
+            background-color: var(--color-secondary);
+            color: white;
+        }
+
+        .location-inputs {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .location-inputs input {
+            flex: 1;
+        }
+
+        .location-inputs button {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid var(--color-secondary);
+            border-radius: 4px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .bid-item {
+            border: 2px solid var(--color-accent);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            cursor: pointer;
+            background-color: white;
+        }
+
+        .bid-item:hover {
+            background-color: var(--color-background);
+        }
+
+        .bid-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .bid-price {
+            font-weight: bold;
+            color: var(--color-button);
+        }
+
+        .bid-status {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .bid-status.pending {
+            background-color: var(--color-accent);
+            color: var(--color-text);
+        }
+
+        .bid-status.matched {
+            background-color: var(--color-button);
+            color: white;
+        }
+
+        .bid-status.completed {
+            background-color: var(--color-secondary);
+            color: white;
+        }
+
+        .bid-location, .bid-expires {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 2px 0;
+        }
+
+        .cancel-btn {
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .cancel-btn:hover {
+            background-color: #cc2a2a;
+        }
+    </style>
+</body>
+</html>
