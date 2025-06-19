@@ -105,17 +105,84 @@
 
         function getCurrentLocation() {
             if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    position => {
-                        document.getElementById('lat').value = position.coords.latitude;
-                        document.getElementById('lon').value = position.coords.longitude;
-                    },
-                    error => {
-                        alert('Could not get your location: ' + error.message);
+                // Check permission status first
+                navigator.permissions.query({name: 'geolocation'}).then(permission => {
+                    if (permission.state === 'denied') {
+                        showLocationHelp();
+                        return;
                     }
-                );
+                    
+                    navigator.geolocation.getCurrentPosition(
+                        position => {
+                            document.getElementById('lat').value = position.coords.latitude.toFixed(6);
+                            document.getElementById('lon').value = position.coords.longitude.toFixed(6);
+                            alert('Location set successfully!');
+                        },
+                        error => {
+                            handleLocationError(error);
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 60000
+                        }
+                    );
+                }).catch(() => {
+                    // Fallback for older browsers
+                    navigator.geolocation.getCurrentPosition(
+                        position => {
+                            document.getElementById('lat').value = position.coords.latitude.toFixed(6);
+                            document.getElementById('lon').value = position.coords.longitude.toFixed(6);
+                            alert('Location set successfully!');
+                        },
+                        error => {
+                            handleLocationError(error);
+                        }
+                    );
+                });
             } else {
-                alert('Geolocation is not supported by this browser.');
+                alert('Geolocation is not supported by this browser. Please enter coordinates manually.');
+            }
+        }
+
+        function handleLocationError(error) {
+            let message = 'Could not get your location: ';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    showLocationHelp();
+                    return;
+                case error.POSITION_UNAVAILABLE:
+                    message += 'Location information is unavailable.';
+                    break;
+                case error.TIMEOUT:
+                    message += 'Location request timed out.';
+                    break;
+                default:
+                    message += 'An unknown error occurred.';
+                    break;
+            }
+            
+            if (confirm(message + '\n\nWould you like to try again?')) {
+                getCurrentLocation();
+            }
+        }
+
+        function showLocationHelp() {
+            const helpText = `Location access was denied. To enable:
+
+Chrome/Edge: Click the location icon in the address bar and select "Allow"
+Firefox: Click the shield icon and select "Allow Location Access"
+Safari: Go to Safari > Settings > Websites > Location
+
+Or enter coordinates manually below.
+
+Would you like to try again?`;
+            
+            if (confirm(helpText)) {
+                // Wait a moment then try again
+                setTimeout(() => {
+                    getCurrentLocation();
+                }, 1000);
             }
         }
 
@@ -150,13 +217,11 @@
                         'Authorization': `Bearer ${authToken}`
                     },
                     body: JSON.stringify({
-                        bid: {
-                            service: service,
-                            lat: lat,
-                            lon: lon,
-                            price: price,
-                            end_time: endTime
-                        }
+                        service: service,
+                        lat: lat,
+                        lon: lon,
+                        price: price,
+                        end_time: endTime
                     })
                 });
 
