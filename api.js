@@ -2,7 +2,7 @@
 class RSEApiService {
     constructor() {
         // Use HTTPS to avoid security warnings
-        this.baseURL = 'https://100.26.236.1:5001';
+        this.baseURL = 'https://rse-api.com:5002';
         this.token = this.getStoredToken();
     }
 
