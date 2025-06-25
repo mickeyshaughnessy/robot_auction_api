@@ -130,6 +130,15 @@
                         <h1>Robot Services Exchange API Documentation</h1>
                         <p class="lead">A marketplace for robot services - bid on robot services or offer robot capacity.</p>
                         
+                        <!-- Authentication Overview -->
+                        <div class="auth-overview">
+                            <h3>Authentication</h3>
+                            <p>Most API endpoints require authentication via Bearer token. First register and login to receive a token, then include it in the Authorization header:</p>
+                            <div class="code-block">
+                                <code>Authorization: Bearer your_access_token_here</code>
+                            </div>
+                        </div>
+                        
                         <!-- API Status Check -->
                         <div class="api-status-section">
                             <h3>API Status Check</h3>
@@ -147,6 +156,41 @@
                     <section class="endpoint-section">
                         <h2>Authentication Endpoints</h2>
                         
+                        <div class="endpoint">
+                            <div class="endpoint-header">
+                                <h3><span class="method get">GET</span> <span class="path">/job_history</span></h3>
+                            </div>
+                            <p>Retrieve the authenticated user's job history including completed, pending, and cancelled jobs.</p>
+                            
+                            <div class="endpoint-content">
+                                <h4>Parameters</h4>
+                                <table class="param-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>status</code></td>
+                                            <td>string</td>
+                                            <td>Optional: Filter by job status (pending, completed, cancelled)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>limit</code></td>
+                                            <td>integer</td>
+                                            <td>Optional: Maximum number of jobs to retrieve (default: 20, max: 100)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <h4>Response</h4>
+                                <p>Returns 200 with jobs array including job details, timestamps, and ratings.</p>
+                            </div>
+                        </div>
+
                         <div class="endpoint">
                             <div class="endpoint-header">
                                 <h3><span class="method post">POST</span> <span class="path">/register</span></h3>
@@ -246,6 +290,20 @@
                             <p>Submit a new bid for a robot service.</p>
                             
                             <div class="endpoint-content">
+                                <h4>Request Body</h4>
+                                <p>Parameters should be nested within a 'bid' object:</p>
+                                <div class="code-block">
+                                    <code>{
+  "bid": {
+    "service": "cleaning",
+    "lat": 40.7128,
+    "lon": -74.0060,
+    "price": 50.00,
+    "end_time": 1640995200
+  }
+}</code>
+                                </div>
+                                
                                 <h4>Parameters</h4>
                                 <table class="param-table">
                                     <thead>
@@ -257,27 +315,27 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td><code>service</code></td>
+                                            <td><code>bid.service</code></td>
                                             <td>string</td>
                                             <td>Detailed description of service requested (e.g., cleaning, delivery)</td>
                                         </tr>
                                         <tr>
-                                            <td><code>lat</code></td>
+                                            <td><code>bid.lat</code></td>
                                             <td>number</td>
                                             <td>Latitude of the service location (-90 to 90)</td>
                                         </tr>
                                         <tr>
-                                            <td><code>lon</code></td>
+                                            <td><code>bid.lon</code></td>
                                             <td>number</td>
                                             <td>Longitude of the service location (-180 to 180)</td>
                                         </tr>
                                         <tr>
-                                            <td><code>price</code></td>
+                                            <td><code>bid.price</code></td>
                                             <td>number</td>
                                             <td>Bid price for the service (in USD)</td>
                                         </tr>
                                         <tr>
-                                            <td><code>end_time</code></td>
+                                            <td><code>bid.end_time</code></td>
                                             <td>integer</td>
                                             <td>Unix timestamp for when the bid expires</td>
                                         </tr>
@@ -293,7 +351,7 @@
                     <!-- Seller Endpoints -->
                     <section class="endpoint-section">
                         <h2>Seller Endpoints</h2>
-                        <p class="section-note">Note: Seller endpoints require authentication and a valid supplier seat.</p>
+                        <p class="section-note">Note: Seller endpoints require authentication and a valid supplier seat. <a href="seats.html">Learn more about supplier seats</a>.</p>
                         
                         <div class="endpoint">
                             <div class="endpoint-header">
@@ -332,11 +390,22 @@
                                             <td>number</td>
                                             <td>Maximum distance the robot will travel (in miles)</td>
                                         </tr>
+                                        <tr>
+                                            <td><code>seat</code></td>
+                                            <td>object</td>
+                                            <td>Supplier seat credentials object:<br>
+                                                <code>{<br>
+                                                &nbsp;&nbsp;"id": "unique_seat_id",<br>
+                                                &nbsp;&nbsp;"owner": "seat_owner_name",<br>
+                                                &nbsp;&nbsp;"secret": "md5_hash_of_seat_phrase"<br>
+                                                }</code>
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
                                 
                                 <h4>Response</h4>
-                                <p>Returns 200 with job details on success, 204 if no matching jobs found.</p>
+                                <p>Returns 200 with job details on success, 204 if no matching jobs found, 403 for invalid seat.</p>
                             </div>
                         </div>
                     </section>
@@ -350,7 +419,7 @@
                             <div class="endpoint-header">
                                 <h3><span class="method post">POST</span> <span class="path">/nearby</span></h3>
                             </div>
-                            <p>Retrieve bids within 10 miles of the specified location.</p>
+                            <p>Retrieve recent activity within 10 miles of the specified location, including completed jobs and active bids.</p>
                             
                             <div class="endpoint-content">
                                 <h4>Parameters</h4>
@@ -377,7 +446,7 @@
                                 </table>
                                 
                                 <h4>Response</h4>
-                                <p>Returns 200 with nearby bids array, 400 for invalid parameters.</p>
+                                <p>Returns 200 with activities array containing recent jobs and bids in the area, 400 for invalid parameters.</p>
                             </div>
                         </div>
 
@@ -385,7 +454,7 @@
                             <div class="endpoint-header">
                                 <h3><span class="method post">POST</span> <span class="path">/sign_job</span></h3>
                             </div>
-                            <p>Sign off on a completed job and rate the counterparty.</p>
+                            <p>Sign off on a completed job and rate the counterparty. Both buyer and seller must sign to complete the job.</p>
                             
                             <div class="endpoint-content">
                                 <h4>Parameters</h4>
