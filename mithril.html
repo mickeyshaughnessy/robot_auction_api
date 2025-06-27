@@ -6,15 +6,57 @@
     <title>Project Mithril - About Us</title>
     <link rel="stylesheet" href="styles.css">
     <style>
+        .team-scroll-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 1rem 0;
+            margin: 2rem 0;
+            scrollbar-width: thin;
+            scrollbar-color: #007acc #f0f0f0;
+        }
+        
+        .team-scroll-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .team-scroll-container::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+        
+        .team-scroll-container::-webkit-scrollbar-thumb {
+            background: #007acc;
+            border-radius: 4px;
+        }
+        
+        .team-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #005a99;
+        }
+        
+        .team-grid {
+            display: flex;
+            gap: 2rem;
+            padding: 0 1rem;
+            min-width: max-content;
+        }
+        
+        .team-pair {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            min-width: 600px;
+            max-width: 600px;
+            flex-shrink: 0;
+        }
+        
         .about-container {
             display: flex;
             align-items: flex-start;
-            margin-top: 2rem;
-            padding-bottom: 2rem;
-            border-bottom: 1px solid #eee;
-        }
-        .about-container:last-child {
-            border-bottom: none;
+            padding: 1.5rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.95);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .headshot {
             width: 200px;
@@ -53,130 +95,173 @@
 </head>
 <body>
     <main>
+        <h2>Project Mithril in Action</h2>
+        
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; margin-top: 2rem; margin-bottom: 3rem;">
+            <div style="text-align: center;">
+                <video controls width="400" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+                    <source src="https://mithrilmedia.s3.us-east-1.amazonaws.com/Sequence+06_7.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+
         <h2>About Us</h2>
         <p>Project Mithril is dedicated to protecting individual privacy in an increasingly connected digital world. Our team combines decades of experience in machine learning, software engineering, and data privacy to create innovative solutions that put control back in the hands of users.</p>
         
         <h2 class="section-header">Team</h2>
         
-        <div class="about-container">
-            <img src="https://mithrilmedia.s3.amazonaws.com/mickey.png" alt="Mickey Shaughnessy" class="headshot">
-            <div class="bio">
-                <h3>Mickey Shaughnessy, Founder and CEO</h3>
-                <p>I'm Mickey Shaughnessy, the creator of Project Mithril. With over two decades of experience in internet software and machine learning, I've dedicated my career to delivering value for everyone through software engineering and having fun with computers.</p>
-                <p>Over the last 5 years I've developed powerful AI-based ad tracking and targeting algorithms to adapt to changing privacy and data environments. Now, I see a critical need for a solution to shield individuals from invasive tracking and targeting.</p>
-                <p>When I'm not confusing robots I enjoy playing with my 4 kids in Lakewood, CO, mountain biking, and cooking for our friends and family.</p>
-                <p>I'm excited to share Project Mithril with you. Sign up for the newsletter, grab an alpha seat, enjoy the demo game, or just take in the sweet AI video creations of Tony M.</p>
-            </div>
-        </div>
-        
-        <div class="about-container">
-            <img src="https://mithrilmedia.s3.amazonaws.com/matt.png" alt="Matt Robbins" class="headshot">
-            <div class="bio">
-                <h3>Matt Robbins, ML Engineer</h3>
-                <p>Matt Robbins is a Data Science lecturer in the Bren School at the University of California, Santa Barbara. His research uses machine learning on network models of complex human systems.</p>
-                <p>He holds a PhD from the Graduate Group in Ecology at UC Davis and an MA in Cognitive Psychology from Washington University in St. Louis.</p>
-            </div>
-        </div>
-        
-        <div class="about-container">
-            <img src="https://mithrilmedia.s3.amazonaws.com/archit.png" alt="Archit Pandey" class="headshot">
-            <div class="bio">
-                <h3>Archit Pandey, ML Engineer</h3>
-                <p>I have 20 years of experience in software development. I am a computer engineer from IIT Dhanbad, India and an MBA from UC Davis, California. In the last 20 years, I have been in the role of a developer, engineering manager and product development with responsibilities ranging from software development to product specifications.</p>
-                <p>At most of the projects I have worked, I have got opportunity to learn about lifecycle of product development and how software links to business. Apart from programming languages i have keen interest in building high throughput, low latency infrastructure. I have built and managed, multi-Terabyte scale data warehouse and programmatic bidding elastic infrastructure that handles billion requests per minute.</p>
-                <p>I have worked 16 years in Adtech and I am very fascinated with the challenges of this business - both for tech and business. I have been involved in solving very challenging problems of Bid auction pricing and automated campaign optimization algorithms.</p>
-            </div>
-        </div>
-        
-        <div class="about-container">
-            <img src="https://mithrilmedia.s3.amazonaws.com/robert.png" alt="Natha Hayre" class="headshot">
-            <div class="bio">
-                <h3>Natha Hayre, ML Engineer</h3>
-                <p>Natha brings extensive experience in machine learning and distributed systems to Project Mithril. With a passion for privacy-preserving technologies, Natha specializes in developing algorithms that protect user data while maintaining system performance.</p>
-                <p>When not coding, Natha enjoys collaborative problem-solving and working with the team to tackle complex technical challenges.</p>
-            </div>
-        </div>
-        
-        <div class="about-container">
-            <img src="https://mithrilmedia.s3.amazonaws.com/ohad.png" alt="Ohad Sasson" class="headshot">
-            <div class="bio">
-                <h3>Ohad Sasson, Network Engineer</h3>
-                <p>Ohad is a seasoned network engineer with deep expertise in secure network architectures and privacy-focused infrastructure design. He brings years of experience in building resilient, scalable systems that prioritize user security and data protection.</p>
-                <p>His work at Project Mithril focuses on ensuring our network infrastructure maintains the highest standards of privacy and performance.</p>
-            </div>
-        </div>
-        
-        <div class="about-container">
-            <img src="https://mithrilmedia.s3.amazonaws.com/ravi.png" alt="Ravi Thinakkal" class="headshot">
-            <div class="bio">
-                <h3>Ravi Thinakkal, Data Engineer</h3>
-                <p>Ravi is our go-to data engineer who specializes in building robust data pipelines and solving complex data architecture challenges. With a keen eye for identifying and resolving system bottlenecks, Ravi ensures our data infrastructure operates at peak efficiency.</p>
-                <p>His expertise in privacy-preserving data processing makes him invaluable to Project Mithril's mission of protecting user information.</p>
-            </div>
-        </div>
-        
-        <div class="about-container">
-            <img src="https://mithrilmedia.s3.amazonaws.com/stafford.png" alt="David Stafford" class="headshot">
-            <div class="bio">
-                <h3>David Stafford, Data Engineer</h3>
-                <p>David brings deep database expertise and data architecture knowledge to the Project Mithril team. With extensive experience in designing and optimizing database systems for privacy and performance, David ensures our data storage solutions meet the highest standards.</p>
-                <p>His work focuses on creating secure, efficient data systems that support our privacy protection goals while maintaining fast, reliable access to information.</p>
-            </div>
-        </div>
-        
-        <div class="about-container">
-            <img src="https://mithrilmedia.s3.amazonaws.com/kyle.png" alt="Kyle Boyd" class="headshot">
-            <div class="bio">
-                <h3>Kyle Boyd, Frontend Engineer</h3>
-                <p>With over a decade of design experience spanning digital applications to architecture, my career has centered around solving complex user problems with elegant solutions. I am excited to help Project Mithril provide an easy, seamless way to help families and individuals retain control over their personal digital privacy.</p>
-                <p>In my free time I enjoy soccer, bike packing, spending time with my young family, and trying to escape the ever-present glowing screens by heading outside.</p>
+        <div class="team-scroll-container">
+            <div class="team-grid">
+                <div class="team-pair">
+                    <div class="about-container">
+                        <img src="https://mithrilmedia.s3.amazonaws.com/mickey.png" alt="Mickey Shaughnessy" class="headshot">
+                        <div class="bio">
+                            <h3>Mickey Shaughnessy, Founder and CEO</h3>
+                            <p>I'm Mickey Shaughnessy, the creator of Project Mithril. With over two decades of experience in internet software and machine learning, I've dedicated my career to delivering value for everyone through software engineering and having fun with computers.</p>
+                            <p>Over the last 5 years I've developed powerful AI-based ad tracking and targeting algorithms to adapt to changing privacy and data environments. Now, I see a critical need for a solution to shield individuals from invasive tracking and targeting.</p>
+                            <p>When I'm not confusing robots I enjoy playing with my 4 kids in Lakewood, CO, mountain biking, and cooking for our friends and family.</p>
+                            <p>I'm excited to share Project Mithril with you. Sign up for the newsletter, grab an alpha seat, enjoy the demo game, or just take in the sweet AI video creations of Tony M.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="about-container">
+                        <img src="https://mithrilmedia.s3.amazonaws.com/matt.png" alt="Matt Robbins" class="headshot">
+                        <div class="bio">
+                            <h3>Matt Robbins, ML Engineer</h3>
+                            <p>Matt Robbins is a Data Science lecturer in the Bren School at the University of California, Santa Barbara. His research uses machine learning on network models of complex human systems.</p>
+                            <p>He holds a PhD from the Graduate Group in Ecology at UC Davis and an MA in Cognitive Psychology from Washington University in St. Louis.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="team-pair">
+                    <div class="about-container">
+                        <img src="https://mithrilmedia.s3.amazonaws.com/archit.png" alt="Archit Pandey" class="headshot">
+                        <div class="bio">
+                            <h3>Archit Pandey, ML Engineer</h3>
+                            <p>I have 20 years of experience in software development. I am a computer engineer from IIT Dhanbad, India and an MBA from UC Davis, California. In the last 20 years, I have been in the role of a developer, engineering manager and product development with responsibilities ranging from software development to product specifications.</p>
+                            <p>At most of the projects I have worked, I have got opportunity to learn about lifecycle of product development and how software links to business. Apart from programming languages i have keen interest in building high throughput, low latency infrastructure. I have built and managed, multi-Terabyte scale data warehouse and programmatic bidding elastic infrastructure that handles billion requests per minute.</p>
+                            <p>I have worked 16 years in Adtech and I am very fascinated with the challenges of this business - both for tech and business. I have been involved in solving very challenging problems of Bid auction pricing and automated campaign optimization algorithms.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="about-container">
+                        <img src="https://mithrilmedia.s3.amazonaws.com/robert.png" alt="Natha Hayre" class="headshot">
+                        <div class="bio">
+                            <h3>Natha Hayre, ML Engineer</h3>
+                            <p>Natha brings extensive experience in machine learning and distributed systems to Project Mithril. With a passion for privacy-preserving technologies, Natha specializes in developing algorithms that protect user data while maintaining system performance.</p>
+                            <p>When not coding, Natha enjoys collaborative problem-solving and working with the team to tackle complex technical challenges.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="team-pair">
+                    <div class="about-container">
+                        <img src="https://mithrilmedia.s3.amazonaws.com/ohad.png" alt="Ohad Sasson" class="headshot">
+                        <div class="bio">
+                            <h3>Ohad Sasson, Network Engineer</h3>
+                            <p>Ohad is a seasoned network engineer with deep expertise in secure network architectures and privacy-focused infrastructure design. He brings years of experience in building resilient, scalable systems that prioritize user security and data protection.</p>
+                            <p>His work at Project Mithril focuses on ensuring our network infrastructure maintains the highest standards of privacy and performance.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="about-container">
+                        <img src="https://mithrilmedia.s3.amazonaws.com/ravi.png" alt="Ravi Thinakkal" class="headshot">
+                        <div class="bio">
+                            <h3>Ravi Thinakkal, Data Engineer</h3>
+                            <p>Ravi is our go-to data engineer who specializes in building robust data pipelines and solving complex data architecture challenges. With a keen eye for identifying and resolving system bottlenecks, Ravi ensures our data infrastructure operates at peak efficiency.</p>
+                            <p>His expertise in privacy-preserving data processing makes him invaluable to Project Mithril's mission of protecting user information.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="team-pair">
+                    <div class="about-container">
+                        <img src="https://mithrilmedia.s3.amazonaws.com/stafford.png" alt="David Stafford" class="headshot">
+                        <div class="bio">
+                            <h3>David Stafford, Data Engineer</h3>
+                            <p>David brings deep database expertise and data architecture knowledge to the Project Mithril team. With extensive experience in designing and optimizing database systems for privacy and performance, David ensures our data storage solutions meet the highest standards.</p>
+                            <p>His work focuses on creating secure, efficient data systems that support our privacy protection goals while maintaining fast, reliable access to information.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="about-container">
+                        <img src="https://mithrilmedia.s3.amazonaws.com/kyle.png" alt="Kyle Boyd" class="headshot">
+                        <div class="bio">
+                            <h3>Kyle Boyd, Frontend Engineer</h3>
+                            <p>With over a decade of design experience spanning digital applications to architecture, my career has centered around solving complex user problems with elegant solutions. I am excited to help Project Mithril provide an easy, seamless way to help families and individuals retain control over their personal digital privacy.</p>
+                            <p>In my free time I enjoy soccer, bike packing, spending time with my young family, and trying to escape the ever-present glowing screens by heading outside.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <h2 class="section-header">Advisors</h2>
         
-        <div class="about-container">
-            <img src="https://mithrilmedia.s3.amazonaws.com/tony.png" alt="Tony Matos" class="headshot">
-            <div class="bio">
-                <h3>Tony Matos, Design Advisor</h3>
-                <p>Creative Technologist passionate about emerging AI technology, aiming to bridge the gap between art and technology in gaming, music, and film. I excel in pushing creative boundaries and driving innovation across corporate, startup, and small business environments.</p>
-                <p>Dedicated to using the latest AI technologies to create safe, captivating art content, fostering synergy between technical teams and creatives to bring innovative ideas to market.</p>
+        <div class="team-scroll-container">
+            <div class="team-grid">
+                <div class="team-pair">
+                    <div class="about-container">
+                        <img src="https://mithrilmedia.s3.amazonaws.com/tony.png" alt="Tony Matos" class="headshot">
+                        <div class="bio">
+                            <h3>Tony Matos, Design Advisor</h3>
+                            <p>Creative Technologist passionate about emerging AI technology, aiming to bridge the gap between art and technology in gaming, music, and film. I excel in pushing creative boundaries and driving innovation across corporate, startup, and small business environments.</p>
+                            <p>Dedicated to using the latest AI technologies to create safe, captivating art content, fostering synergy between technical teams and creatives to bring innovative ideas to market.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="about-container">
+                        <img src="https://mithrilmedia.s3.amazonaws.com/jeff.png" alt="Jeff Edelen" class="headshot">
+                        <div class="bio">
+                            <h3>Jeffery Edelen, Technical Advisor</h3>
+                            <p>I am an economic geologist by training but have substantial experience in multiple areas of the resource extraction/metals and mining industry. This includes exploration and development of mining projects around the world, as well as fundraising and deal making, creating companies, etc.</p>
+                            <p>My diverse business background brings valuable perspective to Project Mithril's strategic development and growth initiatives.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="team-pair">
+                    <div class="about-container">
+                        <img src="https://mithrilmedia.s3.amazonaws.com/danryan.png" alt="Dan Ryan" class="headshot">
+                        <div class="bio">
+                            <h3>Dan Ryan, Technical Advisor</h3>
+                            <p>Dan brings extensive technical leadership experience to Project Mithril's advisory board. With a background in scaling technology companies and implementing complex systems, Dan provides strategic guidance on technical architecture and product development.</p>
+                            <p>His expertise in emerging technologies and market dynamics helps guide Project Mithril's technical roadmap and strategic positioning.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="about-container">
+                        <img src="https://mithrilmedia.s3.amazonaws.com/fitz.png" alt="Mike Fitzgerald" class="headshot">
+                        <div class="bio">
+                            <h3>Mike Fitzgerald, Technical Advisor</h3>
+                            <p>Mike Fitzgerald is a seasoned technology executive with deep experience in privacy technologies and cybersecurity. His advisory role focuses on helping Project Mithril navigate the complex landscape of data protection regulations and industry standards.</p>
+                            <p>With years of experience building privacy-first solutions, Mike provides invaluable insights into market needs and technical implementation strategies.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="team-pair">
+                    <div class="about-container">
+                        <img src="https://mithrilmedia.s3.amazonaws.com/aftab.png" alt="Aftab" class="headshot">
+                        <div class="bio">
+                            <h3>Dr. A. Aftab, Business Advisor</h3>
+                            <p>Dr. Aftab brings extensive business development and strategic planning expertise to Project Mithril. With a background in scaling technology ventures and navigating complex market dynamics, Dr. Aftab provides guidance on business strategy and market expansion.</p>
+                            <p>His experience in building sustainable business models and establishing strategic partnerships helps guide Project Mithril's growth trajectory and market positioning.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <div class="about-container">
-            <img src="https://mithrilmedia.s3.amazonaws.com/jeff.png" alt="Jeff Edelen" class="headshot">
-            <div class="bio">
-                <h3>Jeffery Edelen, Technical Advisor</h3>
-                <p>I am an economic geologist by training but have substantial experience in multiple areas of the resource extraction/metals and mining industry. This includes exploration and development of mining projects around the world, as well as fundraising and deal making, creating companies, etc.</p>
-                <p>My diverse business background brings valuable perspective to Project Mithril's strategic development and growth initiatives.</p>
-            </div>
-        </div>
-        
-        <div class="about-container">
-            <img src="https://mithrilmedia.s3.amazonaws.com/danryan.png" alt="Dan Ryan" class="headshot">
-            <div class="bio">
-                <h3>Dan Ryan, Technical Advisor</h3>
-                <p>Dan brings extensive technical leadership experience to Project Mithril's advisory board. With a background in scaling technology companies and implementing complex systems, Dan provides strategic guidance on technical architecture and product development.</p>
-                <p>His expertise in emerging technologies and market dynamics helps guide Project Mithril's technical roadmap and strategic positioning.</p>
-            </div>
-        </div>
-        
-        <div class="about-container">
-            <img src="https://mithrilmedia.s3.amazonaws.com/fitz.png" alt="Mike Fitzgerald" class="headshot">
-            <div class="bio">
-                <h3>Mike Fitzgerald, Technical Advisor</h3>
-                <p>Mike Fitzgerald is a seasoned technology executive with deep experience in privacy technologies and cybersecurity. His advisory role focuses on helping Project Mithril navigate the complex landscape of data protection regulations and industry standards.</p>
-                <p>With years of experience building privacy-first solutions, Mike provides invaluable insights into market needs and technical implementation strategies.</p>
-            </div>
-        </div>
-        
-        <div class="about-container">
-            <img src="https://mithrilmedia.s3.amazonaws.com/aftab.png" alt="Aftab" class="headshot">
-            <div class="bio">
-                <h3>Dr. A. Aftab, Business Advisor</h3>
-                <p>Dr. Aftab brings extensive business development and strategic planning expertise to Project Mithril. With a background in scaling technology ventures and navigating complex market dynamics, Dr. Aftab provides guidance on business strategy and market expansion.</p>
-                <p>His experience in building sustainable business models and establishing strategic partnerships helps guide Project Mithril's growth trajectory and market positioning.</p>
+
+        <h2 class="section-header">See How Tracking Works</h2>
+        <div style="display: flex; justify-content: center; margin-top: 2rem; margin-bottom: 3rem;">
+             <div style="text-align: center;">
+                <video controls width="400" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+                    <source src="https://mithrilmedia.s3.us-east-1.amazonaws.com/Tracking.mov" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
             </div>
         </div>
     </main>
