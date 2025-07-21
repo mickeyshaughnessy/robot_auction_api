@@ -78,6 +78,28 @@ class RSEAuthManager {
         if (this.logoutBtn) {
             this.logoutBtn.addEventListener('click', () => this.handleLogout());
         }
+        // Fix for user menu button
+        const userMenuBtn = document.getElementById('user-menu-btn');
+        if (userMenuBtn) {
+            // Remove Bootstrap's auto-initialization to prevent conflicts
+            userMenuBtn.removeAttribute('data-bs-toggle');
+            userMenuBtn.removeAttribute('data-bs-target');
+        
+            // Add our own click handler
+            userMenuBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+        
+                const authPanel = document.getElementById('auth-panel');
+                if (authPanel) {
+                    // Use Bootstrap's API to toggle the collapse
+                    const bsCollapse = bootstrap.Collapse.getOrCreateInstance(authPanel, {
+                        toggle: false
+                    });
+                    bsCollapse.toggle();
+                }
+            });
+        }
     }
 
     async handleLogin(event) {
