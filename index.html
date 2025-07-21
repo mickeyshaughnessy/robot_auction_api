@@ -391,5 +391,37 @@
     <script src="api.js"></script>
     <script src="auth.js"></script>
     <script src="main.js"></script>
+    <script>
+        // Ensure auth panel toggle works
+        document.addEventListener('DOMContentLoaded', function() {
+            // Debug: Check if elements exist
+            const userMenuBtn = document.getElementById('user-menu-btn');
+            const authPanel = document.getElementById('auth-panel');
+            
+            if (userMenuBtn && authPanel) {
+                // Backup click handler in case Bootstrap's data-toggle isn't working
+                userMenuBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const bsCollapse = bootstrap.Collapse.getOrCreateInstance(authPanel);
+                    bsCollapse.toggle();
+                });
+            }
+            
+            // Handle Register Now button
+            const registerCta = document.getElementById('register-cta');
+            if (registerCta) {
+                registerCta.addEventListener('click', function() {
+                    // Show auth panel
+                    const bsCollapse = bootstrap.Collapse.getOrCreateInstance(authPanel);
+                    bsCollapse.show();
+                    
+                    // Switch to register form
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('register-section').style.display = 'block';
+                    document.getElementById('profile-section').style.display = 'none';
+                });
+            }
+        });
+    </script>
 </body>
 </html>
